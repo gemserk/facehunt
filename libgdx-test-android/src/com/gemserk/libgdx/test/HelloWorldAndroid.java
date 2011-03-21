@@ -5,8 +5,9 @@ import android.os.Bundle;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 
 public class HelloWorldAndroid extends AndroidApplication {
-	@Override public void onCreate (Bundle savedInstanceState) {
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize(new HelloWorld(), false);		
+		initialize(new HelloWorld(), false);
 	}
 }

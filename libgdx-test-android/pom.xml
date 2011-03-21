@@ -56,6 +56,12 @@
 					<extractDuplicates>true</extractDuplicates>
 				</configuration>
 				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>generate-apk</id>
+						<phase>install</phase>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -122,6 +128,6 @@
 			<scope>provided</scope>
 			<classifier>natives-armeabi-v7a</classifier>
 		</dependency>
-		
+
 	</dependencies>
 </project>
