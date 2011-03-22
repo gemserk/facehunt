@@ -17,6 +17,6 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 
 public class HelloWorldDesktop {
 	public static void main (String[] argv) {
-		new LwjglApplication(new HelloWorld(), "Hello World", 800, 480, false);
+		new LwjglApplication(new PlatformGame(), "Platform Game", 800, 480, false);
 	}
 }
