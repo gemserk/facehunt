@@ -11,7 +11,8 @@ public class PlatformGame extends Game {
 		
 		Texture gemserkLogo = new Texture(Gdx.files.internal("data/logo-gemserk-512x128-white.png"));
 		
-		setScreen(new SplashScreen(gemserkLogo));
+		setScreen(new SplashScreen(this, gemserkLogo));
+		
 	}
 
 
