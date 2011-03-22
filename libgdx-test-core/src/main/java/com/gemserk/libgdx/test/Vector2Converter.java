@@ -1,13 +1,16 @@
 package com.gemserk.libgdx.test;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.TypeConverter;
 
 public class Vector2Converter implements TypeConverter<Vector2> {
 	@Override
 	public float[] copyFromObject(Vector2 object, float[] x) {
-		if (x == null)
+		if (x == null) {
 			x = new float[variables()];
+			Gdx.app.log("HelloWorld", "new array created");
+		}
 		x[0] = object.x;
 		x[1] = object.y;
 		return x;
@@ -15,8 +18,10 @@ public class Vector2Converter implements TypeConverter<Vector2> {
 
 	@Override
 	public Vector2 copyToObject(Vector2 object, float[] x) {
-		if (object == null)
+		if (object == null) {
 			object = new Vector2();
+			Gdx.app.log("HelloWorld", "new vector created");
+		}
 		object.set(x[0], x[1]);
 		return object;
 	}

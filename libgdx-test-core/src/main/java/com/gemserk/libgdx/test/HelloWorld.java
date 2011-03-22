@@ -11,10 +11,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.TypeConverter;
-import com.gemserk.animation4j.interpolator.Interpolators;
 import com.gemserk.animation4j.time.UpdateableTimeProvider;
-import com.gemserk.animation4j.transitions.AutoUpdateableTransition;
 import com.gemserk.animation4j.transitions.Transition;
+import com.gemserk.animation4j.transitions.Transitions;
 
 public class HelloWorld implements ApplicationListener {
 
@@ -49,8 +48,10 @@ public class HelloWorld implements ApplicationListener {
 
 		timeProvider = new UpdateableTimeProvider();
 
-		position = new AutoUpdateableTransition<Vector2>(new Vector2(startPosition), //
-				Interpolators.interpolator(vector2Converter), 0.001f);
+		position = Transitions.transition(startPosition, vector2Converter);
+		
+//		position = new AutoUpdateableTransition<Vector2>(new Vector2(startPosition), //
+//				Interpolators.interpolator(vector2Converter), 0.001f);
 		// position.set(new Vector2(endPosition), 1000);
 
 	}
@@ -65,7 +66,7 @@ public class HelloWorld implements ApplicationListener {
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 
 		Vector2 textPosition = position.get();
-		Gdx.app.log("HelloWorld", "position " + textPosition + ", desiredPosition: " + endPosition);
+//		Gdx.app.log("HelloWorld", "position " + textPosition + ", desiredPosition: " + endPosition);
 
 		spriteBatch.begin();
 		spriteBatch.setColor(Color.WHITE);
@@ -78,7 +79,7 @@ public class HelloWorld implements ApplicationListener {
 		
 		if (textPosition.dst2(endPosition) < 1f) {
 			endPosition.set(random.nextFloat() * Gdx.graphics.getWidth(), random.nextFloat() * Gdx.graphics.getHeight());
-			position.set(new Vector2(endPosition), 1000);
+			position.set(endPosition, 1000);
 		}
 
 	}
