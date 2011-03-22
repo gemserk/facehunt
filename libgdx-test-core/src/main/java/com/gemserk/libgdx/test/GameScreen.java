@@ -15,9 +15,12 @@ public class GameScreen extends ScreenAdapter {
 
 	private SpriteBatch spriteBatch;
 
+	private Texture island;
+
 	public GameScreen(Game game) {
 		this.game = game;
 		background = new Texture(Gdx.files.internal("data/background01-1024x512.jpg"));
+		island = new Texture(Gdx.files.internal("data/island01-128x128.png"));
 		spriteBatch = new SpriteBatch();
 	}
 
@@ -30,7 +33,12 @@ public class GameScreen extends ScreenAdapter {
 
 		spriteBatch.begin();
 		spriteBatch.setColor(Color.WHITE);
+
 		spriteBatch.draw(background, centerX - 800 / 2, centerY - 480 / 2);
+
+		spriteBatch.draw(island, 50 - island.getWidth() / 2, centerY - island.getHeight() / 2);
+		spriteBatch.draw(island, Gdx.graphics.getWidth() - 50 - island.getWidth() / 2, centerY - island.getHeight() / 2);
+
 		spriteBatch.end();
 	}
 

@@ -10,6 +10,7 @@ import com.gemserk.animation4j.interpolator.GenericInterpolator;
 import com.gemserk.animation4j.timeline.TimelineAnimationBuilder;
 import com.gemserk.animation4j.timeline.TimelineValueBuilder;
 import com.gemserk.animation4j.timeline.sync.ObjectSynchronizer;
+import com.gemserk.animation4j.timeline.sync.ReflectionObjectSynchronizer;
 import com.gemserk.animation4j.timeline.sync.SynchrnonizedAnimation;
 import com.gemserk.animation4j.timeline.sync.TimelineSynchronizer;
 
@@ -41,16 +42,16 @@ public class SplashScreen extends ScreenAdapter {
 		// we can use one generic interpolator (with internal state) for each animation value, can't be reused between different animation values
 		final GenericInterpolator<Color> genericColorInterpolator = new GenericInterpolator<Color>(Converters.color());
 
-		// ObjectSynchronizer objectSynchronizer = new ReflectionObjectSynchronizer(this);
-		ObjectSynchronizer objectSynchronizer = new ObjectSynchronizer() {
-
-			@Override
-			public void setValue(String name, Object value) {
-				if (!"color".equals(name))
-					return;
-				color.set((Color) value);
-			}
-		};
+		 ObjectSynchronizer objectSynchronizer = new ReflectionObjectSynchronizer(this);
+//		ObjectSynchronizer objectSynchronizer = new ObjectSynchronizer() {
+//
+//			@Override
+//			public void setValue(String name, Object value) {
+//				if (!"color".equals(name))
+//					return;
+//				color.set((Color) value);
+//			}
+//		};
 
 		splashAnimation = new SynchrnonizedAnimation(new TimelineAnimationBuilder() {
 			{
