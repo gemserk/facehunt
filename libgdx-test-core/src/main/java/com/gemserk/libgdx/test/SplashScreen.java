@@ -88,7 +88,7 @@ public class SplashScreen extends ScreenAdapter {
 		splashAnimation.update(delta * 1000);
 
 		if (splashAnimation.isFinished())
-			game.setScreen(new MainMenuScreen(game));
+			game.setScreen(new GameScreen(game));
 
 	}
 	
