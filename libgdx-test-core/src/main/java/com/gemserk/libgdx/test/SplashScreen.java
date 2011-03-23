@@ -40,7 +40,7 @@ public class SplashScreen extends ScreenAdapter {
 		this.spriteBatch = new SpriteBatch();
 
 		// we can use one generic interpolator (with internal state) for each animation value, can't be reused between different animation values
-		final GenericInterpolator<Color> genericColorInterpolator = new GenericInterpolator<Color>(Converters.color());
+		final GenericInterpolator<Color> genericColorInterpolator = new GenericInterpolator<Color>(LibgdxConverters.color());
 
 		ObjectSynchronizer objectSynchronizer = new ReflectionObjectSynchronizer(this);
 

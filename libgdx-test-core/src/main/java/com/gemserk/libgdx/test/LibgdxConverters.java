@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.TypeConverter;
 
-public class Converters {
+public class LibgdxConverters {
 	
 	private static final TypeConverter<Color> colorConverter = new ColorConverter();
 	

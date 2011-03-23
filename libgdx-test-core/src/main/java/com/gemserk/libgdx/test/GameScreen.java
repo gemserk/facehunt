@@ -37,17 +37,26 @@ public class GameScreen extends ScreenAdapter {
 
 		ArrayList<Entity> entities = new ArrayList<Entity>();
 
+		ArrayList<Entity> entitiesToAdd = new ArrayList<Entity>();
+
 		ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
 
 		void addEntity(Entity entity) {
-			entities.add(entity);
+			entitiesToAdd.add(entity);
 		}
 
 		ArrayList<Entity> getEntities() {
+
+			if (!entitiesToAdd.isEmpty()) {
+				entities.addAll(entitiesToAdd);
+				entitiesToAdd.clear();
+			}
+
 			if (!entitiesToRemove.isEmpty()) {
 				entities.removeAll(entitiesToRemove);
 				entitiesToRemove.clear();
 			}
+
 			return entities;
 		}
 
@@ -92,18 +101,36 @@ public class GameScreen extends ScreenAdapter {
 		Provider<JavaEntityTemplate> javaEntityTemplateProvider = injector.getProvider(JavaEntityTemplate.class);
 
 		templateProvider.add("Island", javaEntityTemplateProvider.get().with(new IslandTemplate()));
+		templateProvider.add("IslandAnimation", javaEntityTemplateProvider.get().with(new IslandAnimationTemplate()));
 
 		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
 		javaEntityTemplate.setInjector(injector);
 
 		final World world = new World(new Vector2(0, 0), new Vector2(800, 480));
 
+		final Color startColor = new Color(1f, 1f, 1f, 0f);
+		final Color endColor = new Color(1f, 1f, 1f, 1f);
+
 		for (int i = 0; i < 20; i++) {
 
-			entityManager.addEntity(templateProvider.getTemplate("Island").instantiate("island01", new HashMap<String, Object>() {
+			final int entityIndex = i;
+
+			final Vector2 position = Vector2Random.vector2(world.min, world.max);
+
+			entityManager.addEntity(templateProvider.getTemplate("IslandAnimation").instantiate("island.animation." + entityIndex, new HashMap<String, Object>() {
 				{
-					put("position", Vector2Random.vector2(world.min, world.max));
+					put("position", position);
 					put("image", island);
+
+					put("startColor", startColor);
+					put("endColor", endColor);
+
+					put("entity", templateProvider.getTemplate("Island").instantiate("island." + entityIndex, new HashMap<String, Object>() {
+						{
+							put("position", position);
+							put("image", island);
+						}
+					}));
 				}
 			}));
 
@@ -129,18 +156,40 @@ public class GameScreen extends ScreenAdapter {
 			Entity entity = entities.get(i);
 
 			// make some logic for the entity
-			if (Gdx.input.justTouched()) {
 
-				int x = Gdx.input.getX();
-				int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+			if (entity.hasTag("island")) {
 
-				Vector2 position = Properties.getValue(entity, "position");
+				if (Gdx.input.justTouched()) {
 
-				if (position.dst(x, y) < 20f) {
-					sound.play(1f);
+					int x = Gdx.input.getX();
+					int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+
+					Vector2 position = Properties.getValue(entity, "position");
+
+					if (position.dst(x, y) < 20f) {
+						sound.play(1f);
+
+						Properties.setValue(entity, "dead", true);
+
+						entityManager.remove(entity);
+
+						// add new entity with fade out animation
+					}
+
+				}
+
+			}
+
+			if (entity.hasTag("animation")) {
+
+				Color color = Properties.getValue(entity, "color");
+				Color endColor = Properties.getValue(entity, "endColor");
+
+				if (color.equals(endColor)) {
+					Entity child = Properties.getValue(entity, "entity");
+					if (child != null)
+						entityManager.addEntity(child);
 					entityManager.remove(entity);
-
-					// add new entity with fade out animation
 				}
 
 			}
@@ -149,19 +198,13 @@ public class GameScreen extends ScreenAdapter {
 				// render the entity
 				Texture texture = Properties.getValue(entity, "image");
 				Vector2 position = Properties.getValue(entity, "position");
+				Color color = Properties.getValue(entity, "color");
+				spriteBatch.setColor(color);
 				spriteBatch.draw(texture, position.x - texture.getWidth() / 2, position.y - texture.getHeight() / 2);
 			}
 		}
 
 		spriteBatch.end();
-
-		// if (Gdx.input.justTouched()) {
-		// sound.play(1f);
-		//
-		// int x = Gdx.input.getX();
-		// int y = Gdx.input.getY();
-		//
-		// }
 
 	}
 
