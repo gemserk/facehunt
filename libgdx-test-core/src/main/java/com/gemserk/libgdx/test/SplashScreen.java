@@ -18,7 +18,7 @@ public class SplashScreen extends ScreenAdapter {
 
 	private final Game game;
 
-	private final Texture companyLogo;
+	private final Texture logo;
 
 	private SpriteBatch spriteBatch;
 
@@ -34,24 +34,15 @@ public class SplashScreen extends ScreenAdapter {
 
 	private SynchrnonizedAnimation splashAnimation;
 
-	public SplashScreen(Game game, Texture companyLogo) {
+	public SplashScreen(Game game) {
 		this.game = game;
-		this.companyLogo = companyLogo;
+		this.logo = new Texture(Gdx.files.internal("data/logo-gemserk-512x128-white.png"));
 		this.spriteBatch = new SpriteBatch();
 
 		// we can use one generic interpolator (with internal state) for each animation value, can't be reused between different animation values
 		final GenericInterpolator<Color> genericColorInterpolator = new GenericInterpolator<Color>(Converters.color());
 
-		 ObjectSynchronizer objectSynchronizer = new ReflectionObjectSynchronizer(this);
-//		ObjectSynchronizer objectSynchronizer = new ObjectSynchronizer() {
-//
-//			@Override
-//			public void setValue(String name, Object value) {
-//				if (!"color".equals(name))
-//					return;
-//				color.set((Color) value);
-//			}
-//		};
+		ObjectSynchronizer objectSynchronizer = new ReflectionObjectSynchronizer(this);
 
 		splashAnimation = new SynchrnonizedAnimation(new TimelineAnimationBuilder() {
 			{
@@ -83,7 +74,7 @@ public class SplashScreen extends ScreenAdapter {
 		spriteBatch.begin();
 		// spriteBatch.setColor(color.get());
 		spriteBatch.setColor(color);
-		spriteBatch.draw(companyLogo, centerX - companyLogo.getWidth() / 2, centerY - companyLogo.getHeight() / 2, 0, 0, companyLogo.getWidth(), companyLogo.getHeight());
+		spriteBatch.draw(logo, centerX - logo.getWidth() / 2, centerY - logo.getHeight() / 2, 0, 0, logo.getWidth(), logo.getHeight());
 		spriteBatch.end();
 
 		splashAnimation.update(delta * 1000);
@@ -92,10 +83,15 @@ public class SplashScreen extends ScreenAdapter {
 			game.setScreen(new GameScreen(game));
 
 	}
-	
+
 	@Override
 	public void show() {
-		Gdx.app.log(PlatformGame.applicationName, "entered splash screen");		
+		Gdx.app.log(PlatformGame.applicationName, "entered splash screen");
 	}
-	
+
+	@Override
+	public void dispose() {
+		this.logo.dispose();
+	}
+
 }
