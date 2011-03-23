@@ -5,7 +5,7 @@ import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.componentsengine.properties.Property;
 import com.gemserk.componentsengine.templates.EntityBuilder;
 
-public class IslandAnimationTemplate extends EntityBuilder {
+public class FadeAnimationTemplate extends EntityBuilder {
 	
 	@Override
 	public void build() {

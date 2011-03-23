@@ -107,8 +107,8 @@ public class GameScreen extends ScreenAdapter {
 
 		Provider<JavaEntityTemplate> javaEntityTemplateProvider = injector.getProvider(JavaEntityTemplate.class);
 
-		templateProvider.add("Island", javaEntityTemplateProvider.get().with(new IslandTemplate()));
-		templateProvider.add("IslandAnimation", javaEntityTemplateProvider.get().with(new IslandAnimationTemplate()));
+		templateProvider.add("Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
+		templateProvider.add("FadeAnimation", javaEntityTemplateProvider.get().with(new FadeAnimationTemplate()));
 
 		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
 		javaEntityTemplate.setInjector(injector);
@@ -124,7 +124,7 @@ public class GameScreen extends ScreenAdapter {
 
 			final Vector2 position = Vector2Random.vector2(world.min, world.max);
 
-			entityManager.addEntity(templateProvider.getTemplate("IslandAnimation").instantiate("island.animation." + entityIndex, new HashMap<String, Object>() {
+			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entityIndex, new HashMap<String, Object>() {
 				{
 					put("position", position);
 					put("image", happyFace);
@@ -132,7 +132,7 @@ public class GameScreen extends ScreenAdapter {
 					put("startColor", startColor);
 					put("endColor", endColor);
 
-					put("entity", templateProvider.getTemplate("Island").instantiate("island." + entityIndex, new HashMap<String, Object>() {
+					put("entity", templateProvider.getTemplate("Touchable").instantiate("touchable." + entityIndex, new HashMap<String, Object>() {
 						{
 							put("position", position);
 							put("image", happyFace);
@@ -164,7 +164,7 @@ public class GameScreen extends ScreenAdapter {
 
 			// make some logic for the entity
 
-			if (entity.hasTag("island")) {
+			if (entity.hasTag("touchable")) {
 
 				if (Gdx.input.justTouched()) {
 
@@ -180,7 +180,7 @@ public class GameScreen extends ScreenAdapter {
 
 						entityManager.remove(entity);
 
-						entityManager.addEntity(templateProvider.getTemplate("IslandAnimation").instantiate("island.animation." + entity.getId(), new HashMap<String, Object>() {
+						entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
 							{
 								put("position", position);
 								put("image", sadFace);
