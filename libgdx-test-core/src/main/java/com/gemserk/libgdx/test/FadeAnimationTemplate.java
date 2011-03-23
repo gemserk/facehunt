@@ -18,6 +18,8 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		Property<Color> colorProperty = new TransitionProperty<Color>(Transitions.transition(startColor, 0.002f, LibgdxConverters.color()));
 		
 		property("position", parameters.get("position"));
+		property("angle", parameters.get("angle"));
+		
 		property("image", parameters.get("image"));
 		property("color", colorProperty);
 		
