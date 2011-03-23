@@ -29,7 +29,9 @@ public class GameScreen extends ScreenAdapter {
 
 	private SpriteBatch spriteBatch;
 
-	private Texture island;
+	private Texture happyFace;
+	
+	private Texture sadFace;
 
 	private Sound sound;
 
@@ -68,6 +70,8 @@ public class GameScreen extends ScreenAdapter {
 
 	EntityManager entityManager = new EntityManager();
 
+	private RegistrableTemplateProvider templateProvider;
+
 	static class World {
 
 		Vector2 min;
@@ -84,11 +88,14 @@ public class GameScreen extends ScreenAdapter {
 	public GameScreen(Game game) {
 		this.game = game;
 		background = new Texture(Gdx.files.internal("data/background01-1024x512.jpg"));
-		island = new Texture(Gdx.files.internal("data/island01-128x128.png"));
+		
+		happyFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
+		sadFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
+		
 		spriteBatch = new SpriteBatch();
 		sound = Gdx.audio.newSound(Gdx.files.internal("data/shot.ogg"));
 
-		final RegistrableTemplateProvider templateProvider = new RegistrableTemplateProvider();
+		templateProvider = new RegistrableTemplateProvider();
 
 		Injector injector = Guice.createInjector(new AbstractModule() {
 
@@ -120,7 +127,7 @@ public class GameScreen extends ScreenAdapter {
 			entityManager.addEntity(templateProvider.getTemplate("IslandAnimation").instantiate("island.animation." + entityIndex, new HashMap<String, Object>() {
 				{
 					put("position", position);
-					put("image", island);
+					put("image", happyFace);
 
 					put("startColor", startColor);
 					put("endColor", endColor);
@@ -128,7 +135,7 @@ public class GameScreen extends ScreenAdapter {
 					put("entity", templateProvider.getTemplate("Island").instantiate("island." + entityIndex, new HashMap<String, Object>() {
 						{
 							put("position", position);
-							put("image", island);
+							put("image", happyFace);
 						}
 					}));
 				}
@@ -164,16 +171,24 @@ public class GameScreen extends ScreenAdapter {
 					int x = Gdx.input.getX();
 					int y = Gdx.graphics.getHeight() - Gdx.input.getY();
 
-					Vector2 position = Properties.getValue(entity, "position");
+					final Vector2 position = Properties.getValue(entity, "position");
 
-					if (position.dst(x, y) < 20f) {
+					if (position.dst(x, y) < 32f) {
 						sound.play(1f);
 
 						Properties.setValue(entity, "dead", true);
 
 						entityManager.remove(entity);
 
-						// add new entity with fade out animation
+						entityManager.addEntity(templateProvider.getTemplate("IslandAnimation").instantiate("island.animation." + entity.getId(), new HashMap<String, Object>() {
+							{
+								put("position", position);
+								put("image", sadFace);
+								put("startColor", Color.WHITE);
+								put("endColor", new Color(1f,1f,1f,0f));
+							}
+						}));
+						
 					}
 
 				}
@@ -202,6 +217,7 @@ public class GameScreen extends ScreenAdapter {
 				spriteBatch.setColor(color);
 				spriteBatch.draw(texture, position.x - texture.getWidth() / 2, position.y - texture.getHeight() / 2);
 			}
+			
 		}
 
 		spriteBatch.end();
@@ -216,7 +232,8 @@ public class GameScreen extends ScreenAdapter {
 	@Override
 	public void dispose() {
 		background.dispose();
-		island.dispose();
+		happyFace.dispose();
+		sadFace.dispose();
 		sound.dispose();
 	}
 

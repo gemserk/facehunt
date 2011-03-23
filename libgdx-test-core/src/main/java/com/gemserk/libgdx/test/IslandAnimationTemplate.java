@@ -15,7 +15,7 @@ public class IslandAnimationTemplate extends EntityBuilder {
 		Color startColor = parameters.get("startColor");
 		Color endColor = parameters.get("endColor");
 		
-		Property<Color> colorProperty = new TransitionProperty<Color>(Transitions.transition(startColor, LibgdxConverters.color()));
+		Property<Color> colorProperty = new TransitionProperty<Color>(Transitions.transition(startColor, 0.002f, LibgdxConverters.color()));
 		
 		property("position", parameters.get("position"));
 		property("image", parameters.get("image"));
@@ -24,8 +24,6 @@ public class IslandAnimationTemplate extends EntityBuilder {
 		property("endColor", endColor);
 		
 		colorProperty.set(endColor);
-		
-		// Properties.setValue(entity, "color", endColor);
 		
 		// the entity to be added
 		property("entity", parameters.get("entity"));

@@ -16,7 +16,7 @@ public class HelloWorldAndroid extends AndroidApplication implements InjectorPro
 		super.onCreate(savedInstanceState);
 		initialize(new PlatformGame(), false);
 	}
-
+	
 	@Override
 	public Injector getInjector() {
 		return guiceApplication.getInjector();
