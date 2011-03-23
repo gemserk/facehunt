@@ -103,20 +103,12 @@ public class GameScreen extends ScreenAdapter {
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entityIndex, new HashMap<String, Object>() {
 				{
 					put("position", position);
+					put("velocity", velocity);
 					put("angle", randomAngle);
 					put("image", happyFace);
-
 					put("startColor", startColor);
 					put("endColor", endColor);
-
-					put("entity", templateProvider.getTemplate("Touchable").instantiate("touchable." + entityIndex, new HashMap<String, Object>() {
-						{
-							put("position", position);
-							put("velocity", velocity);
-							put("angle", randomAngle);
-							put("image", happyFace);
-						}
-					}));
+					put("shouldSpawn", true);
 				}
 			}));
 
@@ -142,7 +134,7 @@ public class GameScreen extends ScreenAdapter {
 		ArrayList<Entity> entities = entityManager.getEntities();
 
 		for (int i = 0; i < entities.size(); i++) {
-			Entity entity = entities.get(i);
+			final Entity entity = entities.get(i);
 
 			// make some logic for the entity
 
@@ -163,10 +155,12 @@ public class GameScreen extends ScreenAdapter {
 						entityManager.remove(entity);
 
 						final Float angle = Properties.getValue(entity, "angle");
+						final Vector2 velocity = Properties.getValue(entity, "velocity");
 						
 						entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
 							{
 								put("position", position);
+								put("velocity", velocity);
 								put("angle", angle);
 								put("image", sadFace);
 								put("startColor", Color.WHITE);
@@ -178,9 +172,9 @@ public class GameScreen extends ScreenAdapter {
 
 				}
 
-				movementComponent.update(entity, delta);
-
 			}
+			
+			movementComponent.update(entity, delta);
 
 			if (entity.hasTag("animation")) {
 
@@ -188,9 +182,17 @@ public class GameScreen extends ScreenAdapter {
 				Color endColor = Properties.getValue(entity, "endColor");
 
 				if (color.equals(endColor)) {
-					Entity child = Properties.getValue(entity, "entity");
-					if (child != null)
-						entityManager.addEntity(child);
+					Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
+					if (shouldSpawn) {
+						entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
+							{
+								put("position", Properties.getValue(entity, "position"));
+								put("velocity", Properties.getValue(entity, "velocity"));
+								put("angle", Properties.getValue(entity, "angle"));
+								put("image", happyFace);
+							}
+						}));
+					}
 					entityManager.remove(entity);
 				}
 

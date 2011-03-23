@@ -18,6 +18,7 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		Property<Color> colorProperty = new TransitionProperty<Color>(Transitions.transition(startColor, 0.002f, LibgdxConverters.color()));
 		
 		property("position", parameters.get("position"));
+		property("velocity", parameters.get("velocity"));
 		property("angle", parameters.get("angle"));
 		
 		property("image", parameters.get("image"));
@@ -27,8 +28,8 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		
 		colorProperty.set(endColor);
 		
-		// the entity to be added
-		property("entity", parameters.get("entity"));
+		// if a touchable should be spawned
+		property("shouldSpawn", parameters.get("shouldSpawn", false));
 
 	}
 
