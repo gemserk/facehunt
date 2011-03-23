@@ -34,6 +34,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>maven-android-plugin</artifactId>
@@ -47,13 +48,8 @@
 					<extractDuplicates>true</extractDuplicates>
 				</configuration>
 				<extensions>true</extensions>
-				<executions>
-					<execution>
-						<id>generate-apk</id>
-						<phase>install</phase>
-					</execution>
-				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 
@@ -96,6 +92,12 @@
 			<groupId>com.badlogic.gdx</groupId>
 			<artifactId>gdx-backend-android</artifactId>
 			<version>${libgdxversion}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.gemserk.componentsengine</groupId>
+			<artifactId>androidmodule</artifactId>
+			<version>0.0.8</version>
 		</dependency>
 
 	</dependencies>
