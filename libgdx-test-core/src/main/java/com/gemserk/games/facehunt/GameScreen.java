@@ -21,6 +21,7 @@ import com.gemserk.componentsengine.templates.RegistrableTemplateProvider;
 import com.gemserk.componentsengine.templates.TemplateProvider;
 import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
+import com.gemserk.games.facehunt.components.RotateComponent;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
 import com.google.inject.AbstractModule;
@@ -107,6 +108,7 @@ public class GameScreen extends ScreenAdapter {
 
 		movementComponent = new MovementComponent(world);
 		renderComponent = new RenderComponent();
+		rotateComponent = new RotateComponent();
 
 		identity = new Matrix4().idt();
 	}
@@ -170,6 +172,7 @@ public class GameScreen extends ScreenAdapter {
 			}
 
 			movementComponent.update(entity, delta);
+			rotateComponent.update(entity, delta);
 
 			if (entity.hasTag("animation")) {
 
@@ -201,7 +204,9 @@ public class GameScreen extends ScreenAdapter {
 
 	RenderComponent renderComponent;
 
-	private MovementComponent movementComponent;
+	MovementComponent movementComponent;
+	
+	RotateComponent rotateComponent;
 
 	@Override
 	public void show() {

@@ -12,7 +12,7 @@ public class FadeAnimationTemplate extends EntityBuilder {
 	@Override
 	public void build() {
 
-		tags("animation");
+		tags("animation", "moveable");
 		
 		Color startColor = parameters.get("startColor");
 		Color endColor = parameters.get("endColor");

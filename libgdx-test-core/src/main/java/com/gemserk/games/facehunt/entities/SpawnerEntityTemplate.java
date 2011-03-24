@@ -23,6 +23,12 @@ public class SpawnerEntityTemplate extends EntityBuilder {
 		
 		property("spawnedElements", parameters.get("template"));
 
+		// 
+		
+		property("currentTime", 0);
+		property("spawnMinDelay", 5000);
+		property("spawnMaxDelay", 5000);
+
 	}
 
 }

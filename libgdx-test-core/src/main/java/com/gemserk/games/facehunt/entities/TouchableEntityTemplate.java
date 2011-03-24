@@ -10,7 +10,8 @@ public class TouchableEntityTemplate extends EntityBuilder {
 
 	@Override
 	public void build() {
-		tags("touchable");
+		
+		tags("touchable", Tags.MOVEABLE);
 		
 		property("position", parameters.get("position"));
 		property("velocity", parameters.get("velocity"));
