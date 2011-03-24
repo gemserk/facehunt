@@ -14,6 +14,7 @@
 package com.gemserk.libgdx.test;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.gemserk.games.facehunt.PlatformGame;
 
 public class HelloWorldDesktop {
 	public static void main (String[] argv) {

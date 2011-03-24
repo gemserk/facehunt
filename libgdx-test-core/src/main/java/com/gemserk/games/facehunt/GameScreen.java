@@ -1,4 +1,4 @@
-package com.gemserk.libgdx.test;
+package com.gemserk.games.facehunt;
 
 import java.util.ArrayList;
 import java.util.HashMap;

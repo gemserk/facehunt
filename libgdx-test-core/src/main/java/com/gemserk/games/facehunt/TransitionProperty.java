@@ -1,4 +1,4 @@
-package com.gemserk.libgdx.test;
+package com.gemserk.games.facehunt;
 
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.componentsengine.properties.Property;

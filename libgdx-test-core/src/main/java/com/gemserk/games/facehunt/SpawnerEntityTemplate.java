@@ -1,4 +1,4 @@
-package com.gemserk.libgdx.test;
+package com.gemserk.games.facehunt;
 
 import com.gemserk.componentsengine.templates.EntityBuilder;
 import com.google.inject.Inject;

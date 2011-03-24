@@ -1,4 +1,4 @@
-package com.gemserk.libgdx.test;
+package com.gemserk.games.facehunt;
 
 import com.badlogic.gdx.Screen;
 

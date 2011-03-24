@@ -5,6 +5,7 @@ import roboguice.inject.InjectorProvider;
 import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
+import com.gemserk.games.facehunt.PlatformGame;
 import com.google.inject.Injector;
 
 public class HelloWorldAndroid extends AndroidApplication implements InjectorProvider {
