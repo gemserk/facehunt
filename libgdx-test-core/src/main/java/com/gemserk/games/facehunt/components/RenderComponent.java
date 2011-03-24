@@ -6,9 +6,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
+import com.gemserk.games.facehunt.values.Spatial;
 
 public class RenderComponent {
 
@@ -20,14 +20,16 @@ public class RenderComponent {
 
 	public void render(Entity entity, SpriteBatch spriteBatch) {
 		Texture texture = Properties.getValue(entity, "image");
-		Vector2 position = Properties.getValue(entity, "position");
-		FloatValue angle = Properties.getValue(entity, "angle");
+		Spatial spatial = Properties.getValue(entity, "spatial");
 		Color color = Properties.getValue(entity, "color");
+		
+		Vector2 position = spatial.position;
+		float angle = spatial.angle;
 
 		rot.idt();
 		trx.idt();
 
-		rot.setToRotation(rotationAxis, angle.value);
+		rot.setToRotation(rotationAxis, angle);
 
 		trx.trn(position.x, position.y, 0f);
 		trx.mul(rot);

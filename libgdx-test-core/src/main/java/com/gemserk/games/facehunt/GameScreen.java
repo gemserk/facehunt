@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
@@ -23,7 +22,10 @@ import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.components.RotateComponent;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
+import com.gemserk.games.facehunt.entities.Tags;
 import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
+import com.gemserk.games.facehunt.values.Movement;
+import com.gemserk.games.facehunt.values.Spatial;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -94,9 +96,13 @@ public class GameScreen extends ScreenAdapter {
 
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entityIndex, new HashMap<String, Object>() {
 				{
-					put("position", position);
-					put("velocity", velocity);
-					put("angle", new FloatValue(randomAngle));
+					// put("position", position);
+					// put("angle", new FloatValue(randomAngle));
+					put("spatial", new Spatial(position, randomAngle));
+
+					// put("velocity", velocity);
+					put("movement", new Movement(velocity));
+
 					put("image", happyFace);
 					put("startColor", startColor);
 					put("endColor", endColor);
@@ -109,6 +115,7 @@ public class GameScreen extends ScreenAdapter {
 		movementComponent = new MovementComponent(world);
 		renderComponent = new RenderComponent();
 		rotateComponent = new RotateComponent();
+		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, sound, sadFace);
 
 		identity = new Matrix4().idt();
 	}
@@ -135,42 +142,7 @@ public class GameScreen extends ScreenAdapter {
 
 			// make some logic for the entity
 
-			if (entity.hasTag("touchable")) {
-
-				if (Gdx.input.justTouched()) {
-
-					int x = Gdx.input.getX();
-					int y = Gdx.graphics.getHeight() - Gdx.input.getY();
-
-					final Vector2 position = Properties.getValue(entity, "position");
-
-					if (position.dst(x, y) < 32f) {
-						sound.play(1f);
-
-						Properties.setValue(entity, "dead", true);
-
-						entityManager.remove(entity);
-
-						final FloatValue angle = Properties.getValue(entity, "angle");
-						final Vector2 velocity = Properties.getValue(entity, "velocity");
-
-						entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
-							{
-								put("position", position);
-								put("velocity", velocity);
-								put("angle", angle);
-								put("image", sadFace);
-								put("startColor", Color.WHITE);
-								put("endColor", new Color(1f, 1f, 1f, 0f));
-							}
-						}));
-
-					}
-
-				}
-
-			}
-
+			detectTouchAndKillComponent.detectTouchAndKill(entity, delta);
 			movementComponent.update(entity, delta);
 			rotateComponent.update(entity, delta);
 
@@ -182,12 +154,13 @@ public class GameScreen extends ScreenAdapter {
 				if (color.equals(endColor)) {
 					Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
 					if (shouldSpawn) {
-						// passing same instances as parameters, this could be a problem!
+						final Spatial spatial = Properties.getValue(entity, "spatial");
+						final Movement movement = Properties.getValue(entity, "movement");
+
 						entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
 							{
-								put("position", Properties.getValue(entity, "position"));
-								put("velocity", Properties.getValue(entity, "velocity"));
-								put("angle", Properties.getValue(entity, "angle"));
+								put("spatial", new Spatial().set(spatial));
+								put("movement", new Movement().set(movement));
 								put("image", happyFace);
 							}
 						}));
@@ -202,11 +175,65 @@ public class GameScreen extends ScreenAdapter {
 
 	}
 
+	public static class DetectTouchAndKillComponent {
+
+		TemplateProvider templateProvider;
+
+		EntityManager entityManager;
+
+		private final Sound sound;
+
+		private final Texture image;
+
+		public DetectTouchAndKillComponent(EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image) {
+			this.entityManager = entityManager;
+			this.templateProvider = templateProvider;
+			this.sound = sound;
+			this.image = image;
+		}
+
+		protected void detectTouchAndKill(final Entity entity, float delta) {
+
+			if (!entity.hasTag(Tags.TOUCHABLE))
+				return;
+
+			if (Gdx.input.justTouched()) {
+
+				int x = Gdx.input.getX();
+				int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+
+				final Spatial spatial = Properties.getValue(entity, "spatial");
+				Vector2 position = spatial.position;
+
+				if (position.dst(x, y) < 32f) {
+					sound.play(1f);
+					entityManager.remove(entity);
+
+					final Movement movement = Properties.getValue(entity, "movement");
+
+					entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
+						{
+							put("spatial", new Spatial().set(spatial));
+							put("movement", new Movement().set(movement));
+							put("image", image);
+							put("startColor", Color.WHITE);
+							put("endColor", new Color(1f, 1f, 1f, 0f));
+						}
+					}));
+
+				}
+			}
+		}
+
+	}
+
 	RenderComponent renderComponent;
 
 	MovementComponent movementComponent;
-	
+
 	RotateComponent rotateComponent;
+
+	private DetectTouchAndKillComponent detectTouchAndKillComponent;
 
 	@Override
 	public void show() {

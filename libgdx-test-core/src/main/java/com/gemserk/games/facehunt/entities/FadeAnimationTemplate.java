@@ -12,16 +12,15 @@ public class FadeAnimationTemplate extends EntityBuilder {
 	@Override
 	public void build() {
 
-		tags("animation", "moveable");
+		tags("animation", Tags.MOVEABLE, Tags.SPATIAL);
 		
 		Color startColor = parameters.get("startColor");
 		Color endColor = parameters.get("endColor");
 		
 		Property<Color> colorProperty = new TransitionProperty<Color>(Transitions.transition(startColor, 0.002f, LibgdxConverters.color()));
 		
-		property("position", parameters.get("position"));
-		property("velocity", parameters.get("velocity"));
-		property("angle", parameters.get("angle"));
+		property("spatial", parameters.get("spatial"));
+		property("movement", parameters.get("movement"));
 		
 		property("image", parameters.get("image"));
 		property("color", colorProperty);

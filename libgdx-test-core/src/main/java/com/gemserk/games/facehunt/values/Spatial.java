@@ -16,5 +16,11 @@ public class Spatial {
 		this.position = position;
 		this.angle = angle;
 	}
+	
+	public Spatial set(Spatial spatial) {
+		this.position.set(spatial.position);
+		this.angle = spatial.angle;
+		return this;
+	}
 
 }

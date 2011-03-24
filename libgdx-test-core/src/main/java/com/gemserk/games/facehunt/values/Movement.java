@@ -13,5 +13,10 @@ public class Movement {
 	public Movement(Vector2 velocity) {
 		this.velocity = velocity;
 	}
+	
+	public Movement set(Movement movement) {
+		this.velocity.set(movement.velocity);
+		return this;
+	}
 
 }

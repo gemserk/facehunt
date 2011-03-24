@@ -5,5 +5,7 @@ public class Tags {
 	public static final String MOVEABLE = "moveable".intern();
 	
 	public static final String SPATIAL = "spatial".intern();
+	
+	public static final String TOUCHABLE = "touchable".intern();
 
 }
