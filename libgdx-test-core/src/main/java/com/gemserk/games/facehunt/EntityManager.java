@@ -12,11 +12,11 @@ public class EntityManager {
 
 	ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
 
-	void addEntity(Entity entity) {
+	public void addEntity(Entity entity) {
 		entitiesToAdd.add(entity);
 	}
 
-	ArrayList<Entity> getEntities() {
+	public ArrayList<Entity> getEntities() {
 
 		if (!entitiesToAdd.isEmpty()) {
 			entities.addAll(entitiesToAdd);

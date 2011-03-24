@@ -2,7 +2,6 @@ package com.gemserk.games.facehunt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -21,11 +20,14 @@ import com.gemserk.componentsengine.templates.TemplateProvider;
 import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.components.RotateComponent;
+import com.gemserk.games.facehunt.components.SpawnerComponent;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
+import com.gemserk.games.facehunt.entities.SpawnerEntityTemplate;
 import com.gemserk.games.facehunt.entities.Tags;
 import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
 import com.gemserk.games.facehunt.values.Movement;
 import com.gemserk.games.facehunt.values.Spatial;
+import com.gemserk.games.facehunt.values.Spawner;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -75,6 +77,7 @@ public class GameScreen extends ScreenAdapter {
 
 		templateProvider.add("Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
 		templateProvider.add("FadeAnimation", javaEntityTemplateProvider.get().with(new FadeAnimationTemplate()));
+		templateProvider.add("Spawner", javaEntityTemplateProvider.get().with(new SpawnerEntityTemplate()));
 
 		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
 		javaEntityTemplate.setInjector(injector);
@@ -84,38 +87,52 @@ public class GameScreen extends ScreenAdapter {
 		final Color startColor = new Color(1f, 1f, 1f, 0f);
 		final Color endColor = new Color(1f, 1f, 1f, 1f);
 
-		Random random = new Random();
+		// Random random = new Random();
 
-		for (int i = 0; i < 20; i++) {
+		// for (int i = 0; i < 20; i++) {
+		//
+		// final int entityIndex = i;
+		//
+		// final Vector2 position = Vector2Random.vector2(world.min, world.max);
+		// final Vector2 velocity = Vector2Random.vector2(-1f, -1f, 1f, 1f).mul(100f);
+		// final float randomAngle = random.nextFloat() * 360;
+		//
+		// entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entityIndex, new HashMap<String, Object>() {
+		// {
+		// // put("position", position);
+		// // put("angle", new FloatValue(randomAngle));
+		// put("spatial", new Spatial(position, randomAngle));
+		//
+		// // put("velocity", velocity);
+		// put("movement", new Movement(velocity));
+		//
+		// put("image", happyFace);
+		// put("startColor", startColor);
+		// put("endColor", endColor);
+		// put("shouldSpawn", true);
+		// }
+		// }));
+		//
+		// }
 
-			final int entityIndex = i;
-
-			final Vector2 position = Vector2Random.vector2(world.min, world.max);
-			final Vector2 velocity = Vector2Random.vector2(-1f, -1f, 1f, 1f).mul(100f);
-			final float randomAngle = random.nextFloat() * 360;
-
-			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entityIndex, new HashMap<String, Object>() {
-				{
-					// put("position", position);
-					// put("angle", new FloatValue(randomAngle));
-					put("spatial", new Spatial(position, randomAngle));
-
-					// put("velocity", velocity);
-					put("movement", new Movement(velocity));
-
-					put("image", happyFace);
-					put("startColor", startColor);
-					put("endColor", endColor);
-					put("shouldSpawn", true);
-				}
-			}));
-
-		}
+		entityManager.addEntity(templateProvider.getTemplate("Spawner").instantiate("global.spawner", new HashMap<String, Object>() {
+			{
+				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
+					{
+						put("image", happyFace);
+						put("startColor", startColor);
+						put("endColor", endColor);
+						put("shouldSpawn", true);
+					}
+				}));
+			}
+		}));
 
 		movementComponent = new MovementComponent(world);
 		renderComponent = new RenderComponent();
 		rotateComponent = new RotateComponent();
 		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, sound, sadFace);
+		spawnerComponent = new SpawnerComponent(entityManager, world);
 
 		identity = new Matrix4().idt();
 	}
@@ -145,6 +162,7 @@ public class GameScreen extends ScreenAdapter {
 			detectTouchAndKillComponent.detectTouchAndKill(entity, delta);
 			movementComponent.update(entity, delta);
 			rotateComponent.update(entity, delta);
+			spawnerComponent.update(entity, delta);
 
 			if (entity.hasTag("animation")) {
 
@@ -234,6 +252,8 @@ public class GameScreen extends ScreenAdapter {
 	RotateComponent rotateComponent;
 
 	private DetectTouchAndKillComponent detectTouchAndKillComponent;
+
+	private SpawnerComponent spawnerComponent;
 
 	@Override
 	public void show() {

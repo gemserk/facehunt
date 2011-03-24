@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
+import com.gemserk.games.facehunt.entities.Tags;
 import com.gemserk.games.facehunt.values.Spatial;
 
 public class RenderComponent {
@@ -19,6 +20,9 @@ public class RenderComponent {
 	private Matrix4 trx = new Matrix4();
 
 	public void render(Entity entity, SpriteBatch spriteBatch) {
+		if (!entity.hasTag(Tags.SPATIAL))
+			return;
+		
 		Texture texture = Properties.getValue(entity, "image");
 		Spatial spatial = Properties.getValue(entity, "spatial");
 		Color color = Properties.getValue(entity, "color");

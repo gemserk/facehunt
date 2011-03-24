@@ -1,6 +1,7 @@
 package com.gemserk.games.facehunt.entities;
 
 import com.gemserk.componentsengine.templates.EntityBuilder;
+import com.gemserk.componentsengine.timers.CountDownTimer;
 import com.gemserk.games.facehunt.EntityManager;
 import com.google.inject.Inject;
 
@@ -18,16 +19,11 @@ public class SpawnerEntityTemplate extends EntityBuilder {
 
 		tags("spawner");
 
-		property("template", parameters.get("template"));
-		property("defaultParameters", parameters.get("defaultParameters"));
-		
-		property("spawnedElements", parameters.get("template"));
+		property("spawner", parameters.get("spawner"));
 
-		// 
-		
-		property("currentTime", 0);
-		property("spawnMinDelay", 5000);
-		property("spawnMaxDelay", 5000);
+		//
+
+		property("timer", new CountDownTimer(1000, true));
 
 	}
 
