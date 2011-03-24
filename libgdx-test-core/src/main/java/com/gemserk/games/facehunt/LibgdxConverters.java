@@ -3,6 +3,7 @@ package com.gemserk.games.facehunt;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.TypeConverter;
+import com.gemserk.animation4j.gdx.converters.ColorConverter;
 
 public class LibgdxConverters {
 	
