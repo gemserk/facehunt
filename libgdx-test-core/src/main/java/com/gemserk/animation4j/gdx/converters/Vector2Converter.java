@@ -1,4 +1,4 @@
-package com.gemserk.games.facehunt;
+package com.gemserk.animation4j.gdx.converters;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;

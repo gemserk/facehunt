@@ -1,6 +1,7 @@
 package com.gemserk.games.facehunt;
 
 import com.badlogic.gdx.graphics.Color;
+import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.componentsengine.properties.Property;
 import com.gemserk.componentsengine.templates.EntityBuilder;
