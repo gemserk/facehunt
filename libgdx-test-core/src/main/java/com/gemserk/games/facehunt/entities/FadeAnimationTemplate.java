@@ -1,10 +1,11 @@
-package com.gemserk.games.facehunt;
+package com.gemserk.games.facehunt.entities;
 
 import com.badlogic.gdx.graphics.Color;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.componentsengine.properties.Property;
 import com.gemserk.componentsengine.templates.EntityBuilder;
+import com.gemserk.games.facehunt.TransitionProperty;
 
 public class FadeAnimationTemplate extends EntityBuilder {
 	

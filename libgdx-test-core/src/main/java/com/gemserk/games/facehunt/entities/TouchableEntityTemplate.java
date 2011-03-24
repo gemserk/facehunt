@@ -1,4 +1,4 @@
-package com.gemserk.games.facehunt;
+package com.gemserk.games.facehunt.entities;
 
 import com.badlogic.gdx.graphics.Color;
 import com.gemserk.componentsengine.templates.EntityBuilder;

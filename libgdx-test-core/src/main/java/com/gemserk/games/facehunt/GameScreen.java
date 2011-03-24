@@ -19,6 +19,8 @@ import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
 import com.gemserk.componentsengine.templates.RegistrableTemplateProvider;
 import com.gemserk.componentsengine.templates.TemplateProvider;
+import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
+import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;

@@ -1,6 +1,7 @@
-package com.gemserk.games.facehunt;
+package com.gemserk.games.facehunt.entities;
 
 import com.gemserk.componentsengine.templates.EntityBuilder;
+import com.gemserk.games.facehunt.EntityManager;
 import com.google.inject.Inject;
 
 public class SpawnerEntityTemplate extends EntityBuilder {
