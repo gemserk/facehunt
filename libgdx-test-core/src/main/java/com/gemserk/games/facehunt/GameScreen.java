@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
@@ -106,7 +107,7 @@ public class GameScreen extends ScreenAdapter {
 				{
 					put("position", position);
 					put("velocity", velocity);
-					put("angle", randomAngle);
+					put("angle", new FloatValue(randomAngle));
 					put("image", happyFace);
 					put("startColor", startColor);
 					put("endColor", endColor);
@@ -123,7 +124,7 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	Matrix4 identity = new Matrix4();
-	
+
 	@Override
 	public void render(float delta) {
 		int centerX = Gdx.graphics.getWidth() / 2;
@@ -160,7 +161,7 @@ public class GameScreen extends ScreenAdapter {
 
 						entityManager.remove(entity);
 
-						final Float angle = Properties.getValue(entity, "angle");
+						final FloatValue angle = Properties.getValue(entity, "angle");
 						final Vector2 velocity = Properties.getValue(entity, "velocity");
 
 						entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
@@ -190,6 +191,7 @@ public class GameScreen extends ScreenAdapter {
 				if (color.equals(endColor)) {
 					Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
 					if (shouldSpawn) {
+						// passing same instances as parameters, this could be a problem!
 						entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
 							{
 								put("position", Properties.getValue(entity, "position"));
@@ -216,17 +218,17 @@ public class GameScreen extends ScreenAdapter {
 		Vector3 rotationAxis = new Vector3(0f, 0f, 1f);
 
 		Matrix4 trx = new Matrix4();
-		
+
 		void render(Entity entity, SpriteBatch spriteBatch) {
 			Texture texture = Properties.getValue(entity, "image");
 			Vector2 position = Properties.getValue(entity, "position");
-			Float angle = Properties.getValue(entity, "angle");
+			FloatValue angle = Properties.getValue(entity, "angle");
 			Color color = Properties.getValue(entity, "color");
 
 			rot.idt();
 			trx.idt();
-			
-			rot.setToRotation(rotationAxis, angle);
+
+			rot.setToRotation(rotationAxis, angle.value);
 
 			trx.trn(position.x, position.y, 0f);
 			trx.mul(rot);
@@ -270,17 +272,25 @@ public class GameScreen extends ScreenAdapter {
 			tmpVelocity.set(velocity);
 
 			// world size!!
-			if (tmpPosition.x > world.max.x)
+			if (tmpPosition.x > world.max.x - 10) {
 				tmpVelocity.x = -tmpVelocity.x;
+				tmpPosition.x = position.x;
+			}
 
-			if (tmpPosition.x < world.min.x)
+			if (tmpPosition.x < world.min.x + 10) {
 				tmpVelocity.x = -tmpVelocity.x;
+				tmpPosition.x = position.x;
+			}
 
-			if (tmpPosition.y > world.max.y)
+			if (tmpPosition.y > world.max.y - 10) {
 				tmpVelocity.y = -tmpVelocity.y;
+				tmpPosition.y = position.y;
+			}
 
-			if (tmpPosition.y < world.min.y)
+			if (tmpPosition.y < world.min.y + 10) {
 				tmpVelocity.y = -tmpVelocity.y;
+				tmpPosition.y = position.y;
+			}
 
 			position.set(tmpPosition);
 			velocity.set(tmpVelocity);
@@ -288,8 +298,8 @@ public class GameScreen extends ScreenAdapter {
 			Properties.setValue(entity, "position", position);
 			Properties.setValue(entity, "velocity", velocity);
 
-			Float angle = Properties.getValue(entity, "angle");
-			angle += 90f * delta;
+			FloatValue angle = Properties.getValue(entity, "angle");
+			angle.value += 90f * delta;
 			Properties.setValue(entity, "angle", angle);
 		}
 
