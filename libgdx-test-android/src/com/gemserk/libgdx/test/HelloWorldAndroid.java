@@ -21,5 +21,6 @@ public class HelloWorldAndroid extends AndroidApplication implements InjectorPro
 	public Injector getInjector() {
 		return guiceApplication.getInjector();
 	}
+
 	
 }

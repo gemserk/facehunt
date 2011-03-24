@@ -99,7 +99,7 @@ public class GameScreen extends ScreenAdapter {
 			final Vector2 position = Vector2Random.vector2(world.min, world.max);
 			final Vector2 velocity = Vector2Random.vector2(-1f, -1f, 1f, 1f).mul(100f);
 			final float randomAngle = random.nextFloat() * 360;
-			
+
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entityIndex, new HashMap<String, Object>() {
 				{
 					put("position", position);
@@ -115,9 +115,13 @@ public class GameScreen extends ScreenAdapter {
 		}
 
 		movementComponent = new MovementComponent(world);
+		renderComponent = new RenderComponent();
 
+		identity = new Matrix4().idt();
 	}
 
+	Matrix4 identity = new Matrix4();
+	
 	@Override
 	public void render(float delta) {
 		int centerX = Gdx.graphics.getWidth() / 2;
@@ -125,7 +129,7 @@ public class GameScreen extends ScreenAdapter {
 
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 
-		spriteBatch.setTransformMatrix(new Matrix4());
+		spriteBatch.setTransformMatrix(identity);
 		spriteBatch.begin();
 		spriteBatch.setColor(Color.WHITE);
 		spriteBatch.draw(background, centerX - 800 / 2, centerY - 480 / 2);
@@ -156,7 +160,7 @@ public class GameScreen extends ScreenAdapter {
 
 						final Float angle = Properties.getValue(entity, "angle");
 						final Vector2 velocity = Properties.getValue(entity, "velocity");
-						
+
 						entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
 							{
 								put("position", position);
@@ -173,7 +177,7 @@ public class GameScreen extends ScreenAdapter {
 				}
 
 			}
-			
+
 			movementComponent.update(entity, delta);
 
 			if (entity.hasTag("animation")) {
@@ -198,34 +202,46 @@ public class GameScreen extends ScreenAdapter {
 
 			}
 
-			if (entity.hasTag("spawner")) {
-
-			}
-
-			{
-				// render the entity
-				Texture texture = Properties.getValue(entity, "image");
-				Vector2 position = Properties.getValue(entity, "position");
-				Float angle = Properties.getValue(entity, "angle");
-				Color color = Properties.getValue(entity, "color");
-				
-				Matrix4 rotation = new Matrix4().idt();
-				rotation.setToRotation(new Vector3(0f,0f,1f), angle);
-				
-				Matrix4 trn = new Matrix4().trn(position.x, position.y, 0f);
-				trn.mul(rotation);
-				
-				spriteBatch.setTransformMatrix(trn);
-				
-				spriteBatch.begin();
-				spriteBatch.setColor(color);
-				spriteBatch.draw(texture, -texture.getWidth() / 2, -texture.getHeight() / 2);
-				spriteBatch.end();
-			}
-
+			render(entity, spriteBatch);
 		}
 
+	}
 
+	public static class RenderComponent {
+
+		Matrix4 rot = new Matrix4();
+
+		Vector3 rotationAxis = new Vector3(0f, 0f, 1f);
+
+		Matrix4 trx = new Matrix4();
+		
+		void render(Entity entity, SpriteBatch spriteBatch) {
+			Texture texture = Properties.getValue(entity, "image");
+			Vector2 position = Properties.getValue(entity, "position");
+			Float angle = Properties.getValue(entity, "angle");
+			Color color = Properties.getValue(entity, "color");
+
+			rot.idt();
+			trx.idt();
+			
+			rot.setToRotation(rotationAxis, angle);
+
+			trx.trn(position.x, position.y, 0f);
+			trx.mul(rot);
+
+			spriteBatch.setTransformMatrix(trx);
+			spriteBatch.begin();
+			spriteBatch.setColor(color);
+			spriteBatch.draw(texture, -texture.getWidth() / 2, -texture.getHeight() / 2);
+			spriteBatch.end();
+		}
+
+	}
+
+	RenderComponent renderComponent;
+
+	protected void render(Entity entity, SpriteBatch spriteBatch) {
+		renderComponent.render(entity, spriteBatch);
 	}
 
 	public static class MovementComponent {
@@ -243,7 +259,7 @@ public class GameScreen extends ScreenAdapter {
 		public void update(Entity entity, float delta) {
 			Vector2 position = Properties.getValue(entity, "position");
 			Vector2 velocity = Properties.getValue(entity, "velocity");
-			
+
 			tmpPosition.set(position);
 			tmpVelocity.set(velocity);
 
@@ -269,7 +285,7 @@ public class GameScreen extends ScreenAdapter {
 
 			Properties.setValue(entity, "position", position);
 			Properties.setValue(entity, "velocity", velocity);
-			
+
 			Float angle = Properties.getValue(entity, "angle");
 			angle += 90f * delta;
 			Properties.setValue(entity, "angle", angle);
