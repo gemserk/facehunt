@@ -6,7 +6,7 @@ import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.games.facehunt.entities.Tags;
 
 public class RotateComponent {
-
+	
 	public void update(Entity entity, float delta) {
 		// if entity has tag "movable" or properties for movement (spatial) , then perform
 		

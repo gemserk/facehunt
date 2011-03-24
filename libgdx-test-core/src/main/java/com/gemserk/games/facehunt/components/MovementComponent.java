@@ -6,10 +6,13 @@ import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.games.facehunt.World;
 import com.gemserk.games.facehunt.entities.Tags;
 import com.gemserk.games.facehunt.values.Movement;
+import com.gemserk.games.facehunt.values.Spatial;
 
 public class MovementComponent {
 
-	Movement tmpMovement = new Movement();
+	private Movement tmpMovement = new Movement();
+	
+	private Spatial tmpSpatial = new Spatial();
 
 	World world;
 
@@ -26,7 +29,7 @@ public class MovementComponent {
 		Vector2 position = Properties.getValue(entity, "position");
 		Vector2 velocity = Properties.getValue(entity, "velocity");
 
-		Vector2 tmpPosition = tmpMovement.position;
+		Vector2 tmpPosition = tmpSpatial.position;
 		Vector2 tmpVelocity = tmpMovement.velocity;
 		
 		tmpPosition.set(position);
