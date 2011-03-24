@@ -13,13 +13,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
 import com.gemserk.componentsengine.templates.RegistrableTemplateProvider;
 import com.gemserk.componentsengine.templates.TemplateProvider;
+import com.gemserk.games.facehunt.components.MovementComponent;
+import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
 import com.google.inject.AbstractModule;
@@ -44,19 +45,6 @@ public class GameScreen extends ScreenAdapter {
 	EntityManager entityManager;
 
 	private RegistrableTemplateProvider templateProvider;
-
-	static class World {
-
-		Vector2 min;
-
-		Vector2 max;
-
-		public World(Vector2 min, Vector2 max) {
-			this.min = min;
-			this.max = max;
-		}
-
-	}
 
 	public GameScreen(Game game) {
 		this.game = game;
@@ -206,104 +194,12 @@ public class GameScreen extends ScreenAdapter {
 
 			}
 
-			render(entity, spriteBatch);
-		}
-
-	}
-
-	public static class RenderComponent {
-
-		Matrix4 rot = new Matrix4();
-
-		Vector3 rotationAxis = new Vector3(0f, 0f, 1f);
-
-		Matrix4 trx = new Matrix4();
-
-		void render(Entity entity, SpriteBatch spriteBatch) {
-			Texture texture = Properties.getValue(entity, "image");
-			Vector2 position = Properties.getValue(entity, "position");
-			FloatValue angle = Properties.getValue(entity, "angle");
-			Color color = Properties.getValue(entity, "color");
-
-			rot.idt();
-			trx.idt();
-
-			rot.setToRotation(rotationAxis, angle.value);
-
-			trx.trn(position.x, position.y, 0f);
-			trx.mul(rot);
-
-			spriteBatch.setTransformMatrix(trx);
-			spriteBatch.begin();
-			spriteBatch.setColor(color);
-			spriteBatch.draw(texture, -texture.getWidth() / 2, -texture.getHeight() / 2);
-			spriteBatch.end();
+			renderComponent.render(entity, spriteBatch);
 		}
 
 	}
 
 	RenderComponent renderComponent;
-
-	protected void render(Entity entity, SpriteBatch spriteBatch) {
-		renderComponent.render(entity, spriteBatch);
-	}
-
-	public static class MovementComponent {
-
-		Vector2 tmpPosition = new Vector2();
-
-		Vector2 tmpVelocity = new Vector2();
-
-		World world;
-
-		public MovementComponent(World world) {
-			this.world = world;
-		}
-
-		public void update(Entity entity, float delta) {
-			Vector2 position = Properties.getValue(entity, "position");
-			Vector2 velocity = Properties.getValue(entity, "velocity");
-
-			tmpPosition.set(position);
-			tmpVelocity.set(velocity);
-
-			tmpPosition.add(tmpVelocity.mul(delta));
-
-			tmpVelocity.set(velocity);
-
-			// world size!!
-			if (tmpPosition.x > world.max.x - 10) {
-				tmpVelocity.x = -tmpVelocity.x;
-				tmpPosition.x = position.x;
-			}
-
-			if (tmpPosition.x < world.min.x + 10) {
-				tmpVelocity.x = -tmpVelocity.x;
-				tmpPosition.x = position.x;
-			}
-
-			if (tmpPosition.y > world.max.y - 10) {
-				tmpVelocity.y = -tmpVelocity.y;
-				tmpPosition.y = position.y;
-			}
-
-			if (tmpPosition.y < world.min.y + 10) {
-				tmpVelocity.y = -tmpVelocity.y;
-				tmpPosition.y = position.y;
-			}
-
-			position.set(tmpPosition);
-			velocity.set(tmpVelocity);
-
-			Properties.setValue(entity, "position", position);
-			Properties.setValue(entity, "velocity", velocity);
-
-			FloatValue angle = Properties.getValue(entity, "angle");
-			angle.value += 90f * delta;
-			Properties.setValue(entity, "angle", angle);
-		}
-
-	}
 
 	private MovementComponent movementComponent;
 

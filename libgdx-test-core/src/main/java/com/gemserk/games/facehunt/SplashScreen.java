@@ -53,7 +53,7 @@ public class SplashScreen extends ScreenAdapter {
 						keyFrame(0, new Color(1f, 1f, 1f, 0f), genericColorInterpolator);
 						keyFrame(2000, new Color(1f, 1f, 1f, 1f), genericColorInterpolator);
 						keyFrame(4000, new Color(1f, 1f, 1f, 1f), genericColorInterpolator);
-						keyFrame(4250, new Color(1f, 1f, 0.3f, 0.7f), genericColorInterpolator);
+						keyFrame(4250, new Color(1f, 1f, 1f, 0.7f), genericColorInterpolator);
 						keyFrame(4500, new Color(0f, 0f, 0f, 0f), genericColorInterpolator);
 					}
 				});
