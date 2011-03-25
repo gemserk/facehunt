@@ -11,6 +11,8 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
@@ -29,6 +31,7 @@ import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.SpawnerEntityTemplate;
 import com.gemserk.games.facehunt.entities.Tags;
 import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
+import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.games.facehunt.values.Movement;
 import com.gemserk.games.facehunt.values.Spatial;
 import com.gemserk.games.facehunt.values.Spawner;
@@ -105,13 +108,19 @@ public class GameScreen extends ScreenAdapter {
 			}
 		}));
 
+		gameData = new GameData();
+
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent();
 		rotateComponent = new RotateComponent("rotate");
-		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, sound, sadFace);
+		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, sound, sadFace, gameData);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world);
 
 		identity = new Matrix4().idt();
+		
+		font = new BitmapFont();
+		font.setColor(0f, 0f, 0f, 0.8f);
+		// font.setScale(1f, 1.5f);
 	}
 
 	Matrix4 identity = new Matrix4();
@@ -149,11 +158,11 @@ public class GameScreen extends ScreenAdapter {
 				if (color.equals(endColor)) {
 					Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
 					if (shouldSpawn) {
-						
+
 						final Spatial spatial = Properties.getValue(entity, "spatial");
 						final Movement movement = Properties.getValue(entity, "movement");
 						final FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
-						
+
 						entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
 							{
 								put("spatial", new Spatial().set(spatial));
@@ -167,21 +176,35 @@ public class GameScreen extends ScreenAdapter {
 				}
 
 			}
-			
+
 			if (entity.hasTag(Tags.TOUCHABLE)) {
-				
+
 				FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
-				
-//				aliveTime.value -= 1f * delta;
-				
-				if (aliveTime.value <= 0f) { 
+
+				// aliveTime.value -= 1f * delta;
+
+				if (aliveTime.value <= 0f) {
+					gameData.deadCritters++;
 					entityManager.remove(entity);
 				}
-				
+
 			}
 
 			renderComponent.render(entity, spriteBatch);
 		}
+		
+		spriteBatch.setTransformMatrix(identity);
+		spriteBatch.begin();
+		
+		String str = "Killed: " + gameData.killedCritters;
+		TextBounds textBounds = font.getBounds(str);
+		font.draw(spriteBatch, str, 10, Gdx.graphics.getHeight() - 20);
+
+		str = "Missed: " + gameData.deadCritters;
+		textBounds = font.getBounds(str);
+		font.draw(spriteBatch, str, Gdx.graphics.getWidth() - textBounds.width - 10, Gdx.graphics.getHeight() - 20);
+
+		spriteBatch.end();
 
 	}
 
@@ -201,17 +224,17 @@ public class GameScreen extends ScreenAdapter {
 			Vector2 position = Vector2Random.vector2(world.min.x + 10, world.min.y + 10, world.max.x - 10, world.max.y - 10);
 			Vector2 velocity = Vector2Random.vector2(-1f, -1f, 1f, 1f).mul(100f);
 			float angle = random.nextFloat() * 360;
-			
+
 			// I want this to be dynamic based on the player's performance.
-			float minAliveTime = 4000f;
-			float maxAliveTime = 6000f;
-			
+			float minAliveTime = 6000f;
+			float maxAliveTime = 10000f;
+
 			float aliveTime = minAliveTime + random.nextFloat() * (maxAliveTime - minAliveTime);
-			
+
 			parameters.put("spatial", new Spatial(position, angle));
 			parameters.put("movement", new Movement(velocity));
 			parameters.put("aliveTime", new FloatValue(aliveTime));
-			
+
 			return parameters;
 		}
 	}
@@ -228,18 +251,21 @@ public class GameScreen extends ScreenAdapter {
 
 		Color endColor = new Color(1f, 1f, 1f, 0f);
 
-		public DetectTouchAndKillComponent(EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image) {
+		private final GameData gameData;
+
+		public DetectTouchAndKillComponent(EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData) {
 			this.entityManager = entityManager;
 			this.templateProvider = templateProvider;
 			this.sound = sound;
 			this.image = image;
+			this.gameData = gameData;
 		}
 
 		protected void detectTouchAndKill(final Entity entity, float delta) {
 
 			if (!entity.hasTag(Tags.TOUCHABLE))
 				return;
-			
+
 			if (!Gdx.input.justTouched())
 				return;
 
@@ -249,24 +275,26 @@ public class GameScreen extends ScreenAdapter {
 			final Spatial spatial = Properties.getValue(entity, "spatial");
 			Vector2 position = spatial.position;
 
-			if (position.dst(x, y) < 32f) {
-				sound.play(1f);
-				entityManager.remove(entity);
+			if (position.dst(x, y) > 32f)
+				return;
 
-				final Movement movement = Properties.getValue(entity, "movement");
-				final Color color = Properties.getValue(entity, "color");
+			sound.play(1f);
+			entityManager.remove(entity);
+			gameData.killedCritters++;
 
-				entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
-					{
-						put("spatial", new Spatial().set(spatial));
-						put("movement", new Movement().set(movement));
-						put("image", image);
-						put("startColor", color);
-						put("endColor", endColor);
-					}
-				}));
+			final Movement movement = Properties.getValue(entity, "movement");
+			final Color color = Properties.getValue(entity, "color");
 
-			}
+			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
+				{
+					put("spatial", new Spatial().set(spatial));
+					put("movement", new Movement().set(movement));
+					put("image", image);
+					put("startColor", color);
+					put("endColor", endColor);
+				}
+			}));
+
 		}
 
 	}
@@ -282,6 +310,10 @@ public class GameScreen extends ScreenAdapter {
 	private SpawnerComponent spawnerComponent;
 
 	private Sound bounceSound;
+
+	private GameData gameData;
+
+	private BitmapFont font;
 
 	@Override
 	public void show() {
