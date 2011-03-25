@@ -47,6 +47,10 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		// bind for movement component
 		propertyRef("movement.spatial", "spatial");
 		propertyRef("movement.movement", "movement");
+		
+		// alive time
+		
+		property("aliveTime", parameters.get("aliveTime"));
 
 	}
 

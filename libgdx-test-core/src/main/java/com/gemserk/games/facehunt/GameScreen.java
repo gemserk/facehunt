@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
@@ -148,20 +149,35 @@ public class GameScreen extends ScreenAdapter {
 				if (color.equals(endColor)) {
 					Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
 					if (shouldSpawn) {
+						
 						final Spatial spatial = Properties.getValue(entity, "spatial");
 						final Movement movement = Properties.getValue(entity, "movement");
-
+						final FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
+						
 						entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
 							{
 								put("spatial", new Spatial().set(spatial));
 								put("movement", new Movement().set(movement));
 								put("image", happyFace);
+								put("aliveTime", aliveTime);
 							}
 						}));
 					}
 					entityManager.remove(entity);
 				}
 
+			}
+			
+			if (entity.hasTag(Tags.TOUCHABLE)) {
+				
+				FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
+				
+//				aliveTime.value -= 1f * delta;
+				
+				if (aliveTime.value <= 0f) { 
+					entityManager.remove(entity);
+				}
+				
 			}
 
 			renderComponent.render(entity, spriteBatch);
@@ -182,13 +198,20 @@ public class GameScreen extends ScreenAdapter {
 		@Override
 		public Map<String, Object> buildParameters(Map<String, Object> parameters) {
 			// should be outside...
-			final Vector2 position = Vector2Random.vector2(world.min.x + 10, world.min.y + 10, world.max.x - 10, world.max.y - 10);
-			final Vector2 velocity = Vector2Random.vector2(-1f, -1f, 1f, 1f).mul(100f);
-			final float angle = random.nextFloat() * 360;
-
+			Vector2 position = Vector2Random.vector2(world.min.x + 10, world.min.y + 10, world.max.x - 10, world.max.y - 10);
+			Vector2 velocity = Vector2Random.vector2(-1f, -1f, 1f, 1f).mul(100f);
+			float angle = random.nextFloat() * 360;
+			
+			// I want this to be dynamic based on the player's performance.
+			float minAliveTime = 4000f;
+			float maxAliveTime = 6000f;
+			
+			float aliveTime = minAliveTime + random.nextFloat() * (maxAliveTime - minAliveTime);
+			
 			parameters.put("spatial", new Spatial(position, angle));
 			parameters.put("movement", new Movement(velocity));
-
+			parameters.put("aliveTime", new FloatValue(aliveTime));
+			
 			return parameters;
 		}
 	}
@@ -228,7 +251,6 @@ public class GameScreen extends ScreenAdapter {
 
 			if (position.dst(x, y) < 32f) {
 				sound.play(1f);
-				
 				entityManager.remove(entity);
 
 				final Movement movement = Properties.getValue(entity, "movement");
