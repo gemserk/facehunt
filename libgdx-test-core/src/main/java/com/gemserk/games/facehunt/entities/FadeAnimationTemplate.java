@@ -9,8 +9,17 @@ import com.gemserk.games.facehunt.TransitionProperty;
 
 public class FadeAnimationTemplate extends EntityBuilder {
 	
+	private int sequence = 1;
+	
+	@Override
+	public String getId() {
+		return "face." + sequence;
+	}
+	
 	@Override
 	public void build() {
+		
+		sequence++;
 
 		tags("animation", Tags.MOVEABLE, Tags.SPATIAL);
 		
@@ -31,6 +40,13 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		
 		// if a touchable should be spawned
 		property("shouldSpawn", parameters.get("shouldSpawn", false));
+		
+		// bind for rotate component
+		propertyRef("rotate.spatial", "spatial");
+		
+		// bind for movement component
+		propertyRef("movement.spatial", "spatial");
+		propertyRef("movement.movement", "movement");
 
 	}
 

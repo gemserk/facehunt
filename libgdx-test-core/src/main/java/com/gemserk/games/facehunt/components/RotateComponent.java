@@ -1,18 +1,28 @@
 package com.gemserk.games.facehunt.components;
 
+import com.gemserk.componentsengine.components.FieldsReflectionComponent;
+import com.gemserk.componentsengine.components.annotations.EntityProperty;
 import com.gemserk.componentsengine.entities.Entity;
-import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.games.facehunt.entities.Tags;
 import com.gemserk.games.facehunt.values.Spatial;
 
-public class RotateComponent {
+public class RotateComponent extends FieldsReflectionComponent {
+	
+	@EntityProperty(required=true)
+	Spatial spatial;
+
+	public RotateComponent(String id) {
+		super(id);
+	}
 
 	public void update(Entity entity, float delta) {
 		if (!entity.hasTag(Tags.SPATIAL))
 			return;
-		Spatial spatial = Properties.getValue(entity, "spatial");
+		
+		super.setEntity(entity);
+		preHandleMessage(null);
 		spatial.angle += 90f * delta;
-		Properties.setValue(entity, "spatial", spatial);
+		postHandleMessage(null);
 	}
 
 }

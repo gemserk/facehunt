@@ -18,6 +18,14 @@ public class TouchableEntityTemplate extends EntityBuilder {
 		property("image", parameters.get("image"));
 		
 		property("color", Color.WHITE);
+		
+		// bind for rotate component
+		propertyRef("rotate.spatial", "spatial");
+		
+		// bind for movement component
+		propertyRef("movement.spatial", "spatial");
+		propertyRef("movement.movement", "movement");
+		
 	}
 
 }

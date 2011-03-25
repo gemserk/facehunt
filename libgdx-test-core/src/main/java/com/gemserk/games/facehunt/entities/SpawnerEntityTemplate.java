@@ -24,7 +24,10 @@ public class SpawnerEntityTemplate extends EntityBuilder {
 		//
 
 		property("timer", new CountDownTimer(1000, true));
-
+		
+		// 
+		
+		propertyRef("spawner.spawner", "spawner");
 	}
 
 }
