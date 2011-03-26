@@ -2,6 +2,7 @@ package com.gemserk.games.facehunt.components;
 
 import java.util.Map;
 
+import com.badlogic.gdx.audio.Sound;
 import com.gemserk.componentsengine.components.Component;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
@@ -16,10 +17,13 @@ public class SpawnerComponent extends Component {
 
 	World world;
 
-	public SpawnerComponent(String id, EntityManager entityManager, World world) {
+	Sound sound;
+
+	public SpawnerComponent(String id, EntityManager entityManager, World world, Sound sound) {
 		super(id);
 		this.entityManager = entityManager;
 		this.world = world;
+		this.sound = sound;
 	}
 
 	public void update(Entity entity, float delta) {
@@ -46,6 +50,9 @@ public class SpawnerComponent extends Component {
 			parameters = spawner.defaultParameters;
 
 		Entity newEntity = spawner.template.instantiate(null, parameters);
+		
+		if (sound != null)
+			sound.play();
 
 		entityManager.addEntity(newEntity);
 

@@ -16,6 +16,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
+import com.gemserk.animation4j.transitions.Transition;
+import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
@@ -52,8 +55,6 @@ public class GameScreen extends ScreenAdapter {
 
 	private Texture sadFace;
 
-	private Sound sound;
-
 	EntityManager entityManager;
 
 	private RegistrableTemplateProvider templateProvider;
@@ -66,8 +67,10 @@ public class GameScreen extends ScreenAdapter {
 		sadFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
 
 		spriteBatch = new SpriteBatch();
-		sound = Gdx.audio.newSound(Gdx.files.internal("data/shot.ogg"));
 		bounceSound = Gdx.audio.newSound(Gdx.files.internal("data/bounce.wav"));
+
+		Sound critterKilledSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-killed.wav"));
+		Sound critterSpawnedSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-spawned.wav"));
 
 		templateProvider = new RegistrableTemplateProvider();
 
@@ -97,6 +100,7 @@ public class GameScreen extends ScreenAdapter {
 
 		entityManager.addEntity(templateProvider.getTemplate("Spawner").instantiate("global.spawner", new HashMap<String, Object>() {
 			{
+				put("respawnTime", new FloatValue(3000f));
 				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
 					{
 						put("image", happyFace);
@@ -109,102 +113,165 @@ public class GameScreen extends ScreenAdapter {
 		}));
 
 		gameData = new GameData();
+		gameData.lives = 2;
 
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent();
 		rotateComponent = new RotateComponent("rotate");
-		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, sound, sadFace, gameData);
-		spawnerComponent = new SpawnerComponent("spawner", entityManager, world);
+		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, critterKilledSound, sadFace, gameData);
+		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
 
 		identity = new Matrix4().idt();
-		
+
 		font = new BitmapFont();
 		font.setColor(0f, 0f, 0f, 0.8f);
 		// font.setScale(1f, 1.5f);
+
+		fadeInColor = Transitions.transition(new Color(1f, 1f, 1f, 0f), LibgdxConverters.color());
+		fadeInColor.set(new Color(1f, 1f, 1f, 1f), 2000);
 	}
 
 	Matrix4 identity = new Matrix4();
 
+	enum GameState {
+		Starting, Playing, GameOver
+	}
+
+	GameState gameState = GameState.Starting;
+
 	@Override
 	public void render(float delta) {
-		int centerX = Gdx.graphics.getWidth() / 2;
-		int centerY = Gdx.graphics.getHeight() / 2;
+		int width = Gdx.graphics.getWidth();
+		int height = Gdx.graphics.getHeight();
+
+		int centerX = width / 2;
+		int centerY = height / 2;
 
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 
-		spriteBatch.setTransformMatrix(identity);
-		spriteBatch.begin();
-		spriteBatch.setColor(Color.WHITE);
-		spriteBatch.draw(background, centerX - 800 / 2, centerY - 480 / 2);
-		spriteBatch.end();
+		if (gameState == GameState.Starting) {
 
-		ArrayList<Entity> entities = entityManager.getEntities();
+			spriteBatch.setTransformMatrix(identity);
+			spriteBatch.begin();
+			spriteBatch.setColor(fadeInColor.get());
+			spriteBatch.draw(background, 0, 0);
+			spriteBatch.end();
 
-		for (int i = 0; i < entities.size(); i++) {
-			final Entity entity = entities.get(i);
+			if (!fadeInColor.isTransitioning())
+				gameState = GameState.Playing;
 
-			// make some logic for the entity
+		} else if (gameState == GameState.Playing) {
 
-			detectTouchAndKillComponent.detectTouchAndKill(entity, delta);
-			movementComponent.update(entity, delta);
-			rotateComponent.update(entity, delta);
-			spawnerComponent.update(entity, delta);
+			spriteBatch.setTransformMatrix(identity);
+			spriteBatch.begin();
+			spriteBatch.setColor(Color.WHITE);
+			spriteBatch.draw(background, 0, 0);
+			spriteBatch.end();
 
-			if (entity.hasTag("animation")) {
+			ArrayList<Entity> entities = entityManager.getEntities();
 
-				Color color = Properties.getValue(entity, "color");
-				Color endColor = Properties.getValue(entity, "endColor");
+			for (int i = 0; i < entities.size(); i++) {
+				final Entity entity = entities.get(i);
 
-				if (color.equals(endColor)) {
-					Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
-					if (shouldSpawn) {
+				// make some logic for the entity
 
-						final Spatial spatial = Properties.getValue(entity, "spatial");
-						final Movement movement = Properties.getValue(entity, "movement");
-						final FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
+				detectTouchAndKillComponent.detectTouchAndKill(entity, delta);
+				movementComponent.update(entity, delta);
+				rotateComponent.update(entity, delta);
+				spawnerComponent.update(entity, delta);
 
-						entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
-							{
-								put("spatial", new Spatial().set(spatial));
-								put("movement", new Movement().set(movement));
-								put("image", happyFace);
-								put("aliveTime", aliveTime);
-							}
-						}));
+				if (entity.hasTag("animation")) {
+
+					Color color = Properties.getValue(entity, "color");
+					Color endColor = Properties.getValue(entity, "endColor");
+
+					if (color.equals(endColor)) {
+						Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
+						if (shouldSpawn) {
+
+							final Spatial spatial = Properties.getValue(entity, "spatial");
+							final Movement movement = Properties.getValue(entity, "movement");
+							final FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
+
+							entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
+								{
+									put("spatial", new Spatial().set(spatial));
+									put("movement", new Movement().set(movement));
+									put("image", happyFace);
+									put("aliveTime", aliveTime);
+								}
+							}));
+						}
+						entityManager.remove(entity);
 					}
-					entityManager.remove(entity);
+
 				}
 
-			}
+				if (entity.hasTag(Tags.TOUCHABLE)) {
 
-			if (entity.hasTag(Tags.TOUCHABLE)) {
+					FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
 
-				FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
+					// aliveTime.value -= 1f * delta;
 
-				// aliveTime.value -= 1f * delta;
+					if (aliveTime.value <= 0f) {
+						gameData.lives--;
+						entityManager.remove(entity);
 
-				if (aliveTime.value <= 0f) {
-					gameData.deadCritters++;
-					entityManager.remove(entity);
+						if (gameData.lives <= 0) {
+
+							fadeInColor.set(new Color(1f, 1f, 1f, 0f), 2000);
+							gameState = GameState.GameOver;
+
+						}
+					}
+
 				}
 
+				renderComponent.render(entity, spriteBatch);
 			}
 
-			renderComponent.render(entity, spriteBatch);
+			spriteBatch.setTransformMatrix(identity);
+			spriteBatch.begin();
+
+			font.setColor(0f, 0f, 0f, 1f);
+			
+			String str = "Killed: " + gameData.killedCritters;
+			TextBounds textBounds = font.getBounds(str);
+			font.draw(spriteBatch, str, 10, height - 20);
+
+			str = "Lives: " + gameData.lives;
+			textBounds = font.getBounds(str);
+			font.draw(spriteBatch, str, width - textBounds.width - 10, height - 20);
+
+			spriteBatch.end();
+
+		} else if (gameState == GameState.GameOver) {
+
+			spriteBatch.setTransformMatrix(identity);
+			spriteBatch.begin();
+			spriteBatch.setColor(fadeInColor.get());
+			spriteBatch.draw(background, 0, 0);
+
+			String str = "Game Over";
+			TextBounds textBounds = font.getBounds(str);
+			font.setColor(1f, 1f, 1f, 1f);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY - textBounds.height / 2);
+
+			spriteBatch.end();
+
+			if (!fadeInColor.isTransitioning()) {
+				// go to another scene
+				// restart game! not this ->
+				gameState = GameState.Starting;
+				fadeInColor.set(new Color(1f, 1f, 1f, 1f), 2000);
+
+				entityManager.removeAll(Tags.SPATIAL);
+
+				gameData.killedCritters = 0;
+				gameData.lives = 2;
+			}
+
 		}
-		
-		spriteBatch.setTransformMatrix(identity);
-		spriteBatch.begin();
-		
-		String str = "Killed: " + gameData.killedCritters;
-		TextBounds textBounds = font.getBounds(str);
-		font.draw(spriteBatch, str, 10, Gdx.graphics.getHeight() - 20);
-
-		str = "Missed: " + gameData.deadCritters;
-		textBounds = font.getBounds(str);
-		font.draw(spriteBatch, str, Gdx.graphics.getWidth() - textBounds.width - 10, Gdx.graphics.getHeight() - 20);
-
-		spriteBatch.end();
 
 	}
 
@@ -315,6 +382,8 @@ public class GameScreen extends ScreenAdapter {
 
 	private BitmapFont font;
 
+	private Transition<Color> fadeInColor;
+
 	@Override
 	public void show() {
 		Gdx.app.log(PlatformGame.applicationName, "entered game screen");
@@ -325,7 +394,8 @@ public class GameScreen extends ScreenAdapter {
 		background.dispose();
 		happyFace.dispose();
 		sadFace.dispose();
-		sound.dispose();
+
+		// TODO: dispose sounds
 	}
 
 }

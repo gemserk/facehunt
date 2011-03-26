@@ -4,6 +4,6 @@ public class GameData {
 	
 	public int killedCritters = 0;
 	
-	public int deadCritters = 0;
+	public int lives = 0;
 	
 }

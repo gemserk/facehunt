@@ -1,5 +1,6 @@
 package com.gemserk.games.facehunt.entities;
 
+import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.templates.EntityBuilder;
 import com.gemserk.componentsengine.timers.CountDownTimer;
 import com.gemserk.games.facehunt.EntityManager;
@@ -23,7 +24,9 @@ public class SpawnerEntityTemplate extends EntityBuilder {
 
 		//
 
-		property("timer", new CountDownTimer(1000, true));
+		// should be a dynamic based on player performance? or on a function of time...
+		FloatValue respawnTime = parameters.get("respawnTime");
+		property("timer", new CountDownTimer((int)respawnTime.value, true));
 		
 		// 
 		

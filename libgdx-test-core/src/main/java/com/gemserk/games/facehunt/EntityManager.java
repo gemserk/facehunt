@@ -35,4 +35,21 @@ public class EntityManager {
 		entitiesToRemove.add(entity);
 	}
 
+	public void removeAll(String... tags) {
+
+		for (int i = 0; i < entities.size(); i++) {
+			Entity entity = entities.get(i);
+
+			for (int j = 0; j < tags.length; j++) {
+				String tag = tags[j];
+				if (entity.hasTag(tag)) {
+					entitiesToRemove.add(entity);
+					break;
+				}
+			}
+
+		}
+
+	}
+
 }
