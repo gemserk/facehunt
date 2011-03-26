@@ -18,7 +18,7 @@ public class SpawnerEntityTemplate extends EntityBuilder {
 	@Override
 	public void build() {
 
-		tags("spawner");
+		tags(Tags.SPAWNER);
 
 		property("spawner", parameters.get("spawner"));
 
@@ -26,7 +26,8 @@ public class SpawnerEntityTemplate extends EntityBuilder {
 
 		// should be a dynamic based on player performance? or on a function of time...
 		FloatValue respawnTime = parameters.get("respawnTime");
-		property("timer", new CountDownTimer((int)respawnTime.value, true));
+		CountDownTimer timer = new CountDownTimer((int)respawnTime.value, true);
+		property("timer", timer);
 		
 		// 
 		

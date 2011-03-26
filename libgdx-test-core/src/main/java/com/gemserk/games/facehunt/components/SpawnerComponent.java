@@ -39,7 +39,10 @@ public class SpawnerComponent extends Component {
 
 		Timer timer = Properties.getValue(entity, "timer");
 
-		if (!timer.update((int) (delta * 1000f)))
+		float spawnSpeed = spawner.spawnSpeed;
+		float spawnSpeedFactor = spawner.spawnSpeedFactor; 
+		
+		if (!timer.update((int) (delta * 1000f * spawnSpeed)))
 			return;
 
 		Map<String, Object> parameters;
@@ -57,6 +60,8 @@ public class SpawnerComponent extends Component {
 		entityManager.addEntity(newEntity);
 
 		timer.reset();
+		
+		spawner.spawnSpeed *= spawnSpeedFactor;
 	}
 
 }

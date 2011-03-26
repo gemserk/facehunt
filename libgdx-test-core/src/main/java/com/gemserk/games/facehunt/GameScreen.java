@@ -69,8 +69,8 @@ public class GameScreen extends ScreenAdapter {
 		spriteBatch = new SpriteBatch();
 		bounceSound = Gdx.audio.newSound(Gdx.files.internal("data/bounce.wav"));
 
-		Sound critterKilledSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-killed.wav"));
-		Sound critterSpawnedSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-spawned.wav"));
+		critterKilledSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-killed.wav"));
+		critterSpawnedSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-spawned.wav"));
 
 		templateProvider = new RegistrableTemplateProvider();
 
@@ -93,11 +93,19 @@ public class GameScreen extends ScreenAdapter {
 		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
 		javaEntityTemplate.setInjector(injector);
 
-		final World world = new World(new Vector2(0, 0), new Vector2(800, 480));
-
-		final Color startColor = new Color(1f, 1f, 1f, 0f);
-		final Color endColor = new Color(1f, 1f, 1f, 1f);
-
+		startColor = new Color(1f, 1f, 1f, 0f);
+		endColor = new Color(1f, 1f, 1f, 1f);
+		world = new World(new Vector2(0, 0), new Vector2(800, 480));
+		
+		font = new BitmapFont();
+		
+		restartGame();
+	}
+	
+	protected void restartGame() {
+		
+		entityManager.removeAll();
+		
 		entityManager.addEntity(templateProvider.getTemplate("Spawner").instantiate("global.spawner", new HashMap<String, Object>() {
 			{
 				put("respawnTime", new FloatValue(3000f));
@@ -108,12 +116,12 @@ public class GameScreen extends ScreenAdapter {
 						put("endColor", endColor);
 						put("shouldSpawn", true);
 					}
-				}, new FaceDefaultParametersBuilder(world), 10));
+				}, new FaceDefaultParametersBuilder(world), 10, 1f, 1.01f));
 			}
 		}));
 
-		gameData = new GameData();
 		gameData.lives = 2;
+		gameData.killedCritters = 0;
 
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent();
@@ -123,12 +131,13 @@ public class GameScreen extends ScreenAdapter {
 
 		identity = new Matrix4().idt();
 
-		font = new BitmapFont();
 		font.setColor(0f, 0f, 0f, 0.8f);
 		// font.setScale(1f, 1.5f);
 
-		fadeInColor = Transitions.transition(new Color(1f, 1f, 1f, 0f), LibgdxConverters.color());
-		fadeInColor.set(new Color(1f, 1f, 1f, 1f), 2000);
+		fadeInColor = Transitions.transition(startColor, LibgdxConverters.color());
+		fadeInColor.set(endColor, 2000);
+		
+		gameState = GameState.Starting;
 	}
 
 	Matrix4 identity = new Matrix4();
@@ -226,7 +235,7 @@ public class GameScreen extends ScreenAdapter {
 					}
 
 				}
-
+				
 				renderComponent.render(entity, spriteBatch);
 			}
 
@@ -262,13 +271,9 @@ public class GameScreen extends ScreenAdapter {
 			if (!fadeInColor.isTransitioning()) {
 				// go to another scene
 				// restart game! not this ->
-				gameState = GameState.Starting;
-				fadeInColor.set(new Color(1f, 1f, 1f, 1f), 2000);
-
-				entityManager.removeAll(Tags.SPATIAL);
-
-				gameData.killedCritters = 0;
-				gameData.lives = 2;
+				
+				restartGame();
+				
 			}
 
 		}
@@ -378,11 +383,21 @@ public class GameScreen extends ScreenAdapter {
 
 	private Sound bounceSound;
 
-	private GameData gameData;
+	private GameData gameData = new GameData();
 
 	private BitmapFont font;
 
 	private Transition<Color> fadeInColor;
+
+	private Sound critterKilledSound;
+
+	private Sound critterSpawnedSound;
+
+	private final Color startColor;
+
+	private final Color endColor;
+
+	private final World world;
 
 	@Override
 	public void show() {
