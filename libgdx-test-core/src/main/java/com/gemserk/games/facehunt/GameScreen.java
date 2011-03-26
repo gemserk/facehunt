@@ -13,9 +13,11 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Disposable;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
@@ -58,11 +60,13 @@ public class GameScreen extends ScreenAdapter {
 	EntityManager entityManager;
 
 	private RegistrableTemplateProvider templateProvider;
+	
+	private ArrayList<Disposable> disposables = new ArrayList<Disposable>();
 
 	public GameScreen(Game game) {
 		this.game = game;
+		
 		background = new Texture(Gdx.files.internal("data/background01-1024x512.jpg"));
-
 		happyFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
 		sadFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
 
@@ -71,6 +75,15 @@ public class GameScreen extends ScreenAdapter {
 
 		critterKilledSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-killed.wav"));
 		critterSpawnedSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-spawned.wav"));
+		
+		disposables.add(spriteBatch);
+		disposables.add(background);
+		disposables.add(happyFace);
+		disposables.add(sadFace);
+		disposables.add(spriteBatch);
+		disposables.add(bounceSound);
+		disposables.add(critterKilledSound);
+		disposables.add(critterSpawnedSound);
 
 		templateProvider = new RegistrableTemplateProvider();
 
@@ -111,12 +124,12 @@ public class GameScreen extends ScreenAdapter {
 				put("respawnTime", new FloatValue(3000f));
 				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
 					{
-						put("image", happyFace);
+//						put("image", new Sprite(happyFace));
 						put("startColor", startColor);
 						put("endColor", endColor);
 						put("shouldSpawn", true);
 					}
-				}, new FaceDefaultParametersBuilder(world), 10, 1f, 1.01f));
+				}, new FaceDefaultParametersBuilder(), 10, 1f, 1.01f));
 			}
 		}));
 
@@ -179,6 +192,9 @@ public class GameScreen extends ScreenAdapter {
 
 			ArrayList<Entity> entities = entityManager.getEntities();
 
+			spriteBatch.setTransformMatrix(identity);
+			spriteBatch.begin();
+			
 			for (int i = 0; i < entities.size(); i++) {
 				final Entity entity = entities.get(i);
 
@@ -201,12 +217,13 @@ public class GameScreen extends ScreenAdapter {
 							final Spatial spatial = Properties.getValue(entity, "spatial");
 							final Movement movement = Properties.getValue(entity, "movement");
 							final FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
+							final Sprite sprite = Properties.getValue(entity, "image");
 
 							entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
 								{
 									put("spatial", new Spatial().set(spatial));
 									put("movement", new Movement().set(movement));
-									put("image", happyFace);
+									put("image", sprite);
 									put("aliveTime", aliveTime);
 								}
 							}));
@@ -238,7 +255,9 @@ public class GameScreen extends ScreenAdapter {
 				
 				renderComponent.render(entity, spriteBatch);
 			}
-
+			
+			spriteBatch.end();
+			
 			spriteBatch.setTransformMatrix(identity);
 			spriteBatch.begin();
 
@@ -280,14 +299,12 @@ public class GameScreen extends ScreenAdapter {
 
 	}
 
-	static class FaceDefaultParametersBuilder implements DefaultParametersBuilder {
+	class FaceDefaultParametersBuilder implements DefaultParametersBuilder {
 
-		private final World world;
+		private Random random = new Random();
 
-		private static Random random = new Random();
-
-		FaceDefaultParametersBuilder(World world) {
-			this.world = world;
+		FaceDefaultParametersBuilder() {
+			
 		}
 
 		@Override
@@ -306,6 +323,7 @@ public class GameScreen extends ScreenAdapter {
 			parameters.put("spatial", new Spatial(position, angle));
 			parameters.put("movement", new Movement(velocity));
 			parameters.put("aliveTime", new FloatValue(aliveTime));
+			parameters.put("image", new Sprite(happyFace));
 
 			return parameters;
 		}
@@ -356,12 +374,13 @@ public class GameScreen extends ScreenAdapter {
 
 			final Movement movement = Properties.getValue(entity, "movement");
 			final Color color = Properties.getValue(entity, "color");
+//			final Sprite sprite = Properties.getValue(entity, "image");
 
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
 				{
 					put("spatial", new Spatial().set(spatial));
 					put("movement", new Movement().set(movement));
-					put("image", image);
+					put("image", new Sprite(image));
 					put("startColor", color);
 					put("endColor", endColor);
 				}
@@ -406,11 +425,8 @@ public class GameScreen extends ScreenAdapter {
 
 	@Override
 	public void dispose() {
-		background.dispose();
-		happyFace.dispose();
-		sadFace.dispose();
-
-		// TODO: dispose sounds
+		for (Disposable disposable : disposables) 
+			disposable.dispose();
 	}
 
 }
