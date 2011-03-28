@@ -32,7 +32,6 @@ import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.components.RotateComponent;
 import com.gemserk.games.facehunt.components.SpawnerComponent;
-import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.MoveableEntityTemplate;
 import com.gemserk.games.facehunt.entities.RenderableEntityTemplate;
@@ -64,12 +63,12 @@ public class GameScreen extends ScreenAdapter {
 	EntityManager entityManager;
 
 	private RegistrableTemplateProvider templateProvider;
-	
+
 	private ArrayList<Disposable> disposables = new ArrayList<Disposable>();
 
 	public GameScreen(Game game) {
 		this.game = game;
-		
+
 		background = new Texture(Gdx.files.internal("data/background01-1024x512.jpg"));
 		happyFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
 		sadFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
@@ -79,7 +78,7 @@ public class GameScreen extends ScreenAdapter {
 
 		critterKilledSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-killed.wav"));
 		critterSpawnedSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-spawned.wav"));
-		
+
 		disposables.add(spriteBatch);
 		disposables.add(background);
 		disposables.add(happyFace);
@@ -106,11 +105,12 @@ public class GameScreen extends ScreenAdapter {
 		templateProvider.add("Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
 		templateProvider.add("FadeAnimation", javaEntityTemplateProvider.get().with(new FadeAnimationTemplate()));
 		templateProvider.add("Spawner", javaEntityTemplateProvider.get().with(new SpawnerEntityTemplate()));
-		
+
 		templateProvider.add("entities.Spatial", javaEntityTemplateProvider.get().with(new SpatialEntityTemplate()));
 		templateProvider.add("entities.Moveable", javaEntityTemplateProvider.get().with(new MoveableEntityTemplate()));
 		templateProvider.add("entities.Renderable", javaEntityTemplateProvider.get().with(new RenderableEntityTemplate()));
-		templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
+
+		// templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
 
 		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
 		javaEntityTemplate.setInjector(injector);
@@ -118,22 +118,22 @@ public class GameScreen extends ScreenAdapter {
 		startColor = new Color(1f, 1f, 1f, 0f);
 		endColor = new Color(1f, 1f, 1f, 1f);
 		world = new World(new Vector2(0, 0), new Vector2(800, 480));
-		
+
 		font = new BitmapFont();
-		
+
 		restartGame();
 	}
-	
+
 	protected void restartGame() {
-		
+
 		entityManager.removeAll();
-		
+
 		entityManager.addEntity(templateProvider.getTemplate("Spawner").instantiate("global.spawner", new HashMap<String, Object>() {
 			{
 				put("respawnTime", new FloatValue(3000f));
 				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
 					{
-//						put("image", new Sprite(happyFace));
+						// put("image", new Sprite(happyFace));
 						put("startColor", startColor);
 						put("endColor", endColor);
 						put("shouldSpawn", true);
@@ -158,7 +158,7 @@ public class GameScreen extends ScreenAdapter {
 
 		fadeInColor = Transitions.transition(startColor, LibgdxConverters.color());
 		fadeInColor.set(endColor, 2000);
-		
+
 		gameState = GameState.Starting;
 	}
 
@@ -203,7 +203,7 @@ public class GameScreen extends ScreenAdapter {
 
 			spriteBatch.setTransformMatrix(identity);
 			spriteBatch.begin();
-			
+
 			for (int i = 0; i < entities.size(); i++) {
 				final Entity entity = entities.get(i);
 
@@ -261,17 +261,17 @@ public class GameScreen extends ScreenAdapter {
 					}
 
 				}
-				
+
 				renderComponent.render(entity, spriteBatch);
 			}
-			
+
 			spriteBatch.end();
-			
+
 			spriteBatch.setTransformMatrix(identity);
 			spriteBatch.begin();
 
 			font.setColor(0f, 0f, 0f, 1f);
-			
+
 			String str = "Score: " + gameData.killedCritters;
 			TextBounds textBounds = font.getBounds(str);
 			font.draw(spriteBatch, str, 10, height - 20);
@@ -303,9 +303,9 @@ public class GameScreen extends ScreenAdapter {
 			if (!fadeInColor.isTransitioning()) {
 				// go to another scene
 				// restart game! not this ->
-				
+
 				restartGame();
-				
+
 			}
 
 		}
@@ -383,7 +383,7 @@ public class GameScreen extends ScreenAdapter {
 
 			final Movement movement = Properties.getValue(entity, "movement");
 			final Color color = Properties.getValue(entity, "color");
-//			final Sprite sprite = Properties.getValue(entity, "image");
+			// final Sprite sprite = Properties.getValue(entity, "image");
 
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
 				{
@@ -434,7 +434,7 @@ public class GameScreen extends ScreenAdapter {
 
 	@Override
 	public void dispose() {
-		for (Disposable disposable : disposables) 
+		for (Disposable disposable : disposables)
 			disposable.dispose();
 	}
 
