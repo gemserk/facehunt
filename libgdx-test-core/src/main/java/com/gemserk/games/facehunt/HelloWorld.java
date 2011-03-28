@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.TypeConverter;
 import com.gemserk.animation4j.gdx.converters.ColorConverter;
 import com.gemserk.animation4j.gdx.converters.Vector2Converter;
-import com.gemserk.animation4j.interpolator.function.InterpolatorFunctionFactory;
+import com.gemserk.animation4j.interpolator.function.InterpolationFunctions;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 
@@ -49,7 +49,7 @@ public class HelloWorld implements ApplicationListener {
 		// position = new AutoUpdateableTransition<Vector2>(startPosition, endPosition, //
 		// new GenericInterpolator<Vector2>(vector2Converter, new FloatArrayInterpolator(2)), 0.001f);
 
-		position = Transitions.transition(startPosition, vector2Converter, InterpolatorFunctionFactory.easeOut(), InterpolatorFunctionFactory.easeIn());
+		position = Transitions.transition(startPosition, vector2Converter, InterpolationFunctions.easeOut(), InterpolationFunctions.easeIn());
 		color = Transitions.transition(new Color(1f,1f,1f,1f), colorConverter);
 		
 	}

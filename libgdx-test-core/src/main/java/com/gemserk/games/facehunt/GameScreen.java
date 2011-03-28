@@ -263,7 +263,7 @@ public class GameScreen extends ScreenAdapter {
 
 			font.setColor(0f, 0f, 0f, 1f);
 			
-			String str = "Killed: " + gameData.killedCritters;
+			String str = "Score: " + gameData.killedCritters;
 			TextBounds textBounds = font.getBounds(str);
 			font.draw(spriteBatch, str, 10, height - 20);
 
@@ -284,6 +284,10 @@ public class GameScreen extends ScreenAdapter {
 			TextBounds textBounds = font.getBounds(str);
 			font.setColor(1f, 1f, 1f, 1f);
 			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY - textBounds.height / 2);
+
+			str = "Score: " + gameData.killedCritters + " points";
+			textBounds = font.getBounds(str);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY - textBounds.height / 2 - textBounds.height);
 
 			spriteBatch.end();
 
