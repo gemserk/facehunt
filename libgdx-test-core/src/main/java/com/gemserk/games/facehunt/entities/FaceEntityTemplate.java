@@ -38,11 +38,9 @@ public class FaceEntityTemplate extends EntityBuilder {
 		parent("entities.Spatial", parameters);
 		parent("entities.Moveable", parameters);
 		parent("entities.Touchable", parameters);
+		parent("entities.Rotationable", parameters);
 
 		property("image", parameters.get("image"));
-
-		// bind for rotate component
-		propertyRef("rotate.spatial", "spatial");
 
 		// color now depends on aliveTime
 		property("color", new ColorFromAliveTimeProperty(entity));

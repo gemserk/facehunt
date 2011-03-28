@@ -11,5 +11,7 @@ public class Tags {
 	public static final String SPAWNER = "spawner".intern();
 	
 	public static final String ALIVE = "alive".intern();
+	
+	public static final String ROTATION = "rotationable".intern();
 
 }

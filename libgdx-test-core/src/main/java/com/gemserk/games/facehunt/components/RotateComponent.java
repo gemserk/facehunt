@@ -16,9 +16,8 @@ public class RotateComponent extends FieldsReflectionComponent {
 	}
 
 	public void update(Entity entity, float delta) {
-		if (!entity.hasTag(Tags.SPATIAL))
+		if (!entity.hasTag(Tags.ROTATION))
 			return;
-		
 		super.setEntity(entity);
 		preHandleMessage(null);
 		spatial.angle += 90f * delta;

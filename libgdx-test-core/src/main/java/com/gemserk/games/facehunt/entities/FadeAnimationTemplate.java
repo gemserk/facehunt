@@ -23,6 +23,7 @@ public class FadeAnimationTemplate extends EntityBuilder {
 
 		parent("entities.Spatial", parameters);
 		parent("entities.Moveable", parameters);
+		parent("entities.Rotationable", parameters);
 
 		tags("animation");
 
@@ -41,11 +42,7 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		// if a touchable should be spawned
 		property("shouldSpawn", parameters.get("shouldSpawn", false));
 
-		// bind for rotate component
-		propertyRef("rotate.spatial", "spatial");
-
 		// alive time
-
 		property("aliveTime", parameters.get("aliveTime"));
 
 	}
