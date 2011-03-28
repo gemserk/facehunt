@@ -21,7 +21,9 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		
 		sequence++;
 
-		tags("animation", Tags.MOVEABLE, Tags.SPATIAL);
+		parent("entities.Spatial", parameters);
+		
+		tags("animation", Tags.MOVEABLE);
 		
 		Color startColor = parameters.get("startColor");
 		Color endColor = parameters.get("endColor");

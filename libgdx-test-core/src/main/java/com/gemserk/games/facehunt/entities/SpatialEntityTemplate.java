@@ -8,7 +8,6 @@ public class SpatialEntityTemplate extends EntityBuilder {
 	public void build() {
 		tags(Tags.SPATIAL);
 		property("spatial", parameters.get("spatial"));
-		
 		// add components?
 	}
 

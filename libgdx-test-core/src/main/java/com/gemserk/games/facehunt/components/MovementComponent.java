@@ -41,7 +41,7 @@ public class MovementComponent extends FieldsReflectionComponent {
 			return;
 
 		super.setEntity(entity);
-		preHandleMessage(null);
+		super.preHandleMessage(null);
 
 		Vector2 position = spatial.position;
 		Vector2 velocity = movement.velocity;
@@ -93,7 +93,7 @@ public class MovementComponent extends FieldsReflectionComponent {
 		position.set(tmpPosition);
 		velocity.set(tmpVelocity);
 
-		postHandleMessage(null);
+		super.postHandleMessage(null);
 	}
 
 }
