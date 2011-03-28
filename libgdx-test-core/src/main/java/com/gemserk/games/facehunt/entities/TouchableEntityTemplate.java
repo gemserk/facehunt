@@ -14,7 +14,7 @@ import com.gemserk.games.facehunt.TransitionProperty;
 public class TouchableEntityTemplate extends EntityBuilder {
 
 	static class ColorFromAliveTimeProperty extends FixedProperty {
-		Color tmpColor = new Color(1f,1f,1f,1f);
+		Color tmpColor = new Color(1f, 1f, 1f, 1f);
 
 		ColorFromAliveTimeProperty(PropertiesHolder propertiesHolder) {
 			super(propertiesHolder);
@@ -35,22 +35,17 @@ public class TouchableEntityTemplate extends EntityBuilder {
 
 	@Override
 	public void build() {
-		
-		parent("entities.Spatial", parameters);
 
-		tags(Tags.TOUCHABLE, Tags.MOVEABLE);
-		
-		property("movement", parameters.get("movement"));
+		parent("entities.Spatial", parameters);
+		parent("entities.Moveable", parameters);
+
+		tags(Tags.TOUCHABLE);
 
 		property("image", parameters.get("image"));
 
 		// bind for rotate component
 		propertyRef("rotate.spatial", "spatial");
 
-		// bind for movement component
-		propertyRef("movement.spatial", "spatial");
-		propertyRef("movement.movement", "movement");
-		
 		// color now depends on aliveTime
 		property("color", new ColorFromAliveTimeProperty(entity));
 
