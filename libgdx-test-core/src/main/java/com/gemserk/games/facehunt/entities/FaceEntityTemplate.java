@@ -30,16 +30,14 @@ public class FaceEntityTemplate extends EntityBuilder {
 
 	private static FloatValueConverter typeConverter = new FloatValueConverter();
 
-	// should be a stateless class, reusable to build a lot of entities.
-	// avoid using it directly, use it through JavaEntityTemplate.
-
 	@Override
 	public void build() {
+		
+		parameters.put("radius", new FloatValue(36f));
 
 		parent("entities.Spatial", parameters);
 		parent("entities.Moveable", parameters);
-
-		tags(Tags.TOUCHABLE);
+		parent("entities.Touchable", parameters);
 
 		property("image", parameters.get("image"));
 

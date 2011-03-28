@@ -22,6 +22,8 @@ import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.commons.values.FloatValue;
+import com.gemserk.componentsengine.components.FieldsReflectionComponent;
+import com.gemserk.componentsengine.components.annotations.EntityProperty;
 import com.gemserk.componentsengine.entities.Entity;
 import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
@@ -32,13 +34,14 @@ import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.components.RotateComponent;
 import com.gemserk.games.facehunt.components.SpawnerComponent;
+import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.MoveableEntityTemplate;
 import com.gemserk.games.facehunt.entities.RenderableEntityTemplate;
 import com.gemserk.games.facehunt.entities.SpatialEntityTemplate;
 import com.gemserk.games.facehunt.entities.SpawnerEntityTemplate;
 import com.gemserk.games.facehunt.entities.Tags;
-import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
+import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.games.facehunt.values.Movement;
 import com.gemserk.games.facehunt.values.Spatial;
@@ -109,6 +112,7 @@ public class GameScreen extends ScreenAdapter {
 		templateProvider.add("entities.Spatial", javaEntityTemplateProvider.get().with(new SpatialEntityTemplate()));
 		templateProvider.add("entities.Moveable", javaEntityTemplateProvider.get().with(new MoveableEntityTemplate()));
 		templateProvider.add("entities.Renderable", javaEntityTemplateProvider.get().with(new RenderableEntityTemplate()));
+		templateProvider.add("entities.Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
 
 		// templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
 
@@ -148,7 +152,7 @@ public class GameScreen extends ScreenAdapter {
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent("render");
 		rotateComponent = new RotateComponent("rotate");
-		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, critterKilledSound, sadFace, gameData);
+		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
 
 		identity = new Matrix4().idt();
@@ -209,7 +213,7 @@ public class GameScreen extends ScreenAdapter {
 
 				// make some logic for the entity
 
-				detectTouchAndKillComponent.detectTouchAndKill(entity, delta);
+				touchableComponent.detectTouchAndKill(entity, delta);
 				movementComponent.update(entity, delta);
 				rotateComponent.update(entity, delta);
 				spawnerComponent.update(entity, delta);
@@ -338,7 +342,7 @@ public class GameScreen extends ScreenAdapter {
 		}
 	}
 
-	public static class DetectTouchAndKillComponent {
+	public static class TouchableComponent extends FieldsReflectionComponent {
 
 		TemplateProvider templateProvider;
 
@@ -351,8 +355,15 @@ public class GameScreen extends ScreenAdapter {
 		Color endColor = new Color(1f, 1f, 1f, 0f);
 
 		private final GameData gameData;
+		
+		@EntityProperty(readOnly=true)
+		Spatial spatial;
+		
+		@EntityProperty(readOnly=true)
+		FloatValue radius;
 
-		public DetectTouchAndKillComponent(EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData) {
+		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData) {
+			super(id);
 			this.entityManager = entityManager;
 			this.templateProvider = templateProvider;
 			this.sound = sound;
@@ -367,6 +378,9 @@ public class GameScreen extends ScreenAdapter {
 
 			if (!Gdx.input.justTouched())
 				return;
+			
+			super.setEntity(entity);
+			super.preHandleMessage(null);
 
 			int x = Gdx.input.getX();
 			int y = Gdx.graphics.getHeight() - Gdx.input.getY();
@@ -394,7 +408,9 @@ public class GameScreen extends ScreenAdapter {
 					put("endColor", endColor);
 				}
 			}));
-
+			
+			super.postHandleMessage(null);
+			
 		}
 
 	}
@@ -405,7 +421,7 @@ public class GameScreen extends ScreenAdapter {
 
 	RotateComponent rotateComponent;
 
-	private DetectTouchAndKillComponent detectTouchAndKillComponent;
+	private TouchableComponent touchableComponent;
 
 	private SpawnerComponent spawnerComponent;
 
