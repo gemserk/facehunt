@@ -11,7 +11,7 @@ import com.gemserk.componentsengine.properties.PropertiesHolder;
 import com.gemserk.componentsengine.templates.EntityBuilder;
 import com.gemserk.games.facehunt.TransitionProperty;
 
-public class TouchableEntityTemplate extends EntityBuilder {
+public class FaceEntityTemplate extends EntityBuilder {
 
 	static class ColorFromAliveTimeProperty extends FixedProperty {
 		Color tmpColor = new Color(1f, 1f, 1f, 1f);

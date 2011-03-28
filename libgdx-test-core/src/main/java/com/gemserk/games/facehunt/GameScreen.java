@@ -38,7 +38,7 @@ import com.gemserk.games.facehunt.entities.RenderableEntityTemplate;
 import com.gemserk.games.facehunt.entities.SpatialEntityTemplate;
 import com.gemserk.games.facehunt.entities.SpawnerEntityTemplate;
 import com.gemserk.games.facehunt.entities.Tags;
-import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
+import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.games.facehunt.values.Movement;
 import com.gemserk.games.facehunt.values.Spatial;
@@ -102,7 +102,7 @@ public class GameScreen extends ScreenAdapter {
 
 		Provider<JavaEntityTemplate> javaEntityTemplateProvider = injector.getProvider(JavaEntityTemplate.class);
 
-		templateProvider.add("Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
+		templateProvider.add("Touchable", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
 		templateProvider.add("FadeAnimation", javaEntityTemplateProvider.get().with(new FadeAnimationTemplate()));
 		templateProvider.add("Spawner", javaEntityTemplateProvider.get().with(new SpawnerEntityTemplate()));
 
