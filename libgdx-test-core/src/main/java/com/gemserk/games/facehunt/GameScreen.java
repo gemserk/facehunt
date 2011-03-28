@@ -32,7 +32,11 @@ import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.components.RotateComponent;
 import com.gemserk.games.facehunt.components.SpawnerComponent;
+import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
+import com.gemserk.games.facehunt.entities.MoveableEntityTemplate;
+import com.gemserk.games.facehunt.entities.RenderableEntityTemplate;
+import com.gemserk.games.facehunt.entities.SpatialEntityTemplate;
 import com.gemserk.games.facehunt.entities.SpawnerEntityTemplate;
 import com.gemserk.games.facehunt.entities.Tags;
 import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
@@ -102,6 +106,11 @@ public class GameScreen extends ScreenAdapter {
 		templateProvider.add("Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
 		templateProvider.add("FadeAnimation", javaEntityTemplateProvider.get().with(new FadeAnimationTemplate()));
 		templateProvider.add("Spawner", javaEntityTemplateProvider.get().with(new SpawnerEntityTemplate()));
+		
+		templateProvider.add("entities.Spatial", javaEntityTemplateProvider.get().with(new SpatialEntityTemplate()));
+		templateProvider.add("entities.Moveable", javaEntityTemplateProvider.get().with(new MoveableEntityTemplate()));
+		templateProvider.add("entities.Renderable", javaEntityTemplateProvider.get().with(new RenderableEntityTemplate()));
+		templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
 
 		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
 		javaEntityTemplate.setInjector(injector);
@@ -137,7 +146,7 @@ public class GameScreen extends ScreenAdapter {
 		gameData.killedCritters = 0;
 
 		movementComponent = new MovementComponent("movement", world, bounceSound);
-		renderComponent = new RenderComponent();
+		renderComponent = new RenderComponent("render");
 		rotateComponent = new RotateComponent("rotate");
 		detectTouchAndKillComponent = new DetectTouchAndKillComponent(entityManager, templateProvider, critterKilledSound, sadFace, gameData);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
@@ -306,10 +315,6 @@ public class GameScreen extends ScreenAdapter {
 	class FaceDefaultParametersBuilder implements DefaultParametersBuilder {
 
 		private Random random = new Random();
-
-		FaceDefaultParametersBuilder() {
-			
-		}
 
 		@Override
 		public Map<String, Object> buildParameters(Map<String, Object> parameters) {
