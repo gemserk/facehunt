@@ -23,7 +23,6 @@ public class FadeAnimationTemplate extends EntityBuilder {
 
 		parent("entities.Spatial", parameters);
 		parent("entities.Moveable", parameters);
-		parent("entities.Rotationable", parameters);
 
 		tags("animation");
 

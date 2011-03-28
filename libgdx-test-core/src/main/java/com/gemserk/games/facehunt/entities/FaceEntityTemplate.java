@@ -1,5 +1,7 @@
 package com.gemserk.games.facehunt.entities;
 
+import java.util.Random;
+
 import com.badlogic.gdx.graphics.Color;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
@@ -30,10 +32,13 @@ public class FaceEntityTemplate extends EntityBuilder {
 
 	private static FloatValueConverter typeConverter = new FloatValueConverter();
 
+	private static Random random = new Random();
+
 	@Override
 	public void build() {
-		
+
 		parameters.put("radius", new FloatValue(36f));
+		parameters.put("rotationSpeed", new FloatValue(random.nextFloat() * 180f - 90f));
 
 		parent("entities.Spatial", parameters);
 		parent("entities.Moveable", parameters);

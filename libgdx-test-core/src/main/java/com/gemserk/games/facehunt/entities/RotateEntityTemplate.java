@@ -7,6 +7,8 @@ public class RotateEntityTemplate extends EntityBuilder {
 	@Override
 	public void build() {
 		tags(Tags.ROTATION);
+		
+		property("rotate.speed", parameters.get("rotationSpeed"));
 		propertyRef("rotate.spatial", "spatial");
 	}
 
