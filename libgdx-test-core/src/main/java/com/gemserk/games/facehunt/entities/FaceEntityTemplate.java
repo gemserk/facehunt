@@ -46,7 +46,6 @@ public class FaceEntityTemplate extends EntityBuilder {
 		parent("entities.Rotationable", parameters);
 
 		property("image", parameters.get("image"));
-
 		// color now depends on aliveTime
 		property("color", new ColorFromAliveTimeProperty(entity));
 

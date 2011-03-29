@@ -29,22 +29,23 @@ public class RenderComponent extends FieldsReflectionComponent {
 
 		if (!entity.hasTag(Tags.SPATIAL))
 			return;
-		
+
 		super.setEntity(entity);
 		super.preHandleMessage(null);
-		
+
 		Vector2 position = spatial.position;
 		float angle = spatial.angle;
 
 		sprite.setColor(color);
-		sprite.rotate(-sprite.getRotation());
-		sprite.translate(-sprite.getX(), -sprite.getY());
 
-		sprite.rotate(angle);
-		sprite.translate(-sprite.getTexture().getWidth() / 2, -sprite.getTexture().getHeight() / 2);
-		sprite.translate(position.x, position.y);
+		sprite.setRotation(angle);
+		sprite.setPosition(
+				position.x - sprite.getTexture().getWidth() / 2, 
+				position.y - sprite.getTexture().getHeight() / 2
+			);
+
 		sprite.draw(spriteBatch);
-		
+
 		super.postHandleMessage(null);
 	}
 

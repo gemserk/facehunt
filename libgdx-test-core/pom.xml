@@ -39,10 +39,11 @@
 			<artifactId>gdx</artifactId>
 			<version>${libgdxversion}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.gemserk.animation4j</groupId>
 			<artifactId>animation4j-core</artifactId>
-			<version>0.0.9-SNAPSHOT</version>
+			<version>0.0.9</version>
 		</dependency>
 		
 		<dependency>
