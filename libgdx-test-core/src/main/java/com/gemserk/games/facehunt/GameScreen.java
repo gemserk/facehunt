@@ -29,11 +29,13 @@ import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
 import com.gemserk.componentsengine.templates.RegistrableTemplateProvider;
 import com.gemserk.componentsengine.templates.TemplateProvider;
+import com.gemserk.games.facehunt.components.AliveComponent;
 import com.gemserk.games.facehunt.components.DefaultParametersBuilder;
 import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.components.RotateComponent;
 import com.gemserk.games.facehunt.components.SpawnerComponent;
+import com.gemserk.games.facehunt.entities.AliveEntityTemplate;
 import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.MoveableEntityTemplate;
@@ -106,7 +108,7 @@ public class GameScreen extends ScreenAdapter {
 
 		Provider<JavaEntityTemplate> javaEntityTemplateProvider = injector.getProvider(JavaEntityTemplate.class);
 
-		templateProvider.add("Touchable", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
+		templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
 		templateProvider.add("FadeAnimation", javaEntityTemplateProvider.get().with(new FadeAnimationTemplate()));
 		templateProvider.add("Spawner", javaEntityTemplateProvider.get().with(new SpawnerEntityTemplate()));
 
@@ -114,6 +116,7 @@ public class GameScreen extends ScreenAdapter {
 		templateProvider.add("entities.Moveable", javaEntityTemplateProvider.get().with(new MoveableEntityTemplate()));
 		templateProvider.add("entities.Renderable", javaEntityTemplateProvider.get().with(new RenderableEntityTemplate()));
 		templateProvider.add("entities.Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
+		templateProvider.add("entities.Alive", javaEntityTemplateProvider.get().with(new AliveEntityTemplate()));
 		templateProvider.add("entities.Rotationable", javaEntityTemplateProvider.get().with(new RotateEntityTemplate()));
 
 		// templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
@@ -125,7 +128,8 @@ public class GameScreen extends ScreenAdapter {
 		endColor = new Color(1f, 1f, 1f, 1f);
 		world = new World(new Vector2(0, 0), new Vector2(800, 480));
 
-		font = new BitmapFont();
+		Sprite fontSprite = new Sprite(new Texture(Gdx.files.internal("data/font.png")));
+		font = new BitmapFont(Gdx.files.internal("data/font.fnt"), fontSprite, false);
 
 		restartGame();
 	}
@@ -139,10 +143,10 @@ public class GameScreen extends ScreenAdapter {
 				put("respawnTime", new FloatValue(3000f));
 				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
 					{
-						// put("image", new Sprite(happyFace));
-						put("startColor", startColor);
-						put("endColor", endColor);
-						put("shouldSpawn", true);
+						 put("image", new Sprite(happyFace));
+						 put("startColor", startColor);
+						 put("endColor", endColor);
+						 put("shouldSpawn", true);
 					}
 				}, new FaceDefaultParametersBuilder(), 10, 1f, 1.01f));
 			}
@@ -156,6 +160,7 @@ public class GameScreen extends ScreenAdapter {
 		rotateComponent = new RotateComponent("rotate");
 		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
+		aliveComponent = new AliveComponent("alive");
 
 		identity = new Matrix4().idt();
 
@@ -218,6 +223,9 @@ public class GameScreen extends ScreenAdapter {
 				touchableComponent.detectTouchAndKill(entity, delta);
 				movementComponent.update(entity, delta);
 				rotateComponent.update(entity, delta);
+
+				// aliveComponent.update(entity, delta);
+
 				spawnerComponent.update(entity, delta);
 
 				if (entity.hasTag("animation")) {
@@ -234,7 +242,7 @@ public class GameScreen extends ScreenAdapter {
 							final FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
 							final Sprite sprite = Properties.getValue(entity, "image");
 
-							entityManager.addEntity(templateProvider.getTemplate("Touchable").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
+							entityManager.addEntity(templateProvider.getTemplate("entities.Face").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
 								{
 									put("spatial", new Spatial().set(spatial));
 									put("movement", new Movement().set(movement));
@@ -248,24 +256,23 @@ public class GameScreen extends ScreenAdapter {
 
 				}
 
-				if (entity.hasTag(Tags.TOUCHABLE)) {
+				if (entity.hasTag(Tags.ALIVE)) {
 
 					FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
+//					Boolean touchable = Properties.getValue(entity, "touchable");
 
 					// aliveTime.value -= 1f * delta;
 
 					if (aliveTime.value <= 0f) {
 						gameData.lives--;
 						entityManager.remove(entity);
-
-						if (gameData.lives <= 0) {
-
-							fadeInColor.set(new Color(1f, 1f, 1f, 0f), 2000);
-							gameState = GameState.GameOver;
-
-						}
 					}
 
+				}
+
+				if (gameData.lives <= 0) {
+					fadeInColor.set(new Color(1f, 1f, 1f, 0f), 2000);
+					gameState = GameState.GameOver;
 				}
 
 				renderComponent.render(entity, spriteBatch);
@@ -276,7 +283,7 @@ public class GameScreen extends ScreenAdapter {
 			spriteBatch.setTransformMatrix(identity);
 			spriteBatch.begin();
 
-			font.setColor(0f, 0f, 0f, 1f);
+			font.setColor(1f, 1f, 1f, 1f);
 
 			String str = "Score: " + gameData.killedCritters;
 			TextBounds textBounds = font.getBounds(str);
@@ -297,32 +304,22 @@ public class GameScreen extends ScreenAdapter {
 
 			String str = "Game Over";
 			TextBounds textBounds = font.getBounds(str);
-			font.setColor(1f, 1f, 1f, 1f);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY - textBounds.height / 2);
+			font.setColor(1f, 0.3f, 0.3f, 1f);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 + textBounds.height);
 
 			str = "Score: " + gameData.killedCritters + " points";
 			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, 
-					centerX - textBounds.width / 2, 
-					centerY - textBounds.height / 2 - textBounds.height);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2);
 
 			str = "Tap screen to restart";
 			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, 
-					centerX - textBounds.width / 2, 
-					centerY - textBounds.height / 2 - textBounds.height * 2);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 - textBounds.height);
 
 			spriteBatch.end();
 
 			if (!fadeInColor.isTransitioning()) {
-				// go to another scene
-				// restart game! not this ->
-
-//				restartGame();
-				
 				if (Gdx.input.justTouched())
 					restartGame();
-
 			}
 
 		}
@@ -368,11 +365,11 @@ public class GameScreen extends ScreenAdapter {
 		Color endColor = new Color(1f, 1f, 1f, 0f);
 
 		private final GameData gameData;
-		
-		@EntityProperty(readOnly=true)
+
+		@EntityProperty(readOnly = true)
 		Spatial spatial;
-		
-		@EntityProperty(readOnly=true)
+
+		@EntityProperty(readOnly = true)
 		FloatValue radius;
 
 		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData) {
@@ -391,7 +388,7 @@ public class GameScreen extends ScreenAdapter {
 
 			if (!Gdx.input.justTouched())
 				return;
-			
+
 			super.setEntity(entity);
 			super.preHandleMessage(null);
 
@@ -408,8 +405,14 @@ public class GameScreen extends ScreenAdapter {
 			entityManager.remove(entity);
 			gameData.killedCritters++;
 
+			// it is like removing the "TouchableComponent" ...
+			// entity.getTags().remove(Tags.TOUCHABLE);
+
 			final Movement movement = Properties.getValue(entity, "movement");
 			final Color color = Properties.getValue(entity, "color");
+
+			// Properties.setValue(entity, "color", endColor);
+
 			// final Sprite sprite = Properties.getValue(entity, "image");
 
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
@@ -421,9 +424,9 @@ public class GameScreen extends ScreenAdapter {
 					put("endColor", endColor);
 				}
 			}));
-			
+
 			super.postHandleMessage(null);
-			
+
 		}
 
 	}
@@ -455,6 +458,8 @@ public class GameScreen extends ScreenAdapter {
 	private final Color endColor;
 
 	private final World world;
+
+	private AliveComponent aliveComponent;
 
 	@Override
 	public void show() {

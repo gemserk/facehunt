@@ -18,7 +18,11 @@ public class TransitionProperty<T> implements Property<T> {
 
 	@Override
 	public void set(T value) {
-		transition.set(value);
+//		if (value instanceof TransitionValue) {
+//			TransitionValue<T> transitionValue = (TransitionValue<T>) value;
+//			transition.set(transitionValue.getValue(), transitionValue.getTime());
+//		} else 
+			transition.set(value);
 	}
 	
 }

@@ -13,16 +13,28 @@ public class AliveEntityTemplate extends EntityBuilder {
 
 	@Override
 	public void build() {
-		
+
 		tags(Tags.ALIVE);
 
-		property("touchable", true);
+		property("touchable", false);
 
-		FloatValue aliveTime = parameters.get("aliveTime");
-		Transition<FloatValue> transition = Transitions.transition(new FloatValue(1f), typeConverter);
-		property("aliveTime", new TransitionProperty<FloatValue>(transition));
-		transition.set(new FloatValue(0f), (int) (aliveTime.value));
+		// FloatValue aliveTime = parameters.get("aliveTime");
+
+		Transition<FloatValue> aliveTransition = Transitions.transition(new FloatValue(0f), typeConverter);
 		
+		// used from outside
+		property("aliveTime", new TransitionProperty<FloatValue>(aliveTransition));
+		
+		property("aliveTransition", aliveTransition);
+		property("totalAliveTime", parameters.get("aliveTime"));
+		
+		propertyRef("alive.touchable", "touchable");
+		propertyRef("alive.aliveTransition", "aliveTransition");
+		propertyRef("alive.totalAliveTime", "totalAliveTime");
+
+		// Transition<FloatValue> transition = Transitions.transition(new FloatValue(1f), typeConverter);
+		// property("aliveTime", new TransitionProperty<FloatValue>(transition));
+		// transition.set(new FloatValue(0f), (int) (aliveTime.value));
 
 	}
 

@@ -36,6 +36,8 @@ public class FaceEntityTemplate extends EntityBuilder {
 
 	@Override
 	public void build() {
+		
+		tags(Tags.ALIVE);
 
 		parameters.put("radius", new FloatValue(36f));
 		parameters.put("rotationSpeed", new FloatValue(random.nextFloat() * 180f - 90f));
@@ -48,6 +50,8 @@ public class FaceEntityTemplate extends EntityBuilder {
 		property("image", parameters.get("image"));
 		// color now depends on aliveTime
 		property("color", new ColorFromAliveTimeProperty(entity));
+		
+//		parent("entities.Alive", parameters);
 
 		FloatValue aliveTime = parameters.get("aliveTime");
 		Transition<FloatValue> transition = Transitions.transition(new FloatValue(1f), typeConverter);
