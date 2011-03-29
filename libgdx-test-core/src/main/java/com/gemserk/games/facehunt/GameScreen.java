@@ -302,7 +302,15 @@ public class GameScreen extends ScreenAdapter {
 
 			str = "Score: " + gameData.killedCritters + " points";
 			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY - textBounds.height / 2 - textBounds.height);
+			font.draw(spriteBatch, str, 
+					centerX - textBounds.width / 2, 
+					centerY - textBounds.height / 2 - textBounds.height);
+
+			str = "Tap screen to restart";
+			textBounds = font.getBounds(str);
+			font.draw(spriteBatch, str, 
+					centerX - textBounds.width / 2, 
+					centerY - textBounds.height / 2 - textBounds.height * 2);
 
 			spriteBatch.end();
 
@@ -310,7 +318,10 @@ public class GameScreen extends ScreenAdapter {
 				// go to another scene
 				// restart game! not this ->
 
-				restartGame();
+//				restartGame();
+				
+				if (Gdx.input.justTouched())
+					restartGame();
 
 			}
 
