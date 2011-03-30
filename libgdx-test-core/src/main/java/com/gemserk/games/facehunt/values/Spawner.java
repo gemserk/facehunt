@@ -18,16 +18,19 @@ public class Spawner {
 	public float spawnSpeed;
 
 	public float spawnSpeedFactor;
+	
+	public float spawnSpeedLimit;
 
 	public Spawner(EntityTemplate template, Map<String, Object> defaultParameters, //
 			DefaultParametersBuilder defaultParametersBuilder, int limit, //
-			float spawnSpeed, float spawnSpeedFactor) {
+			float spawnSpeed, float spawnSpeedFactor, float spawnSpeedLimit) {
 		this.template = template;
 		this.defaultParameters = defaultParameters;
 		this.defaultParametersBuilder = defaultParametersBuilder;
 		this.limit = limit;
 		this.spawnSpeed = spawnSpeed;
 		this.spawnSpeedFactor = spawnSpeedFactor;
+		this.spawnSpeedLimit = spawnSpeedLimit;
 	}
 
 }

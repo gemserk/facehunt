@@ -2,6 +2,7 @@ package com.gemserk.games.facehunt.components;
 
 import java.util.Map;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.gemserk.componentsengine.components.Component;
 import com.gemserk.componentsengine.entities.Entity;
@@ -61,7 +62,15 @@ public class SpawnerComponent extends Component {
 
 		timer.reset();
 		
+		if (spawner.spawnSpeed >= spawner.spawnSpeedLimit) {
+			spawner.spawnSpeed = spawner.spawnSpeedLimit;
+			return;
+		}
+		
+		Gdx.app.log("FaceHunt", "incrementing spawn speed from " + spawnSpeed + " to " + spawnSpeed * spawnSpeedFactor);
+		
 		spawner.spawnSpeed *= spawnSpeedFactor;
+		
 	}
 
 }

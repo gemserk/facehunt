@@ -79,6 +79,8 @@ public class GameScreen extends ScreenAdapter {
 		happyFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
 		sadFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
 
+		heart = new Texture(Gdx.files.internal("data/heart-32x32.png"));
+
 		spriteBatch = new SpriteBatch();
 		bounceSound = Gdx.audio.newSound(Gdx.files.internal("data/bounce.wav"));
 
@@ -89,6 +91,7 @@ public class GameScreen extends ScreenAdapter {
 		disposables.add(background);
 		disposables.add(happyFace);
 		disposables.add(sadFace);
+		disposables.add(heart);
 		disposables.add(spriteBatch);
 		disposables.add(bounceSound);
 		disposables.add(critterKilledSound);
@@ -143,12 +146,12 @@ public class GameScreen extends ScreenAdapter {
 				put("respawnTime", new FloatValue(3000f));
 				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
 					{
-						 put("image", new Sprite(happyFace));
-						 put("startColor", startColor);
-						 put("endColor", endColor);
-						 put("shouldSpawn", true);
+						put("image", new Sprite(happyFace));
+						put("startColor", startColor);
+						put("endColor", endColor);
+						put("shouldSpawn", true);
 					}
-				}, new FaceDefaultParametersBuilder(), 10, 1f, 1.01f));
+				}, new FaceDefaultParametersBuilder(), 10, 1.5f, 1.02f, 6f));
 			}
 		}));
 
@@ -259,7 +262,7 @@ public class GameScreen extends ScreenAdapter {
 				if (entity.hasTag(Tags.ALIVE)) {
 
 					FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
-//					Boolean touchable = Properties.getValue(entity, "touchable");
+					// Boolean touchable = Properties.getValue(entity, "touchable");
 
 					// aliveTime.value -= 1f * delta;
 
@@ -286,12 +289,23 @@ public class GameScreen extends ScreenAdapter {
 			font.setColor(0.2f, 0.2f, 1f, 1f);
 
 			String str = "Score: " + gameData.killedCritters;
-			TextBounds textBounds = font.getBounds(str);
+			// TextBounds textBounds = font.getBounds(str);
 			font.draw(spriteBatch, str, 10, height - 20);
 
-			str = "Lives: " + gameData.lives;
-			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, width - textBounds.width - 10, height - 20);
+			// str = "Lives: " + gameData.lives;
+			// textBounds = font.getBounds(str);
+			// font.draw(spriteBatch, str, width - textBounds.width - 10, height - 20);
+
+			int maxLives = 2;
+			int spaceBetweenLives = 5;
+
+			int xStart = width - 10 - (heart.getWidth() + spaceBetweenLives) * maxLives;
+			int y = height - heart.getHeight() - 20;
+
+			for (int i = 0; i < gameData.lives; i++) {
+				int x = xStart + i * (heart.getWidth() + spaceBetweenLives);
+				spriteBatch.draw(heart, x - heart.getWidth() / 2, y - heart.getHeight() / 2);
+			}
 
 			spriteBatch.end();
 
@@ -460,6 +474,8 @@ public class GameScreen extends ScreenAdapter {
 	private final World world;
 
 	private AliveComponent aliveComponent;
+
+	private Texture heart;
 
 	@Override
 	public void show() {
