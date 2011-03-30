@@ -283,7 +283,7 @@ public class GameScreen extends ScreenAdapter {
 			spriteBatch.setTransformMatrix(identity);
 			spriteBatch.begin();
 
-			font.setColor(1f, 1f, 1f, 1f);
+			font.setColor(0.2f, 0.2f, 1f, 1f);
 
 			String str = "Score: " + gameData.killedCritters;
 			TextBounds textBounds = font.getBounds(str);

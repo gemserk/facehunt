@@ -40,8 +40,7 @@ public class FadeAnimationTemplate extends EntityBuilder {
 
 		// if a touchable should be spawned
 		property("shouldSpawn", parameters.get("shouldSpawn", false));
-
-		// alive time
+		
 		property("aliveTime", parameters.get("aliveTime"));
 
 	}
