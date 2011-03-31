@@ -11,6 +11,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -40,7 +41,6 @@ import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.MoveableEntityTemplate;
 import com.gemserk.games.facehunt.entities.RenderableEntityTemplate;
-import com.gemserk.games.facehunt.entities.RotateEntityTemplate;
 import com.gemserk.games.facehunt.entities.SpatialEntityTemplate;
 import com.gemserk.games.facehunt.entities.SpawnerEntityTemplate;
 import com.gemserk.games.facehunt.entities.Tags;
@@ -76,8 +76,11 @@ public class GameScreen extends ScreenAdapter {
 		this.game = game;
 
 		background = new Texture(Gdx.files.internal("data/background01-1024x512.jpg"));
-		happyFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
-		sadFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
+		happyFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
+		sadFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
+		
+		happyFace.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		sadFace.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
 		heart = new Texture(Gdx.files.internal("data/heart-32x32.png"));
 
@@ -120,7 +123,6 @@ public class GameScreen extends ScreenAdapter {
 		templateProvider.add("entities.Renderable", javaEntityTemplateProvider.get().with(new RenderableEntityTemplate()));
 		templateProvider.add("entities.Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
 		templateProvider.add("entities.Alive", javaEntityTemplateProvider.get().with(new AliveEntityTemplate()));
-		templateProvider.add("entities.Rotationable", javaEntityTemplateProvider.get().with(new RotateEntityTemplate()));
 
 		// templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
 
@@ -356,9 +358,10 @@ public class GameScreen extends ScreenAdapter {
 			float maxAliveTime = 10000f;
 
 			float aliveTime = minAliveTime + random.nextFloat() * (maxAliveTime - minAliveTime);
+			float angularVelocity = random.nextFloat() * 180f - 90f;
 
 			parameters.put("spatial", new Spatial(position, angle));
-			parameters.put("movement", new Movement(velocity));
+			parameters.put("movement", new Movement(velocity, angularVelocity));
 			parameters.put("aliveTime", new FloatValue(aliveTime));
 			parameters.put("image", new Sprite(happyFace));
 
@@ -412,7 +415,7 @@ public class GameScreen extends ScreenAdapter {
 			final Spatial spatial = Properties.getValue(entity, "spatial");
 			Vector2 position = spatial.position;
 
-			if (position.dst(x, y) > 32f)
+			if (position.dst(x, y) > 35f)
 				return;
 
 			sound.play(1f);

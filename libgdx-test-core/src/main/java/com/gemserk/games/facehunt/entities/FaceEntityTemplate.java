@@ -40,12 +40,12 @@ public class FaceEntityTemplate extends EntityBuilder {
 		tags(Tags.ALIVE);
 
 		parameters.put("radius", new FloatValue(36f));
-		parameters.put("rotationSpeed", new FloatValue(random.nextFloat() * 180f - 90f));
+//		parameters.put("rotationSpeed", new FloatValue(random.nextFloat() * 180f - 90f));
 
 		parent("entities.Spatial", parameters);
 		parent("entities.Moveable", parameters);
 		parent("entities.Touchable", parameters);
-		parent("entities.Rotationable", parameters);
+//		parent("entities.Rotationable", parameters);
 
 		property("image", parameters.get("image"));
 		// color now depends on aliveTime
