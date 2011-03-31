@@ -6,7 +6,7 @@ import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.gemserk.componentsengine.reflection.internalfields.PropertiesInternalFields;
-import com.gemserk.games.facehunt.PlatformGame;
+import com.gemserk.games.facehunt.FaceHuntGame;
 import com.google.inject.Injector;
 
 public class FaceHuntAndroidApplication extends AndroidApplication implements InjectorProvider {
@@ -16,7 +16,7 @@ public class FaceHuntAndroidApplication extends AndroidApplication implements In
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize(new PlatformGame(), false);
+		initialize(new FaceHuntGame(), false);
 		PropertiesInternalFields.useFastClassIfPossible = false;
 	}
 

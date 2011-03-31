@@ -23,7 +23,7 @@ public class MainMenuScreen extends ScreenAdapter {
 
 	@Override
 	public void show() {
-		Gdx.app.log(PlatformGame.applicationName, "entered main menu");
+
 	}
 
 	@Override

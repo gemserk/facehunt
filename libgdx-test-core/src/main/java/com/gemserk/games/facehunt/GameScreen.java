@@ -475,7 +475,7 @@ public class GameScreen extends ScreenAdapter {
 
 	@Override
 	public void show() {
-		Gdx.app.log(PlatformGame.applicationName, "entered game screen");
+
 	}
 
 	@Override
