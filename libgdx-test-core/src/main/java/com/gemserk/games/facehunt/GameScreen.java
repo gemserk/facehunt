@@ -34,7 +34,6 @@ import com.gemserk.games.facehunt.components.AliveComponent;
 import com.gemserk.games.facehunt.components.DefaultParametersBuilder;
 import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
-import com.gemserk.games.facehunt.components.RotateComponent;
 import com.gemserk.games.facehunt.components.SpawnerComponent;
 import com.gemserk.games.facehunt.entities.AliveEntityTemplate;
 import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
@@ -162,7 +161,6 @@ public class GameScreen extends ScreenAdapter {
 
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent("render");
-		rotateComponent = new RotateComponent("rotate");
 		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
 		aliveComponent = new AliveComponent("alive");
@@ -227,9 +225,6 @@ public class GameScreen extends ScreenAdapter {
 
 				touchableComponent.detectTouchAndKill(entity, delta);
 				movementComponent.update(entity, delta);
-				rotateComponent.update(entity, delta);
-
-				// aliveComponent.update(entity, delta);
 
 				spawnerComponent.update(entity, delta);
 
@@ -451,8 +446,6 @@ public class GameScreen extends ScreenAdapter {
 	RenderComponent renderComponent;
 
 	MovementComponent movementComponent;
-
-	RotateComponent rotateComponent;
 
 	private TouchableComponent touchableComponent;
 

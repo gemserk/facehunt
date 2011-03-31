@@ -92,6 +92,10 @@ public class MovementComponent extends FieldsReflectionComponent {
 
 		position.set(tmpPosition);
 		velocity.set(tmpVelocity);
+		
+		// rotate
+		float speed = movement.angularVelocity;
+		spatial.angle += speed * delta;
 
 		super.postHandleMessage(null);
 	}
