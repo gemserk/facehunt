@@ -1,4 +1,4 @@
-package com.gemserk.libgdx.test;
+package com.gemserk.games.facehunt;
 
 import roboguice.application.GuiceApplication;
 import roboguice.inject.InjectorProvider;
@@ -9,7 +9,7 @@ import com.gemserk.componentsengine.reflection.internalfields.PropertiesInternal
 import com.gemserk.games.facehunt.PlatformGame;
 import com.google.inject.Injector;
 
-public class HelloWorldAndroid extends AndroidApplication implements InjectorProvider {
+public class FaceHuntAndroidApplication extends AndroidApplication implements InjectorProvider {
 
 	GuiceApplication guiceApplication;
 
