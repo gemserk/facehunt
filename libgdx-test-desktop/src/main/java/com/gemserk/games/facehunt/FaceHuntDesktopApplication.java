@@ -11,12 +11,12 @@
  * governing permissions and limitations under the License.
  */
 
-package com.gemserk.libgdx.test;
+package com.gemserk.games.facehunt;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.gemserk.games.facehunt.PlatformGame;
 
-public class HelloWorldDesktop {
+public class FaceHuntDesktopApplication {
 	public static void main (String[] argv) {
 		new LwjglApplication(new PlatformGame(), "Platform Game", 800, 480, false);
 	}
