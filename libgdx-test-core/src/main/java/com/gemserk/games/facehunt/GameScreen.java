@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
+import com.gemserk.animation4j.transitions.sync.TransitionReflectionObjectSynchronizer;
 import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.components.FieldsReflectionComponent;
 import com.gemserk.componentsengine.components.annotations.EntityProperty;
@@ -77,7 +78,7 @@ public class GameScreen extends ScreenAdapter {
 		background = new Texture(Gdx.files.internal("data/background01-1024x512.jpg"));
 		happyFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
 		sadFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
-		
+
 		happyFace.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		sadFace.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
@@ -135,6 +136,8 @@ public class GameScreen extends ScreenAdapter {
 		Sprite fontSprite = new Sprite(new Texture(Gdx.files.internal("data/font.png")));
 		font = new BitmapFont(Gdx.files.internal("data/font.fnt"), fontSprite, false);
 
+		synchronizersList = new ArrayList<TransitionReflectionObjectSynchronizer>();
+
 		restartGame();
 	}
 
@@ -152,7 +155,7 @@ public class GameScreen extends ScreenAdapter {
 						put("endColor", endColor);
 						put("shouldSpawn", true);
 					}
-				}, new FaceDefaultParametersBuilder(), 10, 1.5f, 1.02f, 6f));
+				}, new FaceDefaultParametersBuilder(), 10, 1.5f, 1.02f, 6.5f));
 			}
 		}));
 
@@ -161,7 +164,7 @@ public class GameScreen extends ScreenAdapter {
 
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent("render");
-		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData);
+		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData, synchronizersList);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
 		aliveComponent = new AliveComponent("alive");
 
@@ -285,9 +288,9 @@ public class GameScreen extends ScreenAdapter {
 
 			font.setColor(0.2f, 0.2f, 1f, 1f);
 
-			String str = "Score: " + gameData.killedCritters;
+			String str = "Smiles: " + gameData.killedCritters;
 			// TextBounds textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, 10, height - 20);
+			font.draw(spriteBatch, str, 10, height - 10);
 
 			// str = "Lives: " + gameData.lives;
 			// textBounds = font.getBounds(str);
@@ -297,7 +300,7 @@ public class GameScreen extends ScreenAdapter {
 			int spaceBetweenLives = 5;
 
 			int xStart = width - 10 - (heart.getWidth() + spaceBetweenLives) * maxLives;
-			int y = height - heart.getHeight() - 20;
+			int y = height - heart.getHeight() - 10;
 
 			for (int i = 0; i < gameData.lives; i++) {
 				int x = xStart + i * (heart.getWidth() + spaceBetweenLives);
@@ -318,7 +321,7 @@ public class GameScreen extends ScreenAdapter {
 			font.setColor(1f, 0.3f, 0.3f, 1f);
 			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 + textBounds.height);
 
-			str = "Score: " + gameData.killedCritters + " points";
+			str = "Smiles: " + gameData.killedCritters + " points";
 			textBounds = font.getBounds(str);
 			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2);
 
@@ -335,6 +338,18 @@ public class GameScreen extends ScreenAdapter {
 
 		}
 
+		ArrayList<TransitionReflectionObjectSynchronizer> toRemove = new ArrayList<TransitionReflectionObjectSynchronizer>();
+
+		for (int i = 0; i < synchronizersList.size(); i++) {
+			TransitionReflectionObjectSynchronizer synchronizer = synchronizersList.get(i);
+			synchronizer.synchronize();
+
+			 if (!synchronizer.getTransition().isTransitioning())
+				 toRemove.add(synchronizer);
+		}
+		
+		synchronizersList.removeAll(toRemove);
+
 	}
 
 	class FaceDefaultParametersBuilder implements DefaultParametersBuilder {
@@ -349,8 +364,8 @@ public class GameScreen extends ScreenAdapter {
 			float angle = random.nextFloat() * 360;
 
 			// I want this to be dynamic based on the player's performance.
-			float minAliveTime = 6000f;
-			float maxAliveTime = 10000f;
+			float minAliveTime = 3000f;
+			float maxAliveTime = 6000f;
 
 			float aliveTime = minAliveTime + random.nextFloat() * (maxAliveTime - minAliveTime);
 			float angularVelocity = random.nextFloat() * 180f - 90f;
@@ -384,13 +399,16 @@ public class GameScreen extends ScreenAdapter {
 		@EntityProperty(readOnly = true)
 		FloatValue radius;
 
-		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData) {
+		private final ArrayList<TransitionReflectionObjectSynchronizer> synchronizersList;
+
+		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData, ArrayList<TransitionReflectionObjectSynchronizer> synchronizersList) {
 			super(id);
 			this.entityManager = entityManager;
 			this.templateProvider = templateProvider;
 			this.sound = sound;
 			this.image = image;
 			this.gameData = gameData;
+			this.synchronizersList = synchronizersList;
 		}
 
 		protected void detectTouchAndKill(final Entity entity, float delta) {
@@ -417,20 +435,25 @@ public class GameScreen extends ScreenAdapter {
 			entityManager.remove(entity);
 			gameData.killedCritters++;
 
-			// it is like removing the "TouchableComponent" ...
-			// entity.getTags().remove(Tags.TOUCHABLE);
-
 			final Movement movement = Properties.getValue(entity, "movement");
 			final Color color = Properties.getValue(entity, "color");
 
-			// Properties.setValue(entity, "color", endColor);
+			movement.angularVelocity = 400f;
+			movement.velocity.set(0, 0);
+//			movement.sizeVelocity.set(-100f, -100f);
 
-			// final Sprite sprite = Properties.getValue(entity, "image");
+			Transition sizeTransition = Transitions.transition(spatial.size, LibgdxConverters.vector2());
+			sizeTransition.set(new Vector2(0f, 0f), 1000);
+
+			TransitionReflectionObjectSynchronizer transitionReflectionObjectSynchronizer = new TransitionReflectionObjectSynchronizer(sizeTransition, spatial, "size");
+			synchronizersList.add(transitionReflectionObjectSynchronizer);
+
+			// spatial.size.mul(0.5f);
 
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
 				{
-					put("spatial", new Spatial().set(spatial));
-					put("movement", new Movement().set(movement));
+					put("spatial", spatial);
+					put("movement", movement);
 					put("image", new Sprite(image));
 					put("startColor", color);
 					put("endColor", endColor);
@@ -470,6 +493,8 @@ public class GameScreen extends ScreenAdapter {
 	private final World world;
 
 	private AliveComponent aliveComponent;
+
+	private ArrayList<TransitionReflectionObjectSynchronizer> synchronizersList;
 
 	private Texture heart;
 

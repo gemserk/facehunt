@@ -12,6 +12,10 @@
 	<packaging>jar</packaging>
 	<name>Test Core</name>
 	<description>Test Core</description>
+	
+	<properties>
+		<animation4j.version>0.0.10-SNAPSHOT</animation4j.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -43,7 +47,7 @@
 		<dependency>
 			<groupId>com.gemserk.animation4j</groupId>
 			<artifactId>animation4j-core</artifactId>
-			<version>0.0.9</version>
+			<version>${animation4j.version}</version>
 		</dependency>
 		
 		<dependency>

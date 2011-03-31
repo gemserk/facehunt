@@ -38,6 +38,7 @@ public class RenderComponent extends FieldsReflectionComponent {
 
 		sprite.setColor(color);
 
+		sprite.setScale(spatial.size.x, spatial.size.y);
 		sprite.setRotation(angle);
 		sprite.setPosition(
 				position.x - sprite.getTexture().getWidth() / 2, 

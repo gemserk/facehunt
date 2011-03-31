@@ -42,16 +42,19 @@ public class MovementComponent extends FieldsReflectionComponent {
 
 		super.setEntity(entity);
 		super.preHandleMessage(null);
+		
+//		tmpSpatial.set(spatial);
+//		tmpMovement.set(movement);
 
 		Vector2 position = spatial.position;
 		Vector2 velocity = movement.velocity;
-
+		
 		Vector2 tmpPosition = tmpSpatial.position;
 		Vector2 tmpVelocity = tmpMovement.velocity;
 
 		tmpPosition.set(position);
 		tmpVelocity.set(velocity);
-
+		
 		tmpPosition.add(tmpVelocity.mul(delta));
 
 		tmpVelocity.set(velocity);
@@ -96,7 +99,11 @@ public class MovementComponent extends FieldsReflectionComponent {
 		// rotate
 		float speed = movement.angularVelocity;
 		spatial.angle += speed * delta;
-
+		
+		// resize
+//		tmpSpatial.size.add(tmpMovement.sizeVelocity.mul(delta));
+//		spatial.size.set(tmpSpatial.size);
+		
 		super.postHandleMessage(null);
 	}
 
