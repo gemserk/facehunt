@@ -210,7 +210,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>libgdx-test-core</artifactId>
+			<artifactId>facehunt-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
