@@ -344,7 +344,7 @@ public class GameScreen extends ScreenAdapter {
 			TransitionReflectionObjectSynchronizer synchronizer = synchronizersList.get(i);
 			synchronizer.synchronize();
 
-			 if (!synchronizer.getTransition().isTransitioning())
+			 if (synchronizer.isFinished())
 				 toRemove.add(synchronizer);
 		}
 		
