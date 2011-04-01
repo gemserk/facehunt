@@ -4,26 +4,36 @@
 	<parent>
 		<groupId>com.gemserk.libgdxtest</groupId>
 		<artifactId>libgdxtest</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.1</version>
 	</parent>
 	<groupId>com.gemserk.libgdxtest</groupId>
 	<artifactId>libgdx-test-android</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>apk</packaging>
 	<name>Test Android</name>
 	<description>Test Android</description>
 
-    <properties>
-        <!-- set a custom format that is guaranteed to grow as a Long number, so it can be used as version code
-        in the AndroidManifest.xml -->
-        <maven.build.timestamp.format>yyMMdddHHmm</maven.build.timestamp.format>
-        <!-- this trick of loading build timestamp into other property is necessary due to
-        http://jira.codehaus.org/browse/MRESOURCES-99 and also more readable -->
-        <versionCode>${maven.build.timestamp}</versionCode>
-    </properties>
+	<properties>
+		<!-- set a custom format that is guaranteed to grow as a Long number, so 
+			it can be used as version code in the AndroidManifest.xml -->
+		<maven.build.timestamp.format>yyMMdddHHmm</maven.build.timestamp.format>
+		<!-- this trick of loading build timestamp into other property is necessary 
+			due to http://jira.codehaus.org/browse/MRESOURCES-99 and also more readable -->
+		<versionCode>${maven.build.timestamp}</versionCode>
+	</properties>
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>res/values</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 
 		<plugins>
 			<plugin>
@@ -74,28 +84,28 @@
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
 				</configuration>
 				<extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>alignApk</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>zipalign</goal>
-                        </goals>
-                    </execution>
-                </executions>
+				<executions>
+					<execution>
+						<id>alignApk</id>
+						<phase>package</phase>
+						<goals>
+							<goal>zipalign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.5</version>
-            </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.5</version>
+			</plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.0-beta-4</version>
-            </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.0-beta-4</version>
+			</plugin>
 
 		</plugins>
 	</build>
@@ -116,63 +126,63 @@
 
 			<build>
 				<plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jarsigner-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>signing</id>
-                                <goals>
-                                    <goal>sign</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                                <phase>package</phase>
-                                <inherited>true</inherited>
-                                <configuration>
-                                    <removeExistingSignatures>true</removeExistingSignatures>
-                                    <archiveDirectory/>
-                                    <includes>
-                                        <include>${project.build.directory}/${project.artifactId}.apk</include>
-                                    </includes>
-                                    <keystore>${sign.keystore}</keystore>
-                                    <alias>${sign.alias}</alias>
-                                    <storepass>${sign.storepass}</storepass>
-                                    <keypass>${sign.keypass}</keypass>
-                                    <verbose>true</verbose>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jarsigner-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>signing</id>
+								<goals>
+									<goal>sign</goal>
+									<goal>verify</goal>
+								</goals>
+								<phase>package</phase>
+								<inherited>true</inherited>
+								<configuration>
+									<removeExistingSignatures>true</removeExistingSignatures>
+									<archiveDirectory />
+									<includes>
+										<include>${project.build.directory}/${project.artifactId}.apk</include>
+									</includes>
+									<keystore>${sign.keystore}</keystore>
+									<alias>${sign.alias}</alias>
+									<storepass>${sign.storepass}</storepass>
+									<keypass>${sign.keypass}</keypass>
+									<verbose>true</verbose>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/${project.artifactId}-signed-aligned.apk</file>
-                                    <type>apk</type>
-                                    <classifier>signed-aligned</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>${project.build.directory}/proguard_map.txt</file>
-                                    <type>map</type>
-                                    <classifier>release</classifier>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-signed-aligned</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>attach-artifact</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<configuration>
+							<artifacts>
+								<artifact>
+									<file>${project.build.directory}/${project.artifactId}-signed-aligned.apk</file>
+									<type>apk</type>
+									<classifier>signed-aligned</classifier>
+								</artifact>
+								<artifact>
+									<file>${project.build.directory}/proguard_map.txt</file>
+									<type>map</type>
+									<classifier>release</classifier>
+								</artifact>
+							</artifacts>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-signed-aligned</id>
+								<phase>package</phase>
+								<goals>
+									<goal>attach-artifact</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 				</plugins>
-				</build>
+			</build>
 
 		</profile>
 	</profiles>

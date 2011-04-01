@@ -131,7 +131,7 @@ public class GameScreen extends ScreenAdapter {
 
 		startColor = new Color(1f, 1f, 1f, 0f);
 		endColor = new Color(1f, 1f, 1f, 1f);
-		world = new World(new Vector2(0, 0), new Vector2(800, 480));
+		world = new World(new Vector2(0, 0), new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 
 		Sprite fontSprite = new Sprite(new Texture(Gdx.files.internal("data/font.png")));
 		font = new BitmapFont(Gdx.files.internal("data/font.fnt"), fontSprite, false);
