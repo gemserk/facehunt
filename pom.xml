@@ -1,12 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.gemserk.libgdxtest</groupId>
-	<artifactId>libgdxtest</artifactId>
+	<groupId>com.gemserk.games.facehunt</groupId>
+	<artifactId>facehunt</artifactId>
 	<version>1.0.2</version>
 	<packaging>pom</packaging>
-	<name>Test Parent</name>
-	<description>Test Parent</description>
+
+	<name>Face Hunt</name>
+	<description>Face Hunt</description>
 
 	<organization>
 		<name>Gemserk</name>
@@ -43,9 +44,9 @@
 
 
 	<modules>
-		<module>libgdx-test-core</module>
-		<module>libgdx-test-android</module>
-		<module>libgdx-test-desktop</module>
+		<module>facehunt-core</module>
+		<module>facehunt-android</module>
+		<module>facehunt-desktop</module>
 	</modules>
 
 	<properties>

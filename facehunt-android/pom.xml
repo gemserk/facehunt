@@ -2,16 +2,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.gemserk.libgdxtest</groupId>
-		<artifactId>libgdxtest</artifactId>
+		<groupId>com.gemserk.games.facehunt</groupId>
+		<artifactId>facehunt</artifactId>
 		<version>1.0.2</version>
 	</parent>
-	<groupId>com.gemserk.libgdxtest</groupId>
-	<artifactId>libgdx-test-android</artifactId>
+
+	<groupId>com.gemserk.games.facehunt</groupId>
+	<artifactId>facehunt-android</artifactId>
 	<version>1.0.2</version>
 	<packaging>apk</packaging>
-	<name>Test Android</name>
-	<description>Test Android</description>
+
+	<name>Face Hunt - Android Version</name>
+	<description>Android version of Face Hunt game</description>
 
 	<properties>
 		<!-- set a custom format that is guaranteed to grow as a Long number, so 
