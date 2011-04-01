@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>com.gemserk.libgdxtest</groupId>
 		<artifactId>libgdxtest</artifactId>
-		<version>1.0.1</version>
+		<version>1.0.2</version>
 	</parent>
 	<groupId>com.gemserk.libgdxtest</groupId>
 	<artifactId>libgdx-test-android</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>apk</packaging>
 	<name>Test Android</name>
 	<description>Test Android</description>
@@ -24,16 +24,6 @@
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
-
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>res/values</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
 
 		<plugins>
 			<plugin>
