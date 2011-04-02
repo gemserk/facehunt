@@ -31,7 +31,6 @@ import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
 import com.gemserk.componentsengine.templates.RegistrableTemplateProvider;
 import com.gemserk.componentsengine.templates.TemplateProvider;
-import com.gemserk.games.facehunt.components.AliveComponent;
 import com.gemserk.games.facehunt.components.DefaultParametersBuilder;
 import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
@@ -166,7 +165,6 @@ public class GameScreen extends ScreenAdapter {
 		renderComponent = new RenderComponent("render");
 		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData, synchronizersList);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
-		aliveComponent = new AliveComponent("alive");
 
 		identity = new Matrix4().idt();
 
@@ -491,8 +489,6 @@ public class GameScreen extends ScreenAdapter {
 	private final Color endColor;
 
 	private final World world;
-
-	private AliveComponent aliveComponent;
 
 	private ArrayList<TransitionReflectionObjectSynchronizer> synchronizersList;
 
