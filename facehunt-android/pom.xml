@@ -74,6 +74,7 @@
 					<deleteConflictingFiles>true</deleteConflictingFiles>
 					<extractDuplicates>true</extractDuplicates>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
+					<assetsDirectory>../facehunt-desktop/src/main/resources</assetsDirectory>
 				</configuration>
 				<extensions>true</extensions>
 				<executions>

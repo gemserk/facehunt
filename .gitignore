@@ -1,7 +1,7 @@
 ./target
-./.classpath
-./.project
-./.settings
+.classpath
+.project
+.settings
 
 facehunt-android/target
 facehunt-android/.classpath
