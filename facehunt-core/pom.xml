@@ -15,7 +15,7 @@
 	<description>Face Hunt - Core</description>
 	
 	<properties>
-		<animation4j.version>0.0.10-SNAPSHOT</animation4j.version>
+		<animation4j.version>0.0.10</animation4j.version>
 	</properties>
 
 	<dependencies>

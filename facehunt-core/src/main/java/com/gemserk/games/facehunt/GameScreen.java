@@ -22,7 +22,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
-import com.gemserk.animation4j.transitions.sync.TransitionReflectionObjectSynchronizer;
+import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.components.FieldsReflectionComponent;
 import com.gemserk.componentsengine.components.annotations.EntityProperty;
@@ -135,8 +135,6 @@ public class GameScreen extends ScreenAdapter {
 		Sprite fontSprite = new Sprite(new Texture(Gdx.files.internal("data/font.png")));
 		font = new BitmapFont(Gdx.files.internal("data/font.fnt"), fontSprite, false);
 
-		synchronizersList = new ArrayList<TransitionReflectionObjectSynchronizer>();
-
 		restartGame();
 	}
 
@@ -163,7 +161,7 @@ public class GameScreen extends ScreenAdapter {
 
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent("render");
-		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData, synchronizersList);
+		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
 
 		identity = new Matrix4().idt();
@@ -229,7 +227,7 @@ public class GameScreen extends ScreenAdapter {
 
 				spawnerComponent.update(entity, delta);
 
-				if (entity.hasTag("animation")) {
+				if (entity.hasTag(Tags.ANIMATION)) {
 
 					Color color = Properties.getValue(entity, "color");
 					Color endColor = Properties.getValue(entity, "endColor");
@@ -336,17 +334,7 @@ public class GameScreen extends ScreenAdapter {
 
 		}
 
-		ArrayList<TransitionReflectionObjectSynchronizer> toRemove = new ArrayList<TransitionReflectionObjectSynchronizer>();
-
-		for (int i = 0; i < synchronizersList.size(); i++) {
-			TransitionReflectionObjectSynchronizer synchronizer = synchronizersList.get(i);
-			synchronizer.synchronize();
-
-			 if (synchronizer.isFinished())
-				 toRemove.add(synchronizer);
-		}
-		
-		synchronizersList.removeAll(toRemove);
+		Synchronizers.synchronize();
 
 	}
 
@@ -397,16 +385,13 @@ public class GameScreen extends ScreenAdapter {
 		@EntityProperty(readOnly = true)
 		FloatValue radius;
 
-		private final ArrayList<TransitionReflectionObjectSynchronizer> synchronizersList;
-
-		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData, ArrayList<TransitionReflectionObjectSynchronizer> synchronizersList) {
+		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData) {
 			super(id);
 			this.entityManager = entityManager;
 			this.templateProvider = templateProvider;
 			this.sound = sound;
 			this.image = image;
 			this.gameData = gameData;
-			this.synchronizersList = synchronizersList;
 		}
 
 		protected void detectTouchAndKill(final Entity entity, float delta) {
@@ -438,15 +423,16 @@ public class GameScreen extends ScreenAdapter {
 
 			movement.angularVelocity = 400f;
 			movement.velocity.set(0, 0);
-//			movement.sizeVelocity.set(-100f, -100f);
 
-			Transition sizeTransition = Transitions.transition(spatial.size, LibgdxConverters.vector2());
-			sizeTransition.set(new Vector2(0f, 0f), 1000);
-
-			TransitionReflectionObjectSynchronizer transitionReflectionObjectSynchronizer = new TransitionReflectionObjectSynchronizer(sizeTransition, spatial, "size");
-			synchronizersList.add(transitionReflectionObjectSynchronizer);
-
-			// spatial.size.mul(0.5f);
+			Synchronizers.transition(spatial.size, Transitions.transitionBuilder(spatial.size) //
+					.end(new Vector2(0f, 0f)) //
+					.time(700) //
+					.build()); //
+			
+//			Synchronizers.transition(color, Transitions.transitionBuilder(color) //
+//					.end(endColor) //
+//					.time(700) //
+//					.build()); //
 
 			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
 				{
@@ -489,8 +475,6 @@ public class GameScreen extends ScreenAdapter {
 	private final Color endColor;
 
 	private final World world;
-
-	private ArrayList<TransitionReflectionObjectSynchronizer> synchronizersList;
 
 	private Texture heart;
 

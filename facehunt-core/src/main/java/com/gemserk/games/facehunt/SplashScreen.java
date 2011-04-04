@@ -39,7 +39,7 @@ public class SplashScreen extends ScreenAdapter {
 		this.logo = new Texture(Gdx.files.internal("data/logo-gemserk-512x128-white.png"));
 		this.spriteBatch = new SpriteBatch();
 
-		ObjectSynchronizer objectSynchronizer = new ReflectionObjectSynchronizer(this);
+		ObjectSynchronizer objectSynchronizer = new ReflectionObjectSynchronizer();
 
 		splashAnimation = new SynchrnonizedAnimation(new TimelineAnimationBuilder() {
 			{
@@ -55,7 +55,7 @@ public class SplashScreen extends ScreenAdapter {
 				});
 				speed(1.3f);
 			}
-		}.build(), new TimelineSynchronizer(objectSynchronizer));
+		}.build(), new TimelineSynchronizer(objectSynchronizer, this));
 
 		splashAnimation.start(1);
 

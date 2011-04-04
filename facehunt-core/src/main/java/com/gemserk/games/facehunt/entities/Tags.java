@@ -13,5 +13,9 @@ public class Tags {
 	public static final String ALIVE = "alive".intern();
 	
 	public static final String ROTATION = "rotationable".intern();
+	
+	//
+	
+	public static final String ANIMATION= "animation".intern();
 
 }

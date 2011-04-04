@@ -24,12 +24,12 @@ public class FadeAnimationTemplate extends EntityBuilder {
 		parent("entities.Spatial", parameters);
 		parent("entities.Moveable", parameters);
 
-		tags("animation");
+		tags(Tags.ANIMATION);
 
 		Color startColor = parameters.get("startColor");
 		Color endColor = parameters.get("endColor");
 
-		Property<Color> colorProperty = new TransitionProperty<Color>(Transitions.transition(startColor, 2f, LibgdxConverters.color()));
+		Property<Color> colorProperty = new TransitionProperty<Color>(Transitions.transition(startColor, 3f, LibgdxConverters.color()));
 
 		property("image", parameters.get("image"));
 		property("color", colorProperty);
