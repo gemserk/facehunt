@@ -13,9 +13,10 @@
 
 	<name>Face Hunt - Core</name>
 	<description>Face Hunt - Core</description>
-	
+
 	<properties>
 		<animation4j.version>0.0.10</animation4j.version>
+		<commons.gdx.version>0.0.1-SNAPSHOT</commons.gdx.version>
 	</properties>
 
 	<dependencies>
@@ -44,19 +45,25 @@
 			<artifactId>gdx</artifactId>
 			<version>${libgdxversion}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.gemserk.animation4j</groupId>
 			<artifactId>animation4j-core</artifactId>
 			<version>${animation4j.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.gemserk.componentsengine</groupId>
 			<artifactId>core</artifactId>
 			<version>0.0.8</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.gemserk.commons.gdx</groupId>
+			<artifactId>commons-gdx-core</artifactId>
+			<version>${commons.gdx.version}</version>
+		</dependency>
+
 	</dependencies>
 
 </project>

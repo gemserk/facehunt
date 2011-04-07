@@ -23,6 +23,7 @@ import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
+import com.gemserk.commons.gdx.ScreenAdapter;
 import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.components.FieldsReflectionComponent;
 import com.gemserk.componentsengine.components.annotations.EntityProperty;
@@ -35,7 +36,6 @@ import com.gemserk.games.facehunt.components.DefaultParametersBuilder;
 import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
 import com.gemserk.games.facehunt.components.SpawnerComponent;
-import com.gemserk.games.facehunt.entities.AliveEntityTemplate;
 import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
 import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
 import com.gemserk.games.facehunt.entities.MoveableEntityTemplate;
@@ -121,7 +121,6 @@ public class GameScreen extends ScreenAdapter {
 		templateProvider.add("entities.Moveable", javaEntityTemplateProvider.get().with(new MoveableEntityTemplate()));
 		templateProvider.add("entities.Renderable", javaEntityTemplateProvider.get().with(new RenderableEntityTemplate()));
 		templateProvider.add("entities.Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
-		templateProvider.add("entities.Alive", javaEntityTemplateProvider.get().with(new AliveEntityTemplate()));
 
 		// templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
 
