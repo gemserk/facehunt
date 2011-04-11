@@ -182,6 +182,54 @@ public class GameScreen extends ScreenAdapter {
 
 	GameState gameState = GameState.Starting;
 
+	public static class LibgdxPointer {
+
+		boolean touched = false;
+
+		Vector2 pressedPosition = new Vector2();
+
+		Vector2 releasedPosition = new Vector2();
+
+		public boolean wasPressed;
+
+		public boolean wasReleased;
+
+		public int index;
+		
+		public LibgdxPointer(int index) {
+			this.index = index;
+		}
+
+		public void update() {
+			
+			if (Gdx.input.isTouched(index)) {
+				
+				if (!touched) {
+					touched = true;
+					wasPressed = true;
+					pressedPosition.set(Gdx.input.getX(index), Gdx.graphics.getHeight() - Gdx.input.getY(index));
+				} else 
+					wasPressed = false;
+				
+			} 
+			
+			if (Gdx.input.isTouched(index)) {
+				
+				if (touched) {
+					touched = false;
+					wasReleased = true;
+					releasedPosition.set(Gdx.input.getX(index), Gdx.graphics.getHeight() - Gdx.input.getY(index));
+				} else {
+					wasReleased = false;
+				}
+				
+			}
+		}
+
+	}
+
+	LibgdxPointer[] libgdxPointers = { new LibgdxPointer(0), new LibgdxPointer(1), new LibgdxPointer(2), new LibgdxPointer(3), new LibgdxPointer(4) };
+
 	@Override
 	public void render(float delta) {
 		int width = Gdx.graphics.getWidth();
@@ -191,6 +239,8 @@ public class GameScreen extends ScreenAdapter {
 		int centerY = height / 2;
 
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
+		
+		updatePointers();
 
 		if (gameState == GameState.Starting) {
 
@@ -337,6 +387,11 @@ public class GameScreen extends ScreenAdapter {
 
 	}
 
+	private void updatePointers() {
+		for (int i = 0; i < libgdxPointers.length; i++) 
+			libgdxPointers[i].update();
+	}
+
 	class FaceDefaultParametersBuilder implements DefaultParametersBuilder {
 
 		private Random random = new Random();
@@ -364,7 +419,7 @@ public class GameScreen extends ScreenAdapter {
 		}
 	}
 
-	public static class TouchableComponent extends FieldsReflectionComponent {
+	public class TouchableComponent extends FieldsReflectionComponent {
 
 		TemplateProvider templateProvider;
 
@@ -403,45 +458,54 @@ public class GameScreen extends ScreenAdapter {
 
 			super.setEntity(entity);
 			super.preHandleMessage(null);
-
-			int x = Gdx.input.getX();
-			int y = Gdx.graphics.getHeight() - Gdx.input.getY();
-
+			
 			final Spatial spatial = Properties.getValue(entity, "spatial");
 			Vector2 position = spatial.position;
-
-			if (position.dst(x, y) > 35f)
-				return;
-
-			sound.play(1f);
-			entityManager.remove(entity);
-			gameData.killedCritters++;
-
-			final Movement movement = Properties.getValue(entity, "movement");
-			final Color color = Properties.getValue(entity, "color");
-
-			movement.angularVelocity = 400f;
-			movement.velocity.set(0, 0);
-
-			Synchronizers.transition(spatial.size, Transitions.transitionBuilder(spatial.size) //
-					.end(new Vector2(0f, 0f)) //
-					.time(700) //
-					.build()); //
 			
-//			Synchronizers.transition(color, Transitions.transitionBuilder(color) //
-//					.end(endColor) //
-//					.time(700) //
-//					.build()); //
+			for (int i = 0; i < libgdxPointers.length; i++) {
+				
+				LibgdxPointer libgdxPointer = libgdxPointers[i];
+				
+				if (!libgdxPointer.wasPressed) 
+					continue;
+				
+				if (position.dst(libgdxPointer.pressedPosition) > (32f + 5f))
+					continue;
+				
+				sound.play(1f);
+				entityManager.remove(entity);
+				gameData.killedCritters++;
 
-			entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
-				{
-					put("spatial", spatial);
-					put("movement", movement);
-					put("image", new Sprite(image));
-					put("startColor", color);
-					put("endColor", endColor);
-				}
-			}));
+				final Movement movement = Properties.getValue(entity, "movement");
+				final Color color = Properties.getValue(entity, "color");
+
+				movement.angularVelocity = 400f;
+				movement.velocity.set(0, 0);
+
+				Synchronizers.transition(spatial.size, Transitions.transitionBuilder(spatial.size) //
+						.end(new Vector2(0f, 0f)) //
+						.time(700) //
+						.build()); //
+
+				entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
+					{
+						put("spatial", spatial);
+						put("movement", movement);
+						put("image", new Sprite(image));
+						put("startColor", color);
+						put("endColor", endColor);
+					}
+				}));
+				
+				break;
+				
+			}
+			
+//			int x = Gdx.input.getX();
+//			int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+//
+//			if (position.dst(x, y) > 35f)
+//				return;
 
 			super.postHandleMessage(null);
 
