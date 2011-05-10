@@ -213,7 +213,7 @@ public class GameScreen extends ScreenAdapter {
 				
 			} 
 			
-			if (Gdx.input.isTouched(index)) {
+			if (!Gdx.input.isTouched(index)) {
 				
 				if (touched) {
 					touched = false;
