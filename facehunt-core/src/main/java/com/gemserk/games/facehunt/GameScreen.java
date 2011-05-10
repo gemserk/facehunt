@@ -1,98 +1,57 @@
 package com.gemserk.games.facehunt;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
-import com.badlogic.gdx.Game;
+import com.artemis.Entity;
+import com.artemis.World;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.gemserk.animation4j.transitions.Transition;
-import com.gemserk.animation4j.transitions.Transitions;
-import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
+import com.gemserk.commons.artemis.WorldWrapper;
+import com.gemserk.commons.artemis.components.SpatialComponent;
+import com.gemserk.commons.artemis.components.SpriteComponent;
+import com.gemserk.commons.artemis.systems.SpriteRendererSystem;
+import com.gemserk.commons.artemis.systems.SpriteUpdateSystem;
 import com.gemserk.commons.gdx.ScreenAdapter;
-import com.gemserk.commons.gdx.input.LibgdxPointer;
+import com.gemserk.commons.gdx.camera.Camera;
+import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
+import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
-import com.gemserk.commons.values.FloatValue;
-import com.gemserk.componentsengine.components.FieldsReflectionComponent;
-import com.gemserk.componentsengine.components.annotations.EntityProperty;
-import com.gemserk.componentsengine.entities.Entity;
-import com.gemserk.componentsengine.properties.Properties;
-import com.gemserk.componentsengine.templates.JavaEntityTemplate;
-import com.gemserk.componentsengine.templates.RegistrableTemplateProvider;
-import com.gemserk.componentsengine.templates.TemplateProvider;
-import com.gemserk.games.facehunt.components.DefaultParametersBuilder;
-import com.gemserk.games.facehunt.components.MovementComponent;
-import com.gemserk.games.facehunt.components.RenderComponent;
-import com.gemserk.games.facehunt.components.SpawnerComponent;
-import com.gemserk.games.facehunt.entities.FaceEntityTemplate;
-import com.gemserk.games.facehunt.entities.FadeAnimationTemplate;
-import com.gemserk.games.facehunt.entities.MoveableEntityTemplate;
-import com.gemserk.games.facehunt.entities.RenderableEntityTemplate;
-import com.gemserk.games.facehunt.entities.SpatialEntityTemplate;
-import com.gemserk.games.facehunt.entities.SpawnerEntityTemplate;
-import com.gemserk.games.facehunt.entities.Tags;
-import com.gemserk.games.facehunt.entities.TouchableEntityTemplate;
-import com.gemserk.games.facehunt.values.GameData;
-import com.gemserk.games.facehunt.values.Movement;
-import com.gemserk.games.facehunt.values.Spatial;
-import com.gemserk.games.facehunt.values.Spawner;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
 
 public class GameScreen extends ScreenAdapter {
 
-	private final Game game;
+	private final FaceHuntGame game;
 
 	private ResourceManager<String> resourceManager;
 
-	private Texture background;
-
 	private SpriteBatch spriteBatch;
 
-	EntityManager entityManager;
+	private Libgdx2dCameraTransformImpl worldCamera = new Libgdx2dCameraTransformImpl();
 
-	private RegistrableTemplateProvider templateProvider;
+	private Libgdx2dCamera backgroundLayerCamera = new Libgdx2dCameraTransformImpl();
 
-	private RenderComponent renderComponent;
+	private Camera cameraData;
 
-	private MovementComponent movementComponent;
+	private WorldWrapper worldWrapper;
 
-	private TouchableComponent touchableComponent;
+	private World world;
 
-	private SpawnerComponent spawnerComponent;
-
-	private GameData gameData = new GameData();
-
-	private BitmapFont font;
-
-	private final Color startColor = new Color(1f, 1f, 1f, 0f);
-
-	private final Color endColor = new Color(1f, 1f, 1f, 1f);
-
-	private Color fadeColor = new Color();
-
-	private final World world;
-
-	private boolean inputEnabled = true;
-
-	public GameScreen(Game game) {
+	public GameScreen(FaceHuntGame game) {
 		this.game = game;
+	}
+
+	protected void restartGame() {
+
+		int viewportWidth = Gdx.graphics.getWidth();
+		int viewportHeight = Gdx.graphics.getHeight();
+
+		cameraData = new Camera(viewportWidth / 2, viewportHeight / 2, 1f, 0f);
+
+		worldCamera.center(viewportWidth / 2, viewportHeight / 2);
 
 		resourceManager = new ResourceManagerImpl<String>();
 
@@ -103,6 +62,7 @@ public class GameScreen extends ScreenAdapter {
 				texture("SadFaceTexture", "data/face-happy-64x64.png");
 				texture("HeartTexture", "data/heart-32x32.png");
 
+				sprite("BackgroundSprite", "BackgroundTexture");
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
 
@@ -114,98 +74,25 @@ public class GameScreen extends ScreenAdapter {
 			}
 		};
 
-		background = resourceManager.getResourceValue("BackgroundTexture");
-
 		spriteBatch = new SpriteBatch();
 
-		templateProvider = new RegistrableTemplateProvider();
+		world = new World();
+		worldWrapper = new WorldWrapper(world);
+		worldWrapper.addUpdateSystem(new SpriteUpdateSystem());
+		worldWrapper.addRenderSystem(new SpriteRendererSystem());
+		worldWrapper.init();
 
-		Injector injector = Guice.createInjector(new AbstractModule() {
-
-			@Override
-			protected void configure() {
-				bind(TemplateProvider.class).toInstance(templateProvider);
-			}
-		});
-
-		entityManager = injector.getInstance(EntityManager.class);
-
-		Provider<JavaEntityTemplate> javaEntityTemplateProvider = injector.getProvider(JavaEntityTemplate.class);
-
-		templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
-		templateProvider.add("FadeAnimation", javaEntityTemplateProvider.get().with(new FadeAnimationTemplate()));
-		templateProvider.add("Spawner", javaEntityTemplateProvider.get().with(new SpawnerEntityTemplate()));
-
-		templateProvider.add("entities.Spatial", javaEntityTemplateProvider.get().with(new SpatialEntityTemplate()));
-		templateProvider.add("entities.Moveable", javaEntityTemplateProvider.get().with(new MoveableEntityTemplate()));
-		templateProvider.add("entities.Renderable", javaEntityTemplateProvider.get().with(new RenderableEntityTemplate()));
-		templateProvider.add("entities.Touchable", javaEntityTemplateProvider.get().with(new TouchableEntityTemplate()));
-
-		// templateProvider.add("entities.Face", javaEntityTemplateProvider.get().with(new FaceEntityTemplate()));
-
-		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
-		javaEntityTemplate.setInjector(injector);
-
-		world = new World(new Vector2(0, 0), new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-
-		font = resourceManager.getResourceValue("Font");
-
-		restartGame();
+		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
+		createStaticSprite(backgroundSprite, viewportWidth * 0.5f, viewportHeight * 0.5f, 1024, 512, 0f, -101, 0.5f, 0.5f, Color.WHITE);
+		
 	}
-
-	protected void restartGame() {
-
-		entityManager.removeAll();
-
-		entityManager.addEntity(templateProvider.getTemplate("Spawner").instantiate("global.spawner", new HashMap<String, Object>() {
-			{
-				put("respawnTime", new FloatValue(3000f));
-				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
-					{
-						put("image", resourceManager.getResourceValue("HappyFaceSprite"));
-						put("startColor", startColor);
-						put("endColor", endColor);
-						put("shouldSpawn", true);
-					}
-				}, new FaceDefaultParametersBuilder(), 10, 1.5f, 1.02f, 6.5f));
-			}
-		}));
-
-		gameData.lives = 2;
-		gameData.killedCritters = 0;
-
-		movementComponent = new MovementComponent("movement", world, (Sound) resourceManager.getResourceValue("CritterBounceSound"));
-		renderComponent = new RenderComponent("render");
-		Texture sadFaceTexture = resourceManager.getResourceValue("SadFaceTexture");
-		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, sadFaceTexture, gameData);
-		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, resourceManager);
-
-		identity = new Matrix4().idt();
-
-		font.setColor(0f, 0f, 0f, 0.8f);
-		// font.setScale(1f, 1.5f);
-
-		inputEnabled = false;
-		Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(2000).build(), new TransitionEventHandler() {
-			@Override
-			public void onTransitionFinished(Transition transition) {
-				gameState = GameState.Playing;
-				inputEnabled = true;
-			}
-		});
-
-		gameState = GameState.Starting;
+	
+	void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
+		Entity entity = world.createEntity();
+		entity.addComponent(new SpatialComponent(new Vector2(x, y), new Vector2(width, height), angle));
+		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
+		entity.refresh();
 	}
-
-	Matrix4 identity = new Matrix4();
-
-	enum GameState {
-		Starting, Playing, GameOver
-	}
-
-	GameState gameState = GameState.Starting;
-
-	LibgdxPointer[] libgdxPointers = { new LibgdxPointer(0), new LibgdxPointer(1), new LibgdxPointer(2), new LibgdxPointer(3), new LibgdxPointer(4) };
 
 	public void internalRender(float delta) {
 		int width = Gdx.graphics.getWidth();
@@ -216,294 +103,23 @@ public class GameScreen extends ScreenAdapter {
 
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 
-		if (gameState == GameState.Starting) {
+		worldCamera.zoom(cameraData.getZoom() * 2f);
+		worldCamera.move(cameraData.getX(), cameraData.getY());
+		worldCamera.rotate(cameraData.getAngle());
 
-			spriteBatch.setTransformMatrix(identity);
-			spriteBatch.begin();
-			spriteBatch.setColor(fadeColor);
-			spriteBatch.draw(background, 0, 0);
-			spriteBatch.end();
-
-		} else if (gameState == GameState.Playing) {
-
-			spriteBatch.setTransformMatrix(identity);
-			spriteBatch.begin();
-			spriteBatch.setColor(Color.WHITE);
-			spriteBatch.draw(background, 0, 0);
-			spriteBatch.end();
-
-			ArrayList<Entity> entities = entityManager.getEntities();
-
-			spriteBatch.setTransformMatrix(identity);
-			spriteBatch.begin();
-
-			for (int i = 0; i < entities.size(); i++) {
-				final Entity entity = entities.get(i);
-				renderComponent.render(entity, spriteBatch);
-			}
-
-			spriteBatch.end();
-
-			spriteBatch.setTransformMatrix(identity);
-			spriteBatch.begin();
-
-			font.setColor(0.2f, 0.2f, 1f, 1f);
-
-			String str = "Smiles: " + gameData.killedCritters;
-			font.draw(spriteBatch, str, 10, height - 10);
-
-			int maxLives = 2;
-			int spaceBetweenLives = 5;
-
-			Texture heart = resourceManager.getResourceValue("HeartTexture");
-
-			int xStart = width - 10 - (heart.getWidth() + spaceBetweenLives) * maxLives;
-			int y = height - heart.getHeight() - 10;
-
-			for (int i = 0; i < gameData.lives; i++) {
-				int x = xStart + i * (heart.getWidth() + spaceBetweenLives);
-				spriteBatch.draw(heart, x - heart.getWidth() / 2, y - heart.getHeight() / 2);
-			}
-
-			spriteBatch.end();
-
-		} else if (gameState == GameState.GameOver) {
-			spriteBatch.setTransformMatrix(identity);
-			spriteBatch.begin();
-			spriteBatch.setColor(fadeColor);
-			spriteBatch.draw(background, 0, 0);
-
-			String str = "Game Over";
-			TextBounds textBounds = font.getBounds(str);
-			font.setColor(1f, 0.3f, 0.3f, 1f);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 + textBounds.height);
-
-			str = "Smiles: " + gameData.killedCritters + " points";
-			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2);
-
-			str = "Tap screen to restart";
-			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 - textBounds.height);
-
-			spriteBatch.end();
-		}
+		worldWrapper.render();
 	}
 
 	@Override
 	public void internalUpdate(float delta) {
 		Synchronizers.synchronize();
-
-		updatePointers();
-
-		if (gameState == GameState.Starting) {
-
-		} else if (gameState == GameState.Playing) {
-
-			ArrayList<Entity> entities = entityManager.getEntities();
-
-			for (int i = 0; i < entities.size(); i++) {
-				final Entity entity = entities.get(i);
-
-				touchableComponent.detectTouchAndKill(entity, delta);
-				movementComponent.update(entity, delta);
-
-				spawnerComponent.update(entity, delta);
-
-				if (entity.hasTag(Tags.ANIMATION)) {
-
-					Color color = Properties.getValue(entity, "color");
-					Color endColor = Properties.getValue(entity, "endColor");
-
-					if (color.equals(endColor)) {
-						Boolean shouldSpawn = Properties.getValue(entity, "shouldSpawn");
-						if (shouldSpawn) {
-
-							final Spatial spatial = Properties.getValue(entity, "spatial");
-							final Movement movement = Properties.getValue(entity, "movement");
-							final FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
-							final Sprite sprite = Properties.getValue(entity, "image");
-
-							entityManager.addEntity(templateProvider.getTemplate("entities.Face").instantiate("touchable." + entity.getId(), new HashMap<String, Object>() {
-								{
-									put("spatial", new Spatial().set(spatial));
-									put("movement", new Movement().set(movement));
-									put("image", sprite);
-									put("aliveTime", aliveTime);
-								}
-							}));
-						}
-						entityManager.remove(entity);
-					}
-
-				}
-
-				if (entity.hasTag(Tags.ALIVE)) {
-
-					FloatValue aliveTime = Properties.getValue(entity, "aliveTime");
-					// Boolean touchable = Properties.getValue(entity, "touchable");
-
-					// aliveTime.value -= 1f * delta;
-
-					if (aliveTime.value <= 0f) {
-						gameData.lives--;
-						entityManager.remove(entity);
-					}
-
-				}
-
-				if (gameData.lives <= 0) {
-					// fadeInColor.set(new Color(1f, 1f, 1f, 0f), 2000);
-					gameState = GameState.GameOver;
-					inputEnabled = false;
-
-					Synchronizers.transition(fadeColor, Transitions.transitionBuilder(fadeColor).end(startColor).time(2000).build(), new TransitionEventHandler() {
-						@Override
-						public void onTransitionFinished(Transition transition) {
-							inputEnabled = true;
-						}
-					});
-
-				}
-
-			}
-
-		} else if (gameState == GameState.GameOver) {
-			if (inputEnabled) {
-				if (Gdx.input.justTouched())
-					restartGame();
-			}
-		}
-	}
-
-	private void updatePointers() {
-		for (int i = 0; i < libgdxPointers.length; i++)
-			libgdxPointers[i].update();
-	}
-
-	class FaceDefaultParametersBuilder implements DefaultParametersBuilder {
-
-		private Random random = new Random();
-
-		@Override
-		public Map<String, Object> buildParameters(Map<String, Object> parameters) {
-			// should be outside...
-			Vector2 position = Vector2Random.vector2(world.min.x + 10, world.min.y + 10, world.max.x - 10, world.max.y - 10);
-			Vector2 velocity = Vector2Random.vector2(-1f, -1f, 1f, 1f).mul(100f);
-			float angle = random.nextFloat() * 360;
-
-			// I want this to be dynamic based on the player's performance.
-			float minAliveTime = 3000f;
-			float maxAliveTime = 6000f;
-
-			float aliveTime = minAliveTime + random.nextFloat() * (maxAliveTime - minAliveTime);
-			float angularVelocity = random.nextFloat() * 180f - 90f;
-
-			parameters.put("spatial", new Spatial(position, angle));
-			parameters.put("movement", new Movement(velocity, angularVelocity));
-			parameters.put("aliveTime", new FloatValue(aliveTime));
-			parameters.put("image", resourceManager.getResourceValue("HappyFaceSprite"));
-
-			return parameters;
-		}
-	}
-
-	public class TouchableComponent extends FieldsReflectionComponent {
-
-		TemplateProvider templateProvider;
-
-		EntityManager entityManager;
-
-		private final Texture image;
-
-		Color endColor = new Color(1f, 1f, 1f, 0f);
-
-		private final GameData gameData;
-
-		@EntityProperty(readOnly = true)
-		Spatial spatial;
-
-		@EntityProperty(readOnly = true)
-		FloatValue radius;
-
-		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Texture image, GameData gameData) {
-			super(id);
-			this.entityManager = entityManager;
-			this.templateProvider = templateProvider;
-			this.image = image;
-			this.gameData = gameData;
-		}
-
-		protected void detectTouchAndKill(final Entity entity, float delta) {
-
-			if (!entity.hasTag(Tags.TOUCHABLE))
-				return;
-
-			if (!Gdx.input.justTouched())
-				return;
-
-			super.setEntity(entity);
-			super.preHandleMessage(null);
-
-			final Spatial spatial = Properties.getValue(entity, "spatial");
-			Vector2 position = spatial.position;
-
-			for (int i = 0; i < libgdxPointers.length; i++) {
-
-				LibgdxPointer libgdxPointer = libgdxPointers[i];
-
-				if (!libgdxPointer.wasPressed)
-					continue;
-
-				if (position.dst(libgdxPointer.getPressedPosition()) > (32f + 5f))
-					continue;
-
-				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-
-				sound.play(1f);
-				entityManager.remove(entity);
-				gameData.killedCritters++;
-
-				final Movement movement = Properties.getValue(entity, "movement");
-				final Color color = Properties.getValue(entity, "color");
-
-				movement.angularVelocity = 400f;
-				movement.velocity.set(0, 0);
-
-				Synchronizers.transition(spatial.size, Transitions.transitionBuilder(spatial.size) //
-						.end(new Vector2(0f, 0f)) //
-						.time(700) //
-						.build()); //
-
-				entityManager.addEntity(templateProvider.getTemplate("FadeAnimation").instantiate("animation." + entity.getId(), new HashMap<String, Object>() {
-					{
-						put("spatial", spatial);
-						put("movement", movement);
-						put("image", new Sprite(image));
-						put("startColor", color);
-						put("endColor", endColor);
-					}
-				}));
-
-				break;
-
-			}
-
-			// int x = Gdx.input.getX();
-			// int y = Gdx.graphics.getHeight() - Gdx.input.getY();
-			//
-			// if (position.dst(x, y) > 35f)
-			// return;
-
-			super.postHandleMessage(null);
-
-		}
-
+		int deltaInMs = (int) (delta * 1000f);
+		worldWrapper.update(deltaInMs);
 	}
 
 	@Override
 	public void show() {
-
+		restartGame();
 	}
 
 	@Override
