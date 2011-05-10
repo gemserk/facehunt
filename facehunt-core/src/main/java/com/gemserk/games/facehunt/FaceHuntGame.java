@@ -16,8 +16,10 @@ import com.gemserk.games.facehunt.screens.MenuScreen;
 public class FaceHuntGame extends Game {
 
 	public GameScreen gameScreen;
+	
 	public FadeTransitionScreen fadeTransitionScreen;
-	private MenuScreen menuScreen;
+	
+	public MenuScreen menuScreen;
 
 	@Override
 	public void create() {
@@ -34,7 +36,7 @@ public class FaceHuntGame extends Game {
 		fadeTransitionScreen = new FadeTransitionScreen(this);
 
 		setScreen(menuScreen);
-		transition(gameScreen);
+		// transition(gameScreen);
 
 		// setScreen(new SplashScreen(gemserkLogo) {
 		//
@@ -53,8 +55,7 @@ public class FaceHuntGame extends Game {
 	}
 
 	public void transition(ScreenAdapter nextScreen) {
-		fadeTransitionScreen.setCurrentScreen((ScreenAdapter) this.getScreen());
-		fadeTransitionScreen.setNextScreen(nextScreen);
+		fadeTransitionScreen.transition((ScreenAdapter) this.getScreen(), nextScreen, 1000);
 		setScreen(fadeTransitionScreen);
 	}
 
