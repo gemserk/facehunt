@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Disposable;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
@@ -69,17 +68,13 @@ public class GameScreen extends ScreenAdapter {
 
 	private RegistrableTemplateProvider templateProvider;
 
-	private ArrayList<Disposable> disposables = new ArrayList<Disposable>();
-	
-	RenderComponent renderComponent;
+	private RenderComponent renderComponent;
 
-	MovementComponent movementComponent;
+	private MovementComponent movementComponent;
 
 	private TouchableComponent touchableComponent;
 
 	private SpawnerComponent spawnerComponent;
-
-	private Sound bounceSound;
 
 	private GameData gameData = new GameData();
 
@@ -93,8 +88,6 @@ public class GameScreen extends ScreenAdapter {
 
 	private final World world;
 
-	private Texture heart;
-
 	public GameScreen(Game game) {
 		this.game = game;
 
@@ -105,24 +98,22 @@ public class GameScreen extends ScreenAdapter {
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				texture("HappyFaceTexture", "data/face-sad-64x64.png");
 				texture("SadFaceTexture", "data/face-happy-64x64.png");
+				texture("HeartTexture", "data/heart-32x32.png");
 
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
 				
 				sound("CritterKilledSound", "data/critter-killed.wav");
 				sound("CritterSpawnedSound", "data/critter-spawned.wav");
+				sound("CritterBounceSound", "data/bounce.wav");
+				
+				font("Font", "data/font.png", "data/font.fnt");
 			}
 		};
 
 		background = resourceManager.getResourceValue("BackgroundTexture");
 
-		heart = new Texture(Gdx.files.internal("data/heart-32x32.png"));
-
 		spriteBatch = new SpriteBatch();
-		bounceSound = Gdx.audio.newSound(Gdx.files.internal("data/bounce.wav"));
-
-		disposables.add(heart);
-		disposables.add(bounceSound);
 
 		templateProvider = new RegistrableTemplateProvider();
 
@@ -154,9 +145,8 @@ public class GameScreen extends ScreenAdapter {
 
 		world = new World(new Vector2(0, 0), new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 
-		Sprite fontSprite = new Sprite(new Texture(Gdx.files.internal("data/font.png")));
-		font = new BitmapFont(Gdx.files.internal("data/font.fnt"), fontSprite, false);
-
+		font = resourceManager.getResourceValue("Font");
+		
 		restartGame();
 	}
 
@@ -181,7 +171,7 @@ public class GameScreen extends ScreenAdapter {
 		gameData.lives = 2;
 		gameData.killedCritters = 0;
 
-		movementComponent = new MovementComponent("movement", world, bounceSound);
+		movementComponent = new MovementComponent("movement", world, (Sound) resourceManager.getResourceValue("CritterBounceSound"));
 		renderComponent = new RenderComponent("render");
 		Texture sadFaceTexture = resourceManager.getResourceValue("SadFaceTexture");
 		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, sadFaceTexture, gameData);
@@ -257,6 +247,8 @@ public class GameScreen extends ScreenAdapter {
 
 			int maxLives = 2;
 			int spaceBetweenLives = 5;
+			
+			Texture heart = resourceManager.getResourceValue("HeartTexture");
 
 			int xStart = width - 10 - (heart.getWidth() + spaceBetweenLives) * maxLives;
 			int y = height - heart.getHeight() - 10;
@@ -507,8 +499,6 @@ public class GameScreen extends ScreenAdapter {
 		resourceManager.unloadAll();
 		spriteBatch.dispose();
 		spriteBatch = null;
-		for (Disposable disposable : disposables)
-			disposable.dispose();
 	}
 
 }
