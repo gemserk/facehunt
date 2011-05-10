@@ -23,6 +23,7 @@ import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.ScreenAdapter;
+import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.components.FieldsReflectionComponent;
@@ -190,52 +191,6 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	GameState gameState = GameState.Starting;
-
-	public static class LibgdxPointer {
-
-		boolean touched = false;
-
-		Vector2 pressedPosition = new Vector2();
-
-		Vector2 releasedPosition = new Vector2();
-
-		public boolean wasPressed;
-
-		public boolean wasReleased;
-
-		public int index;
-
-		public LibgdxPointer(int index) {
-			this.index = index;
-		}
-
-		public void update() {
-
-			if (Gdx.input.isTouched(index)) {
-
-				if (!touched) {
-					touched = true;
-					wasPressed = true;
-					pressedPosition.set(Gdx.input.getX(index), Gdx.graphics.getHeight() - Gdx.input.getY(index));
-				} else
-					wasPressed = false;
-
-			}
-
-			if (!Gdx.input.isTouched(index)) {
-
-				if (touched) {
-					touched = false;
-					wasReleased = true;
-					releasedPosition.set(Gdx.input.getX(index), Gdx.graphics.getHeight() - Gdx.input.getY(index));
-				} else {
-					wasReleased = false;
-				}
-
-			}
-		}
-
-	}
 
 	LibgdxPointer[] libgdxPointers = { new LibgdxPointer(0), new LibgdxPointer(1), new LibgdxPointer(2), new LibgdxPointer(3), new LibgdxPointer(4) };
 
@@ -482,7 +437,7 @@ public class GameScreen extends ScreenAdapter {
 				if (!libgdxPointer.wasPressed)
 					continue;
 
-				if (position.dst(libgdxPointer.pressedPosition) > (32f + 5f))
+				if (position.dst(libgdxPointer.getPressedPosition()) > (32f + 5f))
 					continue;
 
 				sound.play(1f);
