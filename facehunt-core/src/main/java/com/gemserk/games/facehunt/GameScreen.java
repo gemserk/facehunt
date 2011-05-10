@@ -85,7 +85,7 @@ public class GameScreen extends ScreenAdapter {
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				texture("HappyFaceTexture", "data/face-sad-64x64.png");
 				texture("SadFaceTexture", "data/face-happy-64x64.png");
-				
+
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
 			}
@@ -239,8 +239,7 @@ public class GameScreen extends ScreenAdapter {
 
 	LibgdxPointer[] libgdxPointers = { new LibgdxPointer(0), new LibgdxPointer(1), new LibgdxPointer(2), new LibgdxPointer(3), new LibgdxPointer(4) };
 
-	@Override
-	public void render(float delta) {
+	public void internalRender(float delta) {
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();
 
@@ -249,8 +248,6 @@ public class GameScreen extends ScreenAdapter {
 
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 
-		updatePointers();
-
 		if (gameState == GameState.Starting) {
 
 			spriteBatch.setTransformMatrix(identity);
@@ -258,9 +255,6 @@ public class GameScreen extends ScreenAdapter {
 			spriteBatch.setColor(fadeInColor.get());
 			spriteBatch.draw(background, 0, 0);
 			spriteBatch.end();
-
-			if (!fadeInColor.isTransitioning())
-				gameState = GameState.Playing;
 
 		} else if (gameState == GameState.Playing) {
 
@@ -277,8 +271,72 @@ public class GameScreen extends ScreenAdapter {
 
 			for (int i = 0; i < entities.size(); i++) {
 				final Entity entity = entities.get(i);
+				renderComponent.render(entity, spriteBatch);
+			}
 
-				// make some logic for the entity
+			spriteBatch.end();
+
+			spriteBatch.setTransformMatrix(identity);
+			spriteBatch.begin();
+
+			font.setColor(0.2f, 0.2f, 1f, 1f);
+
+			String str = "Smiles: " + gameData.killedCritters;
+			font.draw(spriteBatch, str, 10, height - 10);
+
+			int maxLives = 2;
+			int spaceBetweenLives = 5;
+
+			int xStart = width - 10 - (heart.getWidth() + spaceBetweenLives) * maxLives;
+			int y = height - heart.getHeight() - 10;
+
+			for (int i = 0; i < gameData.lives; i++) {
+				int x = xStart + i * (heart.getWidth() + spaceBetweenLives);
+				spriteBatch.draw(heart, x - heart.getWidth() / 2, y - heart.getHeight() / 2);
+			}
+
+			spriteBatch.end();
+
+		} else if (gameState == GameState.GameOver) {
+			spriteBatch.setTransformMatrix(identity);
+			spriteBatch.begin();
+			spriteBatch.setColor(fadeInColor.get());
+			spriteBatch.draw(background, 0, 0);
+
+			String str = "Game Over";
+			TextBounds textBounds = font.getBounds(str);
+			font.setColor(1f, 0.3f, 0.3f, 1f);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 + textBounds.height);
+
+			str = "Smiles: " + gameData.killedCritters + " points";
+			textBounds = font.getBounds(str);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2);
+
+			str = "Tap screen to restart";
+			textBounds = font.getBounds(str);
+			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 - textBounds.height);
+
+			spriteBatch.end();
+		}
+	}
+
+	@Override
+	public void internalUpdate(float delta) {
+		Synchronizers.synchronize();
+		
+		updatePointers();
+
+		if (gameState == GameState.Starting) {
+
+			if (!fadeInColor.isTransitioning())
+				gameState = GameState.Playing;
+
+		} else if (gameState == GameState.Playing) {
+
+			ArrayList<Entity> entities = entityManager.getEntities();
+
+			for (int i = 0; i < entities.size(); i++) {
+				final Entity entity = entities.get(i);
 
 				touchableComponent.detectTouchAndKill(entity, delta);
 				movementComponent.update(entity, delta);
@@ -332,68 +390,14 @@ public class GameScreen extends ScreenAdapter {
 					gameState = GameState.GameOver;
 				}
 
-				renderComponent.render(entity, spriteBatch);
 			}
-
-			spriteBatch.end();
-
-			spriteBatch.setTransformMatrix(identity);
-			spriteBatch.begin();
-
-			font.setColor(0.2f, 0.2f, 1f, 1f);
-
-			String str = "Smiles: " + gameData.killedCritters;
-			// TextBounds textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, 10, height - 10);
-
-			// str = "Lives: " + gameData.lives;
-			// textBounds = font.getBounds(str);
-			// font.draw(spriteBatch, str, width - textBounds.width - 10, height - 20);
-
-			int maxLives = 2;
-			int spaceBetweenLives = 5;
-
-			int xStart = width - 10 - (heart.getWidth() + spaceBetweenLives) * maxLives;
-			int y = height - heart.getHeight() - 10;
-
-			for (int i = 0; i < gameData.lives; i++) {
-				int x = xStart + i * (heart.getWidth() + spaceBetweenLives);
-				spriteBatch.draw(heart, x - heart.getWidth() / 2, y - heart.getHeight() / 2);
-			}
-
-			spriteBatch.end();
 
 		} else if (gameState == GameState.GameOver) {
-
-			spriteBatch.setTransformMatrix(identity);
-			spriteBatch.begin();
-			spriteBatch.setColor(fadeInColor.get());
-			spriteBatch.draw(background, 0, 0);
-
-			String str = "Game Over";
-			TextBounds textBounds = font.getBounds(str);
-			font.setColor(1f, 0.3f, 0.3f, 1f);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 + textBounds.height);
-
-			str = "Smiles: " + gameData.killedCritters + " points";
-			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2);
-
-			str = "Tap screen to restart";
-			textBounds = font.getBounds(str);
-			font.draw(spriteBatch, str, centerX - textBounds.width / 2, centerY + textBounds.height / 2 - textBounds.height);
-
-			spriteBatch.end();
-
 			if (!fadeInColor.isTransitioning()) {
 				if (Gdx.input.justTouched())
 					restartGame();
 			}
-
 		}
-
-		Synchronizers.synchronize();
-
 	}
 
 	private void updatePointers() {
