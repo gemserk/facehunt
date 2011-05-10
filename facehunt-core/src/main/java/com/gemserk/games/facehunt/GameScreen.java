@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
-import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
@@ -71,6 +70,30 @@ public class GameScreen extends ScreenAdapter {
 	private RegistrableTemplateProvider templateProvider;
 
 	private ArrayList<Disposable> disposables = new ArrayList<Disposable>();
+	
+	RenderComponent renderComponent;
+
+	MovementComponent movementComponent;
+
+	private TouchableComponent touchableComponent;
+
+	private SpawnerComponent spawnerComponent;
+
+	private Sound bounceSound;
+
+	private GameData gameData = new GameData();
+
+	private BitmapFont font;
+
+	private Transition<Color> fadeInColor;
+
+	private final Color startColor = new Color(1f, 1f, 1f, 0f);
+
+	private final Color endColor = new Color(1f, 1f, 1f, 1f);
+
+	private final World world;
+
+	private Texture heart;
 
 	public GameScreen(Game game) {
 		this.game = game;
@@ -85,6 +108,9 @@ public class GameScreen extends ScreenAdapter {
 
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
+				
+				sound("CritterKilledSound", "data/critter-killed.wav");
+				sound("CritterSpawnedSound", "data/critter-spawned.wav");
 			}
 		};
 
@@ -95,13 +121,8 @@ public class GameScreen extends ScreenAdapter {
 		spriteBatch = new SpriteBatch();
 		bounceSound = Gdx.audio.newSound(Gdx.files.internal("data/bounce.wav"));
 
-		critterKilledSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-killed.wav"));
-		critterSpawnedSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-spawned.wav"));
-
 		disposables.add(heart);
 		disposables.add(bounceSound);
-		disposables.add(critterKilledSound);
-		disposables.add(critterSpawnedSound);
 
 		templateProvider = new RegistrableTemplateProvider();
 
@@ -131,8 +152,6 @@ public class GameScreen extends ScreenAdapter {
 		JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate();
 		javaEntityTemplate.setInjector(injector);
 
-		startColor = new Color(1f, 1f, 1f, 0f);
-		endColor = new Color(1f, 1f, 1f, 1f);
 		world = new World(new Vector2(0, 0), new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 
 		Sprite fontSprite = new Sprite(new Texture(Gdx.files.internal("data/font.png")));
@@ -165,16 +184,18 @@ public class GameScreen extends ScreenAdapter {
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent("render");
 		Texture sadFaceTexture = resourceManager.getResourceValue("SadFaceTexture");
-		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFaceTexture, gameData);
-		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
+		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, sadFaceTexture, gameData);
+		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, resourceManager);
 
 		identity = new Matrix4().idt();
 
 		font.setColor(0f, 0f, 0f, 0.8f);
 		// font.setScale(1f, 1.5f);
 
-		fadeInColor = Transitions.transition(startColor, LibgdxConverters.color());
-		fadeInColor.set(endColor, 2000);
+		fadeInColor = Transitions.transitionBuilder(startColor).end(endColor).time(2000).build();
+
+		// fadeInColor = Transitions.transition(startColor, LibgdxConverters.color());
+		// fadeInColor.set(endColor, 2000);
 
 		gameState = GameState.Starting;
 	}
@@ -273,7 +294,7 @@ public class GameScreen extends ScreenAdapter {
 	@Override
 	public void internalUpdate(float delta) {
 		Synchronizers.synchronize();
-		
+
 		updatePointers();
 
 		if (gameState == GameState.Starting) {
@@ -388,8 +409,6 @@ public class GameScreen extends ScreenAdapter {
 
 		EntityManager entityManager;
 
-		private final Sound sound;
-
 		private final Texture image;
 
 		Color endColor = new Color(1f, 1f, 1f, 0f);
@@ -402,11 +421,10 @@ public class GameScreen extends ScreenAdapter {
 		@EntityProperty(readOnly = true)
 		FloatValue radius;
 
-		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Sound sound, Texture image, GameData gameData) {
+		public TouchableComponent(String id, EntityManager entityManager, TemplateProvider templateProvider, Texture image, GameData gameData) {
 			super(id);
 			this.entityManager = entityManager;
 			this.templateProvider = templateProvider;
-			this.sound = sound;
 			this.image = image;
 			this.gameData = gameData;
 		}
@@ -434,6 +452,8 @@ public class GameScreen extends ScreenAdapter {
 
 				if (position.dst(libgdxPointer.getPressedPosition()) > (32f + 5f))
 					continue;
+				
+				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 
 				sound.play(1f);
 				entityManager.remove(entity);
@@ -476,33 +496,6 @@ public class GameScreen extends ScreenAdapter {
 
 	}
 
-	RenderComponent renderComponent;
-
-	MovementComponent movementComponent;
-
-	private TouchableComponent touchableComponent;
-
-	private SpawnerComponent spawnerComponent;
-
-	private Sound bounceSound;
-
-	private GameData gameData = new GameData();
-
-	private BitmapFont font;
-
-	private Transition<Color> fadeInColor;
-
-	private Sound critterKilledSound;
-
-	private Sound critterSpawnedSound;
-
-	private final Color startColor;
-
-	private final Color endColor;
-
-	private final World world;
-
-	private Texture heart;
 
 	@Override
 	public void show() {

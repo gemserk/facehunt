@@ -10,20 +10,21 @@ import com.gemserk.componentsengine.timers.Timer;
 import com.gemserk.games.facehunt.EntityManager;
 import com.gemserk.games.facehunt.World;
 import com.gemserk.games.facehunt.values.Spawner;
+import com.gemserk.resources.ResourceManager;
 
 public class SpawnerComponent extends Component {
 
-	EntityManager entityManager;
+	private final ResourceManager<String> resourceManager;
+	
+	private final EntityManager entityManager;
 
 	World world;
 
-	Sound sound;
-
-	public SpawnerComponent(String id, EntityManager entityManager, World world, Sound sound) {
+	public SpawnerComponent(String id, EntityManager entityManager, World world, ResourceManager<String> resourceManager) {
 		super(id);
 		this.entityManager = entityManager;
 		this.world = world;
-		this.sound = sound;
+		this.resourceManager = resourceManager;
 	}
 
 	public void update(Entity entity, float delta) {
@@ -53,6 +54,8 @@ public class SpawnerComponent extends Component {
 			parameters = spawner.defaultParameters;
 
 		Entity newEntity = spawner.template.instantiate(null, parameters);
+		
+		Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 		
 		if (sound != null)
 			sound.play();
