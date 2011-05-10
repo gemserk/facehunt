@@ -54,8 +54,8 @@
 
 		<dependency>
 			<groupId>com.gemserk.componentsengine</groupId>
-			<artifactId>core</artifactId>
-			<version>0.0.8</version>
+			<artifactId>componentsengine-core</artifactId>
+			<version>0.0.10-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
