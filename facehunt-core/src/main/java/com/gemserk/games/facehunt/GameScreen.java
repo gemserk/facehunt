@@ -66,8 +66,6 @@ public class GameScreen extends ScreenAdapter {
 
 	private SpriteBatch spriteBatch;
 
-	private Texture happyFace;
-
 	private Texture sadFace;
 
 	EntityManager entityManager;
@@ -93,7 +91,6 @@ public class GameScreen extends ScreenAdapter {
 		};
 
 		background = resourceManager.getResourceValue("BackgroundTexture");
-		happyFace = resourceManager.getResourceValue("HappyFaceTexture");
 		sadFace = resourceManager.getResourceValue("SadFaceTexture");
 
 		heart = new Texture(Gdx.files.internal("data/heart-32x32.png"));
@@ -156,7 +153,7 @@ public class GameScreen extends ScreenAdapter {
 				put("respawnTime", new FloatValue(3000f));
 				put("spawner", new Spawner(templateProvider.getTemplate("FadeAnimation"), new HashMap<String, Object>() {
 					{
-						put("image", new Sprite(happyFace));
+						put("image", resourceManager.getResourceValue("HappyFaceSprite"));
 						put("startColor", startColor);
 						put("endColor", endColor);
 						put("shouldSpawn", true);
@@ -381,7 +378,7 @@ public class GameScreen extends ScreenAdapter {
 			parameters.put("spatial", new Spatial(position, angle));
 			parameters.put("movement", new Movement(velocity, angularVelocity));
 			parameters.put("aliveTime", new FloatValue(aliveTime));
-			parameters.put("image", new Sprite(happyFace));
+			parameters.put("image", resourceManager.getResourceValue("HappyFaceSprite"));
 
 			return parameters;
 		}
