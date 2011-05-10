@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
+import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.ScreenAdapter;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
@@ -80,13 +81,15 @@ public class GameScreen extends ScreenAdapter {
 
 	private BitmapFont font;
 
-	private Transition<Color> fadeInColor;
-
 	private final Color startColor = new Color(1f, 1f, 1f, 0f);
 
 	private final Color endColor = new Color(1f, 1f, 1f, 1f);
 
+	private Color fadeColor = new Color();
+
 	private final World world;
+
+	private boolean inputEnabled = true;
 
 	public GameScreen(Game game) {
 		this.game = game;
@@ -102,11 +105,11 @@ public class GameScreen extends ScreenAdapter {
 
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
-				
+
 				sound("CritterKilledSound", "data/critter-killed.wav");
 				sound("CritterSpawnedSound", "data/critter-spawned.wav");
 				sound("CritterBounceSound", "data/bounce.wav");
-				
+
 				font("Font", "data/font.png", "data/font.fnt");
 			}
 		};
@@ -146,7 +149,7 @@ public class GameScreen extends ScreenAdapter {
 		world = new World(new Vector2(0, 0), new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 
 		font = resourceManager.getResourceValue("Font");
-		
+
 		restartGame();
 	}
 
@@ -182,10 +185,14 @@ public class GameScreen extends ScreenAdapter {
 		font.setColor(0f, 0f, 0f, 0.8f);
 		// font.setScale(1f, 1.5f);
 
-		fadeInColor = Transitions.transitionBuilder(startColor).end(endColor).time(2000).build();
-
-		// fadeInColor = Transitions.transition(startColor, LibgdxConverters.color());
-		// fadeInColor.set(endColor, 2000);
+		inputEnabled = false;
+		Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(2000).build(), new TransitionEventHandler() {
+			@Override
+			public void onTransitionFinished(Transition transition) {
+				gameState = GameState.Playing;
+				inputEnabled = true;
+			}
+		});
 
 		gameState = GameState.Starting;
 	}
@@ -213,7 +220,7 @@ public class GameScreen extends ScreenAdapter {
 
 			spriteBatch.setTransformMatrix(identity);
 			spriteBatch.begin();
-			spriteBatch.setColor(fadeInColor.get());
+			spriteBatch.setColor(fadeColor);
 			spriteBatch.draw(background, 0, 0);
 			spriteBatch.end();
 
@@ -247,7 +254,7 @@ public class GameScreen extends ScreenAdapter {
 
 			int maxLives = 2;
 			int spaceBetweenLives = 5;
-			
+
 			Texture heart = resourceManager.getResourceValue("HeartTexture");
 
 			int xStart = width - 10 - (heart.getWidth() + spaceBetweenLives) * maxLives;
@@ -263,7 +270,7 @@ public class GameScreen extends ScreenAdapter {
 		} else if (gameState == GameState.GameOver) {
 			spriteBatch.setTransformMatrix(identity);
 			spriteBatch.begin();
-			spriteBatch.setColor(fadeInColor.get());
+			spriteBatch.setColor(fadeColor);
 			spriteBatch.draw(background, 0, 0);
 
 			String str = "Game Over";
@@ -290,9 +297,6 @@ public class GameScreen extends ScreenAdapter {
 		updatePointers();
 
 		if (gameState == GameState.Starting) {
-
-			if (!fadeInColor.isTransitioning())
-				gameState = GameState.Playing;
 
 		} else if (gameState == GameState.Playing) {
 
@@ -349,14 +353,23 @@ public class GameScreen extends ScreenAdapter {
 				}
 
 				if (gameData.lives <= 0) {
-					fadeInColor.set(new Color(1f, 1f, 1f, 0f), 2000);
+					// fadeInColor.set(new Color(1f, 1f, 1f, 0f), 2000);
 					gameState = GameState.GameOver;
+					inputEnabled = false;
+
+					Synchronizers.transition(fadeColor, Transitions.transitionBuilder(fadeColor).end(startColor).time(2000).build(), new TransitionEventHandler() {
+						@Override
+						public void onTransitionFinished(Transition transition) {
+							inputEnabled = true;
+						}
+					});
+
 				}
 
 			}
 
 		} else if (gameState == GameState.GameOver) {
-			if (!fadeInColor.isTransitioning()) {
+			if (inputEnabled) {
 				if (Gdx.input.justTouched())
 					restartGame();
 			}
@@ -444,7 +457,7 @@ public class GameScreen extends ScreenAdapter {
 
 				if (position.dst(libgdxPointer.getPressedPosition()) > (32f + 5f))
 					continue;
-				
+
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 
 				sound.play(1f);
@@ -487,7 +500,6 @@ public class GameScreen extends ScreenAdapter {
 		}
 
 	}
-
 
 	@Override
 	public void show() {
