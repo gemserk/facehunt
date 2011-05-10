@@ -8,11 +8,16 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
+import com.gemserk.commons.gdx.ScreenAdapter;
+import com.gemserk.games.facehunt.screens.FadeTransitionScreen;
 import com.gemserk.games.facehunt.screens.GameScreen;
+import com.gemserk.games.facehunt.screens.MenuScreen;
 
 public class FaceHuntGame extends Game {
-	
+
 	public GameScreen gameScreen;
+	public FadeTransitionScreen fadeTransitionScreen;
+	private MenuScreen menuScreen;
 
 	@Override
 	public void create() {
@@ -22,9 +27,14 @@ public class FaceHuntGame extends Game {
 		final Texture gemserkLogo = new Texture(Gdx.files.internal("data/logo-gemserk-512x128-white.png"));
 		gemserkLogo.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
+		menuScreen = new MenuScreen(this);
 		gameScreen = new GameScreen(this);
-		
-		setScreen(gameScreen);
+		gameScreen.restartGame();
+
+		fadeTransitionScreen = new FadeTransitionScreen(this);
+
+		setScreen(menuScreen);
+		transition(gameScreen);
 
 		// setScreen(new SplashScreen(gemserkLogo) {
 		//
@@ -40,6 +50,12 @@ public class FaceHuntGame extends Game {
 		//
 		// });
 
+	}
+
+	public void transition(ScreenAdapter nextScreen) {
+		fadeTransitionScreen.setCurrentScreen((ScreenAdapter) this.getScreen());
+		fadeTransitionScreen.setNextScreen(nextScreen);
+		setScreen(fadeTransitionScreen);
 	}
 
 }

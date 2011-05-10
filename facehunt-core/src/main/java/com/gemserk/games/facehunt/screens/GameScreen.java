@@ -40,12 +40,16 @@ public class GameScreen extends ScreenAdapter {
 	private WorldWrapper worldWrapper;
 
 	private World world;
+	
+	private boolean gameOver = false;
 
 	public GameScreen(FaceHuntGame game) {
 		this.game = game;
 	}
 
-	protected void restartGame() {
+	public void restartGame() {
+		
+		gameOver = false;
 
 		int viewportWidth = Gdx.graphics.getWidth();
 		int viewportHeight = Gdx.graphics.getHeight();
@@ -78,13 +82,16 @@ public class GameScreen extends ScreenAdapter {
 		spriteBatch = new SpriteBatch();
 
 		world = new World();
+		
 		worldWrapper = new WorldWrapper(world);
-		worldWrapper.addUpdateSystem(new SpriteUpdateSystem());
+		worldWrapper.addRenderSystem(new SpriteUpdateSystem());
 		worldWrapper.addRenderSystem(new SpriteRendererSystem());
 		worldWrapper.init();
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		createStaticSprite(backgroundSprite, viewportWidth * 0.5f, viewportHeight * 0.5f, 1024, 512, 0f, -101, 0.5f, 0.5f, Color.WHITE);
+		
+		world.loopStart();
 		
 	}
 	
@@ -98,9 +105,6 @@ public class GameScreen extends ScreenAdapter {
 	public void internalRender(float delta) {
 		int width = Gdx.graphics.getWidth();
 		int height = Gdx.graphics.getHeight();
-
-		int centerX = width / 2;
-		int centerY = height / 2;
 
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 
@@ -120,7 +124,8 @@ public class GameScreen extends ScreenAdapter {
 
 	@Override
 	public void show() {
-		restartGame();
+		if (gameOver)
+			restartGame();
 	}
 
 	@Override
