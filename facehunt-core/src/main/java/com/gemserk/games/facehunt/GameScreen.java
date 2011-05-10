@@ -66,8 +66,6 @@ public class GameScreen extends ScreenAdapter {
 
 	private SpriteBatch spriteBatch;
 
-	private Texture sadFace;
-
 	EntityManager entityManager;
 
 	private RegistrableTemplateProvider templateProvider;
@@ -91,7 +89,6 @@ public class GameScreen extends ScreenAdapter {
 		};
 
 		background = resourceManager.getResourceValue("BackgroundTexture");
-		sadFace = resourceManager.getResourceValue("SadFaceTexture");
 
 		heart = new Texture(Gdx.files.internal("data/heart-32x32.png"));
 
@@ -167,7 +164,8 @@ public class GameScreen extends ScreenAdapter {
 
 		movementComponent = new MovementComponent("movement", world, bounceSound);
 		renderComponent = new RenderComponent("render");
-		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFace, gameData);
+		Texture sadFaceTexture = resourceManager.getResourceValue("SadFaceTexture");
+		touchableComponent = new TouchableComponent("touchable", entityManager, templateProvider, critterKilledSound, sadFaceTexture, gameData);
 		spawnerComponent = new SpawnerComponent("spawner", entityManager, world, critterSpawnedSound);
 
 		identity = new Matrix4().idt();
