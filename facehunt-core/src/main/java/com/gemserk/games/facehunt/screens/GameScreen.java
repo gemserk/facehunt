@@ -6,6 +6,7 @@ import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -32,6 +33,8 @@ import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
+import com.gemserk.games.facehunt.components.OutsideAreaComponent;
+import com.gemserk.games.facehunt.systems.OutsideAreaTriggerSystem;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
@@ -111,6 +114,7 @@ public class GameScreen extends ScreenAdapter {
 		worldWrapper.addRenderSystem(new SpriteRendererSystem(renderLayers));
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
+		worldWrapper.addUpdateSystem(new OutsideAreaTriggerSystem());
 		worldWrapper.init();
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
@@ -153,9 +157,12 @@ public class GameScreen extends ScreenAdapter {
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
 				
 				createFace(x, y, linearVelocity, angularVelocity);
+				
+				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
+				sound.play();
 
 				Gdx.app.log("FaceHunt", "Face spawned at (" + x + ", " + y + ")");
-
+				
 				return false;
 			}
 		}));
@@ -174,6 +181,30 @@ public class GameScreen extends ScreenAdapter {
 		entity.addComponent(new SpatialComponent(new Vector2(x, y), new Vector2(64f, 64f), 0f));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new MovementComponent(linearVelocity, angularVelocity));
+		
+		entity.addComponent(new OutsideAreaComponent(new Rectangle(0,0,Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
+				OutsideAreaComponent outisdeAreaComponent = e.getComponent(OutsideAreaComponent.class);				
+				MovementComponent movementComponent = e.getComponent(MovementComponent.class);
+				
+				Vector2 position = spatialComponent.getPosition();
+				Rectangle area = outisdeAreaComponent.getArea();
+				Vector2 velocity = movementComponent.getVelocity();
+				
+				if (position.x < area.x || position.x > area.x + area.width)
+					velocity.x = -velocity.x;
+
+				if (position.y < area.y || position.y > area.y + area.height)
+					velocity.y = -velocity.y;
+				
+				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
+				sound.play();
+				
+				return false;
+			}
+		}));
 
 		entity.refresh();
 	}
