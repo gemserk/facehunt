@@ -1,4 +1,4 @@
-package com.gemserk.games.facehunt;
+package com.gemserk.games.facehunt.screens;
 
 import com.artemis.Entity;
 import com.artemis.World;
@@ -19,6 +19,7 @@ import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
+import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 

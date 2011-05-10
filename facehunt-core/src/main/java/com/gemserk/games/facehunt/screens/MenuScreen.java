@@ -1,4 +1,4 @@
-package com.gemserk.games.facehunt;
+package com.gemserk.games.facehunt.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.commons.gdx.ScreenAdapter;
 
-public class MainMenuScreen extends ScreenAdapter {
+public class MenuScreen extends ScreenAdapter {
 
 	private final Game game;
 
@@ -16,7 +16,7 @@ public class MainMenuScreen extends ScreenAdapter {
 
 	private SpriteBatch spriteBatch;
 
-	public MainMenuScreen(Game game) {
+	public MenuScreen(Game game) {
 		this.game = game;
 		this.logo = new Texture(Gdx.files.internal("data/logo-gemserk-512x128-white.png"));
 		this.spriteBatch = new SpriteBatch();

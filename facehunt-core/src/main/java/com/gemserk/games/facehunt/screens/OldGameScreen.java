@@ -1,4 +1,4 @@
-package com.gemserk.games.facehunt;
+package com.gemserk.games.facehunt.screens;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +32,9 @@ import com.gemserk.componentsengine.properties.Properties;
 import com.gemserk.componentsengine.templates.JavaEntityTemplate;
 import com.gemserk.componentsengine.templates.RegistrableTemplateProvider;
 import com.gemserk.componentsengine.templates.TemplateProvider;
+import com.gemserk.games.facehunt.EntityManager;
+import com.gemserk.games.facehunt.Vector2Random;
+import com.gemserk.games.facehunt.World;
 import com.gemserk.games.facehunt.components.DefaultParametersBuilder;
 import com.gemserk.games.facehunt.components.MovementComponent;
 import com.gemserk.games.facehunt.components.RenderComponent;
