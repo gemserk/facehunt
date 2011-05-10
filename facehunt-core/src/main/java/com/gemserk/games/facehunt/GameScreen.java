@@ -11,7 +11,6 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -24,6 +23,7 @@ import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.ScreenAdapter;
+import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.commons.values.FloatValue;
 import com.gemserk.componentsengine.components.FieldsReflectionComponent;
 import com.gemserk.componentsengine.components.annotations.EntityProperty;
@@ -48,6 +48,8 @@ import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.games.facehunt.values.Movement;
 import com.gemserk.games.facehunt.values.Spatial;
 import com.gemserk.games.facehunt.values.Spawner;
+import com.gemserk.resources.ResourceManager;
+import com.gemserk.resources.ResourceManagerImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -56,6 +58,8 @@ import com.google.inject.Provider;
 public class GameScreen extends ScreenAdapter {
 
 	private final Game game;
+
+	private ResourceManager<String> resourceManager;
 
 	private Texture background;
 
@@ -74,12 +78,22 @@ public class GameScreen extends ScreenAdapter {
 	public GameScreen(Game game) {
 		this.game = game;
 
-		background = new Texture(Gdx.files.internal("data/background01-1024x512.jpg"));
-		happyFace = new Texture(Gdx.files.internal("data/face-sad-64x64.png"));
-		sadFace = new Texture(Gdx.files.internal("data/face-happy-64x64.png"));
+		resourceManager = new ResourceManagerImpl<String>();
 
-		happyFace.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		sadFace.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		new LibgdxResourceBuilder(resourceManager) {
+			{
+				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
+				texture("HappyFaceTexture", "data/face-sad-64x64.png");
+				texture("SadFaceTexture", "data/face-happy-64x64.png");
+				
+				sprite("HappyFaceSprite", "HappyFaceTexture");
+				sprite("SadFaceSprite", "SadFaceTexture");
+			}
+		};
+
+		background = resourceManager.getResourceValue("BackgroundTexture");
+		happyFace = resourceManager.getResourceValue("HappyFaceTexture");
+		sadFace = resourceManager.getResourceValue("SadFaceTexture");
 
 		heart = new Texture(Gdx.files.internal("data/heart-32x32.png"));
 
@@ -89,12 +103,7 @@ public class GameScreen extends ScreenAdapter {
 		critterKilledSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-killed.wav"));
 		critterSpawnedSound = Gdx.audio.newSound(Gdx.files.internal("data/critter-spawned.wav"));
 
-		disposables.add(spriteBatch);
-		disposables.add(background);
-		disposables.add(happyFace);
-		disposables.add(sadFace);
 		disposables.add(heart);
-		disposables.add(spriteBatch);
 		disposables.add(bounceSound);
 		disposables.add(critterKilledSound);
 		disposables.add(critterSpawnedSound);
@@ -195,26 +204,26 @@ public class GameScreen extends ScreenAdapter {
 		public boolean wasReleased;
 
 		public int index;
-		
+
 		public LibgdxPointer(int index) {
 			this.index = index;
 		}
 
 		public void update() {
-			
+
 			if (Gdx.input.isTouched(index)) {
-				
+
 				if (!touched) {
 					touched = true;
 					wasPressed = true;
 					pressedPosition.set(Gdx.input.getX(index), Gdx.graphics.getHeight() - Gdx.input.getY(index));
-				} else 
+				} else
 					wasPressed = false;
-				
-			} 
-			
+
+			}
+
 			if (!Gdx.input.isTouched(index)) {
-				
+
 				if (touched) {
 					touched = false;
 					wasReleased = true;
@@ -222,7 +231,7 @@ public class GameScreen extends ScreenAdapter {
 				} else {
 					wasReleased = false;
 				}
-				
+
 			}
 		}
 
@@ -239,7 +248,7 @@ public class GameScreen extends ScreenAdapter {
 		int centerY = height / 2;
 
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
-		
+
 		updatePointers();
 
 		if (gameState == GameState.Starting) {
@@ -388,7 +397,7 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	private void updatePointers() {
-		for (int i = 0; i < libgdxPointers.length; i++) 
+		for (int i = 0; i < libgdxPointers.length; i++)
 			libgdxPointers[i].update();
 	}
 
@@ -458,20 +467,20 @@ public class GameScreen extends ScreenAdapter {
 
 			super.setEntity(entity);
 			super.preHandleMessage(null);
-			
+
 			final Spatial spatial = Properties.getValue(entity, "spatial");
 			Vector2 position = spatial.position;
-			
+
 			for (int i = 0; i < libgdxPointers.length; i++) {
-				
+
 				LibgdxPointer libgdxPointer = libgdxPointers[i];
-				
-				if (!libgdxPointer.wasPressed) 
+
+				if (!libgdxPointer.wasPressed)
 					continue;
-				
+
 				if (position.dst(libgdxPointer.pressedPosition) > (32f + 5f))
 					continue;
-				
+
 				sound.play(1f);
 				entityManager.remove(entity);
 				gameData.killedCritters++;
@@ -496,16 +505,16 @@ public class GameScreen extends ScreenAdapter {
 						put("endColor", endColor);
 					}
 				}));
-				
+
 				break;
-				
+
 			}
-			
-//			int x = Gdx.input.getX();
-//			int y = Gdx.graphics.getHeight() - Gdx.input.getY();
-//
-//			if (position.dst(x, y) > 35f)
-//				return;
+
+			// int x = Gdx.input.getX();
+			// int y = Gdx.graphics.getHeight() - Gdx.input.getY();
+			//
+			// if (position.dst(x, y) > 35f)
+			// return;
 
 			super.postHandleMessage(null);
 
@@ -548,6 +557,9 @@ public class GameScreen extends ScreenAdapter {
 
 	@Override
 	public void dispose() {
+		resourceManager.unloadAll();
+		spriteBatch.dispose();
+		spriteBatch = null;
 		for (Disposable disposable : disposables)
 			disposable.dispose();
 	}
