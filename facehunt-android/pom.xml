@@ -26,6 +26,7 @@
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
+		<finalName>facehunt-android</finalName>
 
 		<plugins>
 			<plugin>
