@@ -16,7 +16,7 @@ import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class ScoreScreen extends GameStateImpl {
+public class ScoreGameState extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
@@ -34,7 +34,7 @@ public class ScoreScreen extends GameStateImpl {
 
 	private GameData gameData;
 
-	public ScoreScreen(FaceHuntGame game) {
+	public ScoreGameState(FaceHuntGame game) {
 		this.game = game;
 	}
 

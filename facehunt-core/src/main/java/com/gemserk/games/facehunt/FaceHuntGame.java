@@ -8,9 +8,9 @@ import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.gdx.InternalScreen;
 import com.gemserk.commons.gdx.ScreenAdapter;
 import com.gemserk.games.facehunt.screens.FadeTransitionScreen;
-import com.gemserk.games.facehunt.screens.GameScreen;
-import com.gemserk.games.facehunt.screens.MenuScreen;
-import com.gemserk.games.facehunt.screens.ScoreScreen;
+import com.gemserk.games.facehunt.screens.PlayGameState;
+import com.gemserk.games.facehunt.screens.MenuGameState;
+import com.gemserk.games.facehunt.screens.ScoreGameState;
 import com.gemserk.games.facehunt.screens.SplashGameState;
 
 public class FaceHuntGame extends Game {
@@ -25,19 +25,19 @@ public class FaceHuntGame extends Game {
 
 	public InternalScreen scoreScreen;
 
-	public ScoreScreen scoreGameState;
+	public ScoreGameState scoreGameState;
 
-	public GameScreen gameGameState;
+	public PlayGameState gameGameState;
 
 	@Override
 	public void create() {
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
 
-		gameGameState = new GameScreen(this);
-		scoreGameState = new ScoreScreen(this);
+		gameGameState = new PlayGameState(this);
+		scoreGameState = new ScoreGameState(this);
 
-		menuScreen = new InternalScreen(new MenuScreen(this));
+		menuScreen = new InternalScreen(new MenuGameState(this));
 		gameScreen = new InternalScreen(gameGameState);
 		scoreScreen = new InternalScreen(scoreGameState);
 		splashScreen = new InternalScreen(new SplashGameState(this));

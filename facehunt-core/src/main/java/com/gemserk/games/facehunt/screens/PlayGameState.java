@@ -56,7 +56,7 @@ import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class GameScreen extends GameStateImpl {
+public class PlayGameState extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
@@ -92,7 +92,7 @@ public class GameScreen extends GameStateImpl {
 
 	private BitmapFont font;
 
-	public GameScreen(FaceHuntGame game) {
+	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
 	}
 

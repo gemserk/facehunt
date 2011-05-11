@@ -13,7 +13,7 @@ import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class MenuScreen extends GameStateImpl {
+public class MenuGameState extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
@@ -27,7 +27,7 @@ public class MenuScreen extends GameStateImpl {
 
 	private TextButton exitButton;
 
-	public MenuScreen(FaceHuntGame game) {
+	public MenuGameState(FaceHuntGame game) {
 		this.game = game;
 	}
 
