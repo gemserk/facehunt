@@ -15,16 +15,18 @@ import com.gemserk.games.facehunt.screens.SplashGameState;
 
 public class FaceHuntGame extends Game {
 
-	public InternalScreen gameScreen;
-	
 	public FadeTransitionScreen fadeTransitionScreen;
+
+	public InternalScreen splashScreen;
 	
+	public InternalScreen gameScreen;
+
 	public InternalScreen menuScreen;
 
 	public InternalScreen scoreScreen;
 
 	public ScoreScreen scoreGameState;
-	
+
 	public GameScreen gameGameState;
 
 	@Override
@@ -38,10 +40,11 @@ public class FaceHuntGame extends Game {
 		menuScreen = new InternalScreen(new MenuScreen(this));
 		gameScreen = new InternalScreen(gameGameState);
 		scoreScreen = new InternalScreen(scoreGameState);
-		
+		splashScreen = new InternalScreen(new SplashGameState(this));
+
 		fadeTransitionScreen = new FadeTransitionScreen(this);
 
-		transition(null, new InternalScreen(new SplashGameState(this)));
+		transition(null, splashScreen);
 	}
 
 	public void transition(ScreenAdapter nextScreen) {
