@@ -1,19 +1,22 @@
 package com.gemserk.games.facehunt.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
+import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
+import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class MenuScreen extends GameStateImpl {
+public class ScoreScreen extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
@@ -23,11 +26,15 @@ public class MenuScreen extends GameStateImpl {
 
 	private Sprite backgroundSprite;
 
-	private TextButton playButton;
+	private TextButton tryAgainButton;
 
-	private TextButton exitButton;
+	private TextButton mainMenuButton;
 
-	public MenuScreen(FaceHuntGame game) {
+	private BitmapFont font;
+
+	private GameData gameData;
+
+	public ScoreScreen(FaceHuntGame game) {
 		this.game = game;
 	}
 
@@ -49,17 +56,10 @@ public class MenuScreen extends GameStateImpl {
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
 
-		BitmapFont font = resourceManager.getResourceValue("Font");
-		font.setScale(2f);
+		font = resourceManager.getResourceValue("Font");
 
-		String playButtonText = "Play";
-
-		// if (!game.gameScreen.gameOver)
-		// playButtonText = "Resume";
-
-		playButton = new TextButton(font, playButtonText, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.7f);
-		exitButton = new TextButton(font, "Exit", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
-
+		tryAgainButton = new TextButton(font, "Try again", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
+		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.2f);
 	}
 
 	@Override
@@ -67,23 +67,30 @@ public class MenuScreen extends GameStateImpl {
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
 		backgroundSprite.draw(spriteBatch);
-		playButton.draw(spriteBatch);
-		exitButton.draw(spriteBatch);
+
+		font.setColor(Color.RED);
+		SpriteBatchUtils.drawCentered(spriteBatch, font, "Game Over", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.7f);
+		SpriteBatchUtils.drawCentered(spriteBatch, font, "Score: " + gameData.killedCritters * 100, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
+
+		tryAgainButton.draw(spriteBatch);
+		mainMenuButton.draw(spriteBatch);
 		spriteBatch.end();
 	}
 
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize();
-		playButton.update();
-		exitButton.update();
+		
+		tryAgainButton.update();
+		mainMenuButton.update();
 
-		if (playButton.isReleased()) {
+		if (tryAgainButton.isReleased()) {
+			// game.gameGameState.gameOver = true;
 			game.transition(game.gameScreen, true);
 		}
 
-		if (exitButton.isReleased()) {
-			System.exit(0);
+		if (mainMenuButton.isReleased()) {
+			game.transition(game.menuScreen, true);
 		}
 	}
 
@@ -92,6 +99,10 @@ public class MenuScreen extends GameStateImpl {
 		resourceManager.unloadAll();
 		spriteBatch.dispose();
 		spriteBatch = null;
+	}
+
+	public void setGameData(GameData gameData) {
+		this.gameData = gameData;
 	}
 
 }

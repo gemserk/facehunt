@@ -9,6 +9,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -39,7 +40,7 @@ import com.gemserk.commons.artemis.systems.SpriteRendererSystem;
 import com.gemserk.commons.artemis.systems.SpriteUpdateSystem;
 import com.gemserk.commons.artemis.systems.TimerSystem;
 import com.gemserk.commons.artemis.triggers.AbstractTrigger;
-import com.gemserk.commons.gdx.ScreenAdapter;
+import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
 import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
@@ -51,10 +52,11 @@ import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.OutsideAreaTriggerSystem;
+import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class GameScreen extends ScreenAdapter {
+public class GameScreen extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
@@ -72,7 +74,7 @@ public class GameScreen extends ScreenAdapter {
 
 	private World world;
 
-	public boolean gameOver = false;
+	public boolean gameOver = true;
 
 	private static final Color hideColor = new Color(1f, 1f, 1f, 0f);
 
@@ -85,6 +87,10 @@ public class GameScreen extends ScreenAdapter {
 	private Box2DDebugRenderer box2dDebugRenderer;
 
 	private FaceHuntController controller;
+
+	private GameData gameData;
+
+	private BitmapFont font;
 
 	public GameScreen(FaceHuntGame game) {
 		this.game = game;
@@ -104,6 +110,10 @@ public class GameScreen extends ScreenAdapter {
 		float invZoom = 1 / zoom;
 
 		cameraData = new Camera(0f, 0f, zoom, 0f);
+		gameData = new GameData();
+		
+		gameData.killedCritters = 0;
+		gameData.lives = 2;
 
 		resourceManager = new ResourceManagerImpl<String>();
 
@@ -127,6 +137,8 @@ public class GameScreen extends ScreenAdapter {
 		};
 
 		spriteBatch = new SpriteBatch();
+		
+		font = resourceManager.getResourceValue("Font");
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
 		renderLayers.add(new RenderLayer(-1000, -100, backgroundLayerCamera));
@@ -271,6 +283,7 @@ public class GameScreen extends ScreenAdapter {
 			@Override
 			protected boolean handle(Entity e) {
 				world.deleteEntity(e);
+				gameData.lives--;
 				return true;
 			}
 		}));
@@ -282,16 +295,21 @@ public class GameScreen extends ScreenAdapter {
 
 				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
 				Spatial spatial = spatialComponent.getSpatial();
-				
+
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
-				
+
 				PhysicsComponent physicsComponent = e.getComponent(PhysicsComponent.class);
 				Body body = physicsComponent.getBody();
 
 				createDeadFace(spatial, body.getLinearVelocity(), body.getAngularVelocity() * MathUtils.radiansToDegrees, 500, currentColor);
-				
+
 				world.deleteEntity(e);
+				gameData.killedCritters++;
+				
+				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
+				sound.play();
+				
 				return true;
 			}
 		}));
@@ -322,7 +340,8 @@ public class GameScreen extends ScreenAdapter {
 		entity.refresh();
 	}
 
-	public void internalRender(float delta) {
+	@Override
+	public void render(int delta) {
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		worldCamera.zoom(cameraData.getZoom());
 		worldCamera.move(cameraData.getX(), cameraData.getY());
@@ -331,29 +350,42 @@ public class GameScreen extends ScreenAdapter {
 
 		if (Gdx.input.isKeyPressed(Keys.D))
 			box2dDebugRenderer.render(physicsWorld);
+		
+		spriteBatch.begin();
+		
+		font.setColor(Color.RED);
+		font.draw(spriteBatch, "Points: " + gameData.killedCritters * 100, 10, Gdx.graphics.getHeight());
+		
+		spriteBatch.end();
 	}
 
 	@Override
-	public void internalUpdate(float delta) {
-		int deltaInMs = (int) (delta * 1000f);
+	public void update(int delta) {
 		Synchronizers.synchronize();
 
-		controller.update(deltaInMs);
-		worldWrapper.update(deltaInMs);
+		controller.update(delta);
+		worldWrapper.update(delta);
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
 			game.transition(game.menuScreen);
+		
+		if (gameData.lives <= 0) {
+			gameOver = true;
+			game.scoreGameState.setGameData(gameData);
+			game.transition(game.scoreScreen, true);
+		}
+		
 	}
 
 	@Override
-	public void show() {
+	public void init() {
 		if (gameOver)
 			restartGame();
 		Gdx.input.setCatchBackKey(true);
 	}
 
 	@Override
-	public void hide() {
+	public void pause() {
 		Gdx.input.setCatchBackKey(false);
 	}
 

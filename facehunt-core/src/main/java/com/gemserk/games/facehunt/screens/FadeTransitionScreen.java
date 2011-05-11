@@ -36,10 +36,17 @@ public class FadeTransitionScreen extends ScreenAdapter {
 
 	private int time;
 
+	private boolean shouldDisposeCurrent;
+
 	public void transition(ScreenAdapter currentScreen, ScreenAdapter nextScreen, int time) {
+		this.transition(currentScreen, nextScreen, time, false);
+	}
+	
+	public void transition(ScreenAdapter currentScreen, ScreenAdapter nextScreen, int time, boolean shouldDisposeCurrent) {
 		this.currentScreen = currentScreen;
 		this.nextScreen = nextScreen;
 		this.time = time;
+		this.shouldDisposeCurrent = shouldDisposeCurrent;
 	}
 
 	public FadeTransitionScreen(FaceHuntGame game) {
@@ -60,18 +67,30 @@ public class FadeTransitionScreen extends ScreenAdapter {
 		overlay.setPosition(0, 0);
 		overlay.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-		Synchronizers.transition(fadeColor, Transitions.transitionBuilder(endColor).end(startColor).time(time / 2).build(), new TransitionEventHandler() {
-			@Override
-			public void onTransitionFinished(Transition transition) {
-				currentScreen = nextScreen;
-				Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2).build(), new TransitionEventHandler() {
-					@Override
-					public void onTransitionFinished(Transition transition) {
-						game.setScreen(nextScreen);
-					}
-				});
-			}
-		});
+		if (currentScreen == null) {
+			currentScreen = nextScreen;
+			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2).build(), new TransitionEventHandler() {
+				@Override
+				public void onTransitionFinished(Transition transition) {
+					game.setScreen(nextScreen);
+				}
+			});
+		} else {
+			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(endColor).end(startColor).time(time / 2).build(), new TransitionEventHandler() {
+				@Override
+				public void onTransitionFinished(Transition transition) {
+					if (shouldDisposeCurrent)
+						currentScreen.dispose();
+					currentScreen = nextScreen;
+					Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2).build(), new TransitionEventHandler() {
+						@Override
+						public void onTransitionFinished(Transition transition) {
+							game.setScreen(nextScreen);
+						}
+					});
+				}
+			});
+		}
 	}
 
 	@Override
