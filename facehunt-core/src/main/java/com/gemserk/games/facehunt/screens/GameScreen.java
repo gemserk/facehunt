@@ -24,6 +24,7 @@ import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
 import com.gemserk.commons.artemis.components.HitComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
+import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpatialImpl;
 import com.gemserk.commons.artemis.components.SpatialPhysicsImpl;
@@ -44,6 +45,10 @@ import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
+import com.gemserk.games.facehunt.components.FaceControllerComponent;
+import com.gemserk.games.facehunt.controllers.FaceHuntController;
+import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
+import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.OutsideAreaTriggerSystem;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -69,6 +74,7 @@ public class GameScreen extends ScreenAdapter {
 	public boolean gameOver = false;
 
 	private static final Color hideColor = new Color(1f, 1f, 1f, 0f);
+
 	private static final Color showColor = new Color(1f, 1f, 1f, 1f);
 
 	private com.badlogic.gdx.physics.box2d.World physicsWorld;
@@ -76,6 +82,8 @@ public class GameScreen extends ScreenAdapter {
 	private BodyBuilder bodyBuilder;
 
 	private Box2DDebugRenderer box2dDebugRenderer;
+
+	private FaceHuntController controller;
 
 	public GameScreen(FaceHuntGame game) {
 		this.game = game;
@@ -123,6 +131,8 @@ public class GameScreen extends ScreenAdapter {
 		renderLayers.add(new RenderLayer(-1000, -100, backgroundLayerCamera));
 		renderLayers.add(new RenderLayer(-100, 100, worldCamera));
 
+		controller = new FaceHuntControllerImpl();
+
 		physicsWorld = new com.badlogic.gdx.physics.box2d.World(new Vector2(0f, 0f), false);
 		bodyBuilder = new BodyBuilder(physicsWorld);
 		box2dDebugRenderer = new Box2DDebugRenderer();
@@ -137,6 +147,7 @@ public class GameScreen extends ScreenAdapter {
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
 		worldWrapper.addUpdateSystem(new OutsideAreaTriggerSystem());
+		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.init();
 
 		createBorder(viewportWidth * 0.5f, 0, viewportWidth, 10);
@@ -201,7 +212,7 @@ public class GameScreen extends ScreenAdapter {
 				Vector2 linearVelocity = new Vector2(0f, 0f);
 				linearVelocity.x = MathUtils.random(50f, 150f);
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
-				
+
 				int aliveTime = MathUtils.random(3000, 7000);
 
 				createFace(x, y, linearVelocity, angularVelocity, aliveTime);
@@ -263,6 +274,46 @@ public class GameScreen extends ScreenAdapter {
 			}
 		}));
 
+		entity.addComponent(new FaceControllerComponent(controller, new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				// world.add animation face...
+
+				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
+				Spatial spatial = spatialComponent.getSpatial();
+				
+				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+				Color currentColor = spriteComponent.getColor();
+
+				createDeadFace(spatial, new Vector2(), 0f, 500, currentColor);
+				
+				world.deleteEntity(e);
+				return true;
+			}
+		}));
+
+		entity.refresh();
+	}
+
+	void createDeadFace(Spatial spatial, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color currentColor) {
+		Entity entity = world.createEntity();
+
+		Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+
+		final Color faceColor = new Color();
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(currentColor).end(hideColor).time(500).build());
+
+		entity.addComponent(new SpatialComponent(new SpatialImpl(spatial)));
+		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
+		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				world.deleteEntity(e);
+				return true;
+			}
+		}));
+
 		entity.refresh();
 	}
 
@@ -279,8 +330,10 @@ public class GameScreen extends ScreenAdapter {
 
 	@Override
 	public void internalUpdate(float delta) {
-		Synchronizers.synchronize();
 		int deltaInMs = (int) (delta * 1000f);
+		Synchronizers.synchronize();
+
+		controller.update(deltaInMs);
 		worldWrapper.update(deltaInMs);
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
