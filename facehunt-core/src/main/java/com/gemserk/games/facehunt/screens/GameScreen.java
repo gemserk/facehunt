@@ -106,10 +106,7 @@ public class GameScreen extends GameStateImpl {
 		// worldCamera.center(viewportWidth / 2, viewportHeight / 2);
 		worldCamera.center(0f, 0f);
 
-		float zoom = 1f;
-		float invZoom = 1 / zoom;
-
-		cameraData = new Camera(0f, 0f, zoom, 0f);
+		cameraData = new Camera(0f, 0f, 1f, 0f);
 		gameData = new GameData();
 		
 		gameData.killedCritters = 0;
@@ -119,6 +116,8 @@ public class GameScreen extends GameStateImpl {
 
 		new LibgdxResourceBuilder(resourceManager) {
 			{
+				setCacheWhenLoad(true);
+				
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				texture("HappyFaceTexture", "data/face-happy-64x64.png");
 				texture("SadFaceTexture", "data/face-sad-64x64.png");
@@ -250,9 +249,9 @@ public class GameScreen extends GameStateImpl {
 
 		final Color faceColor = new Color();
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500).build(), new TransitionEventHandler() {
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500).build(), new TransitionEventHandler<Color>() {
 			@Override
-			public void onTransitionFinished(Transition transition) {
+			public void onTransitionFinished(Transition<Color> transition) {
 				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500).build());
 			}
 		});
