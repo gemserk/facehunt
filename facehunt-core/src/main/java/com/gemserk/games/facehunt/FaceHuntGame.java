@@ -27,18 +27,18 @@ public class FaceHuntGame extends Game {
 
 	public ScoreGameState scoreGameState;
 
-	public PlayGameState gameGameState;
+	public PlayGameState playGameState;
 
 	@Override
 	public void create() {
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
 
-		gameGameState = new PlayGameState(this);
+		playGameState = new PlayGameState(this);
 		scoreGameState = new ScoreGameState(this);
 
 		menuScreen = new InternalScreen(new MenuGameState(this));
-		gameScreen = new InternalScreen(gameGameState);
+		gameScreen = new InternalScreen(playGameState);
 		scoreScreen = new InternalScreen(scoreGameState);
 		splashScreen = new InternalScreen(new SplashGameState(this));
 
