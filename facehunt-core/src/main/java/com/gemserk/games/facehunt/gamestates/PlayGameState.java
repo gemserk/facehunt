@@ -1,4 +1,4 @@
-package com.gemserk.games.facehunt.screens;
+package com.gemserk.games.facehunt.gamestates;
 
 import java.util.ArrayList;
 

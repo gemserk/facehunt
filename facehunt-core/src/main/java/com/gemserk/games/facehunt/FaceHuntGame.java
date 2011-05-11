@@ -7,11 +7,11 @@ import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.gdx.InternalScreen;
 import com.gemserk.commons.gdx.ScreenAdapter;
+import com.gemserk.games.facehunt.gamestates.MenuGameState;
+import com.gemserk.games.facehunt.gamestates.PlayGameState;
+import com.gemserk.games.facehunt.gamestates.ScoreGameState;
+import com.gemserk.games.facehunt.gamestates.SplashGameState;
 import com.gemserk.games.facehunt.screens.FadeTransitionScreen;
-import com.gemserk.games.facehunt.screens.PlayGameState;
-import com.gemserk.games.facehunt.screens.MenuGameState;
-import com.gemserk.games.facehunt.screens.ScoreGameState;
-import com.gemserk.games.facehunt.screens.SplashGameState;
 
 public class FaceHuntGame extends Game {
 

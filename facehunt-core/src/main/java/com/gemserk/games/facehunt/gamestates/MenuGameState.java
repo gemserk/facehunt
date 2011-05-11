@@ -1,4 +1,4 @@
-package com.gemserk.games.facehunt.screens;
+package com.gemserk.games.facehunt.gamestates;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL10;
