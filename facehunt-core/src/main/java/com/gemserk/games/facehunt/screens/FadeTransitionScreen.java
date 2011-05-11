@@ -48,10 +48,8 @@ public class FadeTransitionScreen extends ScreenAdapter {
 		resourceManager = new ResourceManagerImpl<String>();
 		new LibgdxResourceBuilder(resourceManager) {
 			{
-
 				texture("OverlayTexture", "data/white-rectangle.png");
 				sprite("OverlaySprite", "OverlayTexture");
-
 			}
 		};
 	}

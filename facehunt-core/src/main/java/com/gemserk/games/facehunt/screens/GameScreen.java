@@ -17,15 +17,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
+import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
+import com.gemserk.commons.artemis.components.HitComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpatialImpl;
 import com.gemserk.commons.artemis.components.SpatialPhysicsImpl;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
+import com.gemserk.commons.artemis.systems.HitDetectionSystem;
 import com.gemserk.commons.artemis.systems.MovementSystem;
 import com.gemserk.commons.artemis.systems.PhysicsSystem;
 import com.gemserk.commons.artemis.systems.RenderLayer;
@@ -62,7 +66,7 @@ public class GameScreen extends ScreenAdapter {
 
 	private World world;
 
-	private boolean gameOver = false;
+	public boolean gameOver = false;
 
 	private static final Color hideColor = new Color(1f, 1f, 1f, 0f);
 	private static final Color showColor = new Color(1f, 1f, 1f, 1f);
@@ -129,6 +133,7 @@ public class GameScreen extends ScreenAdapter {
 		worldWrapper.addRenderSystem(new SpriteUpdateSystem());
 		worldWrapper.addRenderSystem(new SpriteRendererSystem(renderLayers));
 		worldWrapper.addUpdateSystem(new PhysicsSystem(physicsWorld));
+		worldWrapper.addUpdateSystem(new HitDetectionSystem());
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
 		worldWrapper.addUpdateSystem(new OutsideAreaTriggerSystem());
@@ -175,8 +180,8 @@ public class GameScreen extends ScreenAdapter {
 	void createFaceSpawner(final Rectangle spawnArea) {
 		Entity entity = world.createEntity();
 
-		final int minTime = 2000;
-		final int maxTime = 5000;
+		final int minTime = 1000;
+		final int maxTime = 2000;
 
 		entity.addComponent(new TimerComponent(MathUtils.random(minTime, maxTime), new AbstractTrigger() {
 			@Override
@@ -188,16 +193,18 @@ public class GameScreen extends ScreenAdapter {
 				float x = MathUtils.random(spawnArea.x, spawnArea.width);
 				float y = MathUtils.random(spawnArea.y, spawnArea.height);
 
-				float angularVelocity = MathUtils.random(30f, 90f);
+				float angularVelocity = MathUtils.random(30f, 180f);
 
 				if (MathUtils.randomBoolean())
 					angularVelocity = -angularVelocity;
 
 				Vector2 linearVelocity = new Vector2(0f, 0f);
-				linearVelocity.x = MathUtils.random(30f, 100f);
+				linearVelocity.x = MathUtils.random(50f, 150f);
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
+				
+				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFace(x, y, linearVelocity, angularVelocity);
+				createFace(x, y, linearVelocity, angularVelocity, aliveTime);
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -210,14 +217,19 @@ public class GameScreen extends ScreenAdapter {
 		entity.refresh();
 	}
 
-	void createFace(float x, float y, Vector2 linearVelocity, float angularVelocity) {
+	void createFace(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
 		Entity entity = world.createEntity();
 
 		Sprite sprite = resourceManager.getResourceValue("SadFaceSprite");
 
-		Color faceColor = new Color();
+		final Color faceColor = new Color();
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500).build());
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500).build(), new TransitionEventHandler() {
+			@Override
+			public void onTransitionFinished(Transition transition) {
+				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500).build());
+			}
+		});
 
 		Body body = getBodyBuilder() //
 				.type(BodyType.DynamicBody) //
@@ -229,39 +241,27 @@ public class GameScreen extends ScreenAdapter {
 				.position(x, y)//
 				.build();
 
-		body.applyAngularImpulse(angularVelocity);
-		body.applyLinearImpulse(linearVelocity, body.getTransform().getPosition());
+		body.setLinearVelocity(linearVelocity);
+		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		entity.addComponent(new PhysicsComponent(body));
 		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, 64f, 64f)));
-
-		// entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, 64f, 64f, 0f)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
-		// entity.addComponent(new MovementComponent(linearVelocity, angularVelocity));
-
-		// entity.addComponent(new OutsideAreaComponent(new Rectangle(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), new AbstractTrigger() {
-		// @Override
-		// protected boolean handle(Entity e) {
-		// SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
-		// OutsideAreaComponent outisdeAreaComponent = e.getComponent(OutsideAreaComponent.class);
-		// MovementComponent movementComponent = e.getComponent(MovementComponent.class);
-		//
-		// Spatial spatial = spatialComponent.getSpatial();
-		// Rectangle area = outisdeAreaComponent.getArea();
-		// Vector2 velocity = movementComponent.getVelocity();
-		//
-		// if (spatial.getX() < area.x || spatial.getX() > area.x + area.width)
-		// velocity.x = -velocity.x;
-		//
-		// if (spatial.getY() < area.y || spatial.getY() > area.y + area.height)
-		// velocity.y = -velocity.y;
-		//
-		// Sound sound = resourceManager.getResourceValue("CritterBounceSound");
-		// sound.play();
-		//
-		// return false;
-		// }
-		// }));
+		entity.addComponent(new HitComponent(new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
+				sound.play();
+				return false;
+			}
+		}));
+		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				world.deleteEntity(e);
+				return true;
+			}
+		}));
 
 		entity.refresh();
 	}
