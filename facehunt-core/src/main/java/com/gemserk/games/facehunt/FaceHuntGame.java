@@ -35,6 +35,8 @@ public class FaceHuntGame extends Game {
 
 		fadeTransitionScreen = new FadeTransitionScreen(this);
 
+		// transition(null, menuScreen);
+		
 		setScreen(menuScreen);
 		// transition(gameScreen);
 
@@ -56,6 +58,11 @@ public class FaceHuntGame extends Game {
 
 	public void transition(ScreenAdapter nextScreen) {
 		fadeTransitionScreen.transition((ScreenAdapter) this.getScreen(), nextScreen, 1000);
+		setScreen(fadeTransitionScreen);
+	}
+	
+	public void transition(ScreenAdapter currentScreen, ScreenAdapter nextScreen) {
+		fadeTransitionScreen.transition(currentScreen, nextScreen, 1000);
 		setScreen(fadeTransitionScreen);
 	}
 

@@ -76,7 +76,8 @@ public class FadeTransitionScreen extends ScreenAdapter {
 
 	@Override
 	public void internalRender(float delta) {
-		currentScreen.internalRender(delta);
+		if (currentScreen != null)
+			currentScreen.internalRender(delta);
 
 		if (spriteBatch == null)
 			return;

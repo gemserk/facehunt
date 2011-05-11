@@ -23,6 +23,7 @@ import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
 import com.gemserk.commons.artemis.components.HitComponent;
+import com.gemserk.commons.artemis.components.MovementComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
@@ -109,8 +110,8 @@ public class GameScreen extends ScreenAdapter {
 		new LibgdxResourceBuilder(resourceManager) {
 			{
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
-				texture("HappyFaceTexture", "data/face-sad-64x64.png");
-				texture("SadFaceTexture", "data/face-happy-64x64.png");
+				texture("HappyFaceTexture", "data/face-happy-64x64.png");
+				texture("SadFaceTexture", "data/face-sad-64x64.png");
 				texture("HeartTexture", "data/heart-32x32.png");
 
 				sprite("BackgroundSprite", "BackgroundTexture");
@@ -284,8 +285,11 @@ public class GameScreen extends ScreenAdapter {
 				
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
+				
+				PhysicsComponent physicsComponent = e.getComponent(PhysicsComponent.class);
+				Body body = physicsComponent.getBody();
 
-				createDeadFace(spatial, new Vector2(), 0f, 500, currentColor);
+				createDeadFace(spatial, body.getLinearVelocity(), body.getAngularVelocity() * MathUtils.radiansToDegrees, 500, currentColor);
 				
 				world.deleteEntity(e);
 				return true;
@@ -305,6 +309,7 @@ public class GameScreen extends ScreenAdapter {
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(currentColor).end(hideColor).time(500).build());
 
 		entity.addComponent(new SpatialComponent(new SpatialImpl(spatial)));
+		entity.addComponent(new MovementComponent(linearVelocity, angularVelocity));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
 			@Override
