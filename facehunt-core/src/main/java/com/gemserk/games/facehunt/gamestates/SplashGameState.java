@@ -64,6 +64,9 @@ public class SplashGameState extends GameStateImpl {
 		time -= delta;
 		if (time <= 0) 
 			game.transition(game.menuScreen, true);
+		
+		if (Gdx.input.justTouched())
+			time = 0;
 	}
 
 	@Override

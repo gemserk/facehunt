@@ -92,6 +92,8 @@ public class PlayGameState extends GameStateImpl {
 
 	private BitmapFont font;
 
+	private Sprite heartSprite;
+
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -126,6 +128,7 @@ public class PlayGameState extends GameStateImpl {
 				sprite("BackgroundSprite", "BackgroundTexture");
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
+				sprite("HeartSprite", "HeartTexture");
 
 				sound("CritterKilledSound", "data/critter-killed.wav");
 				sound("CritterSpawnedSound", "data/critter-spawned.wav");
@@ -137,6 +140,7 @@ public class PlayGameState extends GameStateImpl {
 
 		spriteBatch = new SpriteBatch();
 		
+		heartSprite = resourceManager.getResourceValue("HeartSprite");
 		font = resourceManager.getResourceValue("Font");
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
@@ -357,6 +361,16 @@ public class PlayGameState extends GameStateImpl {
 		font.setColor(Color.RED);
 		font.draw(spriteBatch, "Points: " + gameData.killedCritters * 100, 10, Gdx.graphics.getHeight());
 		
+		
+		float startX = Gdx.graphics.getWidth() - 64f;
+		float y = Gdx.graphics.getHeight() - 32f;
+		
+		for (int i = 0; i < gameData.lives; i++) {
+			heartSprite.setPosition(startX, y);
+			heartSprite.draw(spriteBatch);
+			startX-= 32f;
+		}
+		
 		spriteBatch.end();
 	}
 
@@ -368,7 +382,7 @@ public class PlayGameState extends GameStateImpl {
 		worldWrapper.update(delta);
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
-			game.transition(game.menuScreen);
+			game.transition(game.scoreScreen);
 		
 		if (gameData.lives <= 0) {
 			gameOver = true;
@@ -395,6 +409,7 @@ public class PlayGameState extends GameStateImpl {
 		spriteBatch.dispose();
 		spriteBatch = null;
 		physicsWorld.dispose();
+		gameOver = true;
 	}
 
 }

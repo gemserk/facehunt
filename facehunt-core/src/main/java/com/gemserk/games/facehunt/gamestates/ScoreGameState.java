@@ -58,19 +58,29 @@ public class ScoreGameState extends GameStateImpl {
 
 		font = resourceManager.getResourceValue("Font");
 
-		tryAgainButton = new TextButton(font, "Try again", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
-		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.2f);
+		String buttonText = "Try again";
+
+		if (!game.playGameState.gameOver)
+			buttonText = "Resume";
+
+		tryAgainButton = new TextButton(font, buttonText, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
+		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.3f);
 	}
 
 	@Override
 	public void render(int delta) {
+		if (spriteBatch == null)
+			return;
+		
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
 		backgroundSprite.draw(spriteBatch);
 
-		font.setColor(Color.RED);
-		SpriteBatchUtils.drawCentered(spriteBatch, font, "Game Over", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.7f);
-		SpriteBatchUtils.drawCentered(spriteBatch, font, "Score: " + gameData.killedCritters * 100, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
+		if (game.playGameState.gameOver && gameData != null) {
+			font.setColor(Color.RED);
+			SpriteBatchUtils.drawCentered(spriteBatch, font, "Game Over", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.7f);
+			SpriteBatchUtils.drawCentered(spriteBatch, font, "Score: " + gameData.killedCritters * 100, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
+		}
 
 		tryAgainButton.draw(spriteBatch);
 		mainMenuButton.draw(spriteBatch);
@@ -80,17 +90,18 @@ public class ScoreGameState extends GameStateImpl {
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize();
-		
+
 		tryAgainButton.update();
 		mainMenuButton.update();
 
 		if (tryAgainButton.isReleased()) {
-			// game.gameGameState.gameOver = true;
 			game.transition(game.gameScreen, true);
 		}
 
 		if (mainMenuButton.isReleased()) {
 			game.transition(game.menuScreen, true);
+			game.gameScreen.dispose();
+			setGameData(null);
 		}
 	}
 
