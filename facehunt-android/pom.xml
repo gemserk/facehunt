@@ -216,11 +216,5 @@
 			<version>${libgdxversion}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.gemserk.componentsengine</groupId>
-			<artifactId>androidmodule</artifactId>
-			<version>0.0.8</version>
-		</dependency>
-
 	</dependencies>
 </project>

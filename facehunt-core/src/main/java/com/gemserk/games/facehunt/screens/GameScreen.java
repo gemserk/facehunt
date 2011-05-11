@@ -174,6 +174,8 @@ public class GameScreen extends GameStateImpl {
 		createFaceSpawner(new Rectangle(64, 64, viewportWidth - 128, viewportHeight - 128));
 
 		world.loopStart();
+		
+		Gdx.input.setCatchBackKey(true);
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -381,7 +383,6 @@ public class GameScreen extends GameStateImpl {
 	public void init() {
 		if (gameOver)
 			restartGame();
-		Gdx.input.setCatchBackKey(true);
 	}
 
 	@Override
