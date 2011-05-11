@@ -18,7 +18,9 @@ import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
 import com.gemserk.commons.artemis.components.MovementComponent;
+import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
+import com.gemserk.commons.artemis.components.SpatialImpl;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
 import com.gemserk.commons.artemis.systems.MovementSystem;
@@ -126,7 +128,7 @@ public class GameScreen extends ScreenAdapter {
 
 	void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		Entity entity = world.createEntity();
-		entity.addComponent(new SpatialComponent(new Vector2(x, y), new Vector2(width, height), angle));
+		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
 		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
 		entity.refresh();
 	}
@@ -178,7 +180,7 @@ public class GameScreen extends ScreenAdapter {
 
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500).build());
 
-		entity.addComponent(new SpatialComponent(new Vector2(x, y), new Vector2(64f, 64f), 0f));
+		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, 64f, 64f, 0f)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new MovementComponent(linearVelocity, angularVelocity));
 		
@@ -189,14 +191,14 @@ public class GameScreen extends ScreenAdapter {
 				OutsideAreaComponent outisdeAreaComponent = e.getComponent(OutsideAreaComponent.class);				
 				MovementComponent movementComponent = e.getComponent(MovementComponent.class);
 				
-				Vector2 position = spatialComponent.getPosition();
+				Spatial spatial = spatialComponent.getSpatial();
 				Rectangle area = outisdeAreaComponent.getArea();
 				Vector2 velocity = movementComponent.getVelocity();
 				
-				if (position.x < area.x || position.x > area.x + area.width)
+				if (spatial.getX() < area.x || spatial.getX() > area.x + area.width)
 					velocity.x = -velocity.x;
 
-				if (position.y < area.y || position.y > area.y + area.height)
+				if (spatial.getY() < area.y || spatial.getY() > area.y + area.height)
 					velocity.y = -velocity.y;
 				
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
