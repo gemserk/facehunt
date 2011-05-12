@@ -43,6 +43,7 @@ import com.gemserk.commons.artemis.triggers.AbstractTrigger;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
 import com.gemserk.commons.gdx.camera.Camera;
+import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
@@ -108,7 +109,7 @@ public class PlayGameState extends GameStateImpl {
 		// worldCamera.center(viewportWidth / 2, viewportHeight / 2);
 		worldCamera.center(0f, 0f);
 
-		cameraData = new Camera(0f, 0f, 1f, 0f);
+		cameraData = new CameraImpl(0f, 0f, 1f, 0f);
 		gameData = new GameData();
 		
 		gameData.killedCritters = 0;
