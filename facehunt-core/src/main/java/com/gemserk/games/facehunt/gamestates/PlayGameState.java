@@ -182,7 +182,6 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	BodyBuilder getBodyBuilder() {
-		bodyBuilder.reset();
 		return bodyBuilder;
 	}
 
