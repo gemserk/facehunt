@@ -253,10 +253,10 @@ public class PlayGameState extends GameStateImpl {
 
 		final Color faceColor = new Color();
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500).build(), new TransitionEventHandler<Color>() {
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
 			@Override
 			public void onTransitionFinished(Transition<Color> transition) {
-				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500).build());
+				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
 			}
 		});
 
@@ -329,7 +329,7 @@ public class PlayGameState extends GameStateImpl {
 
 		final Color faceColor = new Color();
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(currentColor).end(hideColor).time(500).build());
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(currentColor).end(hideColor).time(500));
 
 		entity.addComponent(new SpatialComponent(new SpatialImpl(spatial)));
 		entity.addComponent(new MovementComponent(linearVelocity, angularVelocity));

@@ -69,20 +69,20 @@ public class FadeTransitionScreen extends ScreenAdapter {
 
 		if (currentScreen == null) {
 			currentScreen = nextScreen;
-			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2).build(), new TransitionEventHandler() {
+			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
 				@Override
 				public void onTransitionFinished(Transition transition) {
 					game.setScreen(nextScreen);
 				}
 			});
 		} else {
-			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(endColor).end(startColor).time(time / 2).build(), new TransitionEventHandler() {
+			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(endColor).end(startColor).time(time / 2), new TransitionEventHandler() {
 				@Override
 				public void onTransitionFinished(Transition transition) {
 					if (shouldDisposeCurrent)
 						currentScreen.dispose();
 					currentScreen = nextScreen;
-					Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2).build(), new TransitionEventHandler() {
+					Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
 						@Override
 						public void onTransitionFinished(Transition transition) {
 							game.setScreen(nextScreen);
@@ -109,7 +109,8 @@ public class FadeTransitionScreen extends ScreenAdapter {
 
 	@Override
 	public void internalUpdate(float delta) {
-		Synchronizers.synchronize();
+		long deltaInMs = (long) (delta * 1000f);
+		Synchronizers.synchronize(deltaInMs);
 	}
 
 	@Override
