@@ -101,7 +101,7 @@ public class PlayGameState extends GameStateImpl {
 
 	static class Wave {
 
-		public String texts;
+		public String[] texts;
 
 		public int normalCritters = 0;
 
@@ -109,25 +109,30 @@ public class PlayGameState extends GameStateImpl {
 
 	private Wave[] waves = new Wave[] { new Wave() {
 		{
-			texts = "Don't let the faces escape,\nkill 5 faces by touching over them.";
-			normalCritters = 5;
+			texts = new String[] { "Don't let the faces escape,\ntouch over them to kill'em.", "Let's practice, kill 15 faces..." };
+			normalCritters = 15;
 		}
 	}, new Wave() {
 		{
-			texts = "Nicely done but don't celebrate yet,\nmore faces are coming!";
+			texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "And they have new powers..." };
 			normalCritters = 15;
 		}
 	}, };
 
 	private int currentWaveIndex;
 
+	private int currentTextIndex;
+
+	private Wave currentWave;
+	
+	private String currentText;
+	
 	enum InternalGameState {
 		INTRO, PLAYING, PREPARE_INTRO
 	}
 
 	InternalGameState internalGameState;
 
-	private Wave currentWave;
 
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
@@ -218,6 +223,8 @@ public class PlayGameState extends GameStateImpl {
 		Gdx.input.setCatchBackKey(true);
 
 		currentWaveIndex = 0;
+		currentTextIndex = 0;
+		currentText = "";
 
 		internalGameState = InternalGameState.PREPARE_INTRO;
 	}
@@ -419,14 +426,14 @@ public class PlayGameState extends GameStateImpl {
 		if (currentWave != null) {
 			font.setColor(waveIntroductionColor);
 			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
-					currentWave.texts, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
-			
+					currentText, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
+
 			font.setScale(0.7f);
 			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
 					"tap to continue", (Gdx.graphics.getWidth() * 0.8f), (Gdx.graphics.getHeight() * 0.1f));
 			font.setScale(1f);
 		}
-		
+
 		spriteBatch.end();
 	}
 
@@ -455,14 +462,21 @@ public class PlayGameState extends GameStateImpl {
 
 		if (internalGameState == InternalGameState.INTRO) {
 
-			if (Gdx.input.isTouched()) {
-				internalGameState = InternalGameState.PLAYING;
-				gameData.killedCritters = 0;
+			if (Gdx.input.justTouched()) {
+				currentTextIndex++;
+				
+				if (currentTextIndex >= currentWave.texts.length) {
+					internalGameState = InternalGameState.PLAYING;
+					gameData.killedCritters = 0;
 
-				Color endColor = new Color(Color.BLUE);
-				endColor.a = 0f;
+					Color endColor = new Color(Color.BLUE);
+					endColor.a = 0f;
 
-				Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor));
+					Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor));
+				} else {
+					currentText = currentWave.texts[currentTextIndex];
+				}
+
 			}
 
 		}
@@ -472,12 +486,16 @@ public class PlayGameState extends GameStateImpl {
 			endColor.a = 1f;
 			waveIntroductionColor.a = 0f;
 
+			currentTextIndex = 0;
+			
 			if (currentWaveIndex >= waves.length) {
 				game.transition(game.scoreScreen, true);
 				return;
 			}
 
 			currentWave = waves[currentWaveIndex];
+			currentText = currentWave.texts[currentTextIndex];
+
 			Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor), //
 					new TransitionEventHandler() {
 						@Override
