@@ -33,12 +33,17 @@ public class MenuGameState extends GameStateImpl {
 
 	private BitmapFont titleFont;
 
+	private Sprite happyFaceSprite;
+
 	public MenuGameState(FaceHuntGame game) {
 		this.game = game;
 	}
 
 	@Override
 	public void init() {
+
+		int viewportWidth = Gdx.graphics.getWidth();
+		int viewportHeight = Gdx.graphics.getHeight();
 
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
@@ -48,21 +53,41 @@ public class MenuGameState extends GameStateImpl {
 				setCacheWhenLoad(true);
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				sprite("BackgroundSprite", "BackgroundTexture");
-				font("Font", "data/font.png", "data/font.fnt");
-				font("TitleFont", "data/titlefont.png", "data/titlefont.fnt");
+				font("Font", "data/titlefont.png", "data/titlefont.fnt", true);
+				font("TitleFont", "data/titlefont.png", "data/titlefont.fnt", true);
+				
+				texture("HappyFaceTexture", "data/face-happy-64x64.png");
+				sprite("HappyFaceSprite", "HappyFaceTexture");
+				
 			}
 		};
 
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
+		
+		happyFaceSprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 		titleFont = resourceManager.getResourceValue("TitleFont");
+		titleFont.setColor(1f, 1f, 0f, 1f);
+		titleFont.setScale(1f * viewportWidth / 800f);
 		
 		font = resourceManager.getResourceValue("Font");
-		font.setScale(2f);
+		font.setScale(1f * viewportWidth / 800f);
 
-		playButton = new TextButton(font, "Play", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
-		exitButton = new TextButton(font, "Exit", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
+		playButton = new TextButton(font, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+		exitButton = new TextButton(font, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
+		
+		Color notOverColor = new Color(1f, 1f, 1f, 1f);
+		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
+		
+		playButton.setNotOverColor(notOverColor);
+		playButton.setOverColor(overColor);
+		playButton.setColor(notOverColor);
+		
+		exitButton.setNotOverColor(notOverColor);
+		exitButton.setOverColor(overColor);
+		exitButton.setColor(notOverColor);
+		
 	}
 
 	@Override
@@ -73,9 +98,11 @@ public class MenuGameState extends GameStateImpl {
 		playButton.draw(spriteBatch);
 		exitButton.draw(spriteBatch);
 		
-		font.setColor(Color.WHITE);
-		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.9f);
+		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
 		
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f, 0f);
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f, 0f);
+
 		spriteBatch.end();
 	}
 
