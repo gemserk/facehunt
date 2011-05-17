@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
@@ -43,7 +42,9 @@ public class MenuGameState extends GameStateImpl {
 
 	private float happyFaceAngle = 0f;
 
-	private ParticleEmitter particleEmitter;
+	private ParticleEmitter particleEmitter1;
+
+	private ParticleEmitter particleEmitter2;
 
 	public MenuGameState(FaceHuntGame game) {
 		this.game = game;
@@ -79,12 +80,13 @@ public class MenuGameState extends GameStateImpl {
 		happyFaceSprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 		try {
-			particleEmitter = new ParticleEmitter(new BufferedReader(new InputStreamReader(Gdx.files.internal("data/emitters/FaceEmitter").read())));
+			particleEmitter1 = new ParticleEmitter(new BufferedReader(new InputStreamReader(Gdx.files.internal("data/emitters/FaceEmitter").read())));
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load face particle emitter", e);
 		}
 
-		particleEmitter.setSprite(new Sprite(happyFaceSprite));
+		particleEmitter1.setSprite(new Sprite(happyFaceSprite));
+		particleEmitter2 = new ParticleEmitter(particleEmitter1);
 
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
@@ -107,6 +109,8 @@ public class MenuGameState extends GameStateImpl {
 		exitButton.setOverColor(overColor);
 		exitButton.setColor(notOverColor);
 
+		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f);
+		particleEmitter2.setPosition(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f);
 	}
 
 	@Override
@@ -114,17 +118,14 @@ public class MenuGameState extends GameStateImpl {
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
 		backgroundSprite.draw(spriteBatch);
-		
-		if (Gdx.app.getType() == ApplicationType.Android) {
-			if (Gdx.input.isTouched())
-				particleEmitter.draw(spriteBatch, ((float) delta) * 0.001f);
-		} else
-			particleEmitter.draw(spriteBatch, ((float) delta) * 0.001f);
 
 		playButton.draw(spriteBatch);
 		exitButton.draw(spriteBatch);
 
 		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
+
+		particleEmitter1.draw(spriteBatch, ((float) delta) * 0.001f);
+		particleEmitter2.draw(spriteBatch, ((float) delta) * 0.001f);
 
 		happyFaceSprite.setColor(1f, 1f, 0f, 1f);
 		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f, happyFaceAngle);
@@ -147,7 +148,7 @@ public class MenuGameState extends GameStateImpl {
 		if (exitButton.isReleased())
 			System.exit(0);
 
-		particleEmitter.setPosition(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+		// particleEmitter.setPosition(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 	}
 
 	@Override

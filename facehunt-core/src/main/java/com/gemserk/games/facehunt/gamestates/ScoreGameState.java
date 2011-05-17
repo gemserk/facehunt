@@ -1,6 +1,8 @@
 package com.gemserk.games.facehunt.gamestates;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,6 +13,8 @@ import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
+import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
+import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
@@ -34,6 +38,8 @@ public class ScoreGameState extends GameStateImpl {
 
 	private GameData gameData;
 
+	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
+	
 	public ScoreGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -76,6 +82,22 @@ public class ScoreGameState extends GameStateImpl {
 		mainMenuButton.setNotOverColor(notOverColor);
 		mainMenuButton.setOverColor(overColor);
 		mainMenuButton.setColor(notOverColor);
+		
+		Gdx.input.setCatchBackKey(true);
+		
+		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
+		
+		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {{
+			if (Gdx.app.getType() == ApplicationType.Android)
+				monitorKey("back", Keys.BACK);
+			else 
+				monitorKey("back", Keys.ESCAPE);
+		}};
+	}
+	
+	@Override
+	public void pause() {
+		Gdx.input.setCatchBackKey(false);		
 	}
 
 	@Override
@@ -100,7 +122,9 @@ public class ScoreGameState extends GameStateImpl {
 
 	@Override
 	public void update(int delta) {
-		Synchronizers.synchronize();
+		Synchronizers.synchronize(delta);
+		
+		inputDevicesMonitor.update();
 
 		tryAgainButton.update();
 		mainMenuButton.update();
@@ -109,7 +133,7 @@ public class ScoreGameState extends GameStateImpl {
 			game.transition(game.gameScreen, true);
 		}
 
-		if (mainMenuButton.isReleased()) {
+		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
 			game.transition(game.menuScreen, true);
 			game.gameScreen.dispose();
 			setGameData(null);

@@ -230,8 +230,6 @@ public class PlayGameState extends GameStateImpl {
 
 		world.loopStart();
 
-		Gdx.input.setCatchBackKey(true);
-
 		currentWaveIndex = 0;
 		currentTextIndex = 0;
 		currentText = "";
@@ -497,7 +495,7 @@ public class PlayGameState extends GameStateImpl {
 
 	@Override
 	public void update(int delta) {
-		Synchronizers.synchronize();
+		Synchronizers.synchronize(delta);
 
 		controller.update(delta);
 
@@ -583,6 +581,7 @@ public class PlayGameState extends GameStateImpl {
 	public void init() {
 		if (gameOver)
 			restartGame();
+		Gdx.input.setCatchBackKey(true);
 	}
 
 	@Override

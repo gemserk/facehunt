@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
-import com.gemserk.animation4j.transitions.sync.Synchronizers;
+import com.gemserk.animation4j.transitions.sync.Synchronizer;
 import com.gemserk.commons.gdx.ScreenAdapter;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
@@ -37,6 +37,8 @@ public class FadeTransitionScreen extends ScreenAdapter {
 	private int time;
 
 	private boolean shouldDisposeCurrent;
+	
+	private Synchronizer synchronizer;
 
 	public void transition(ScreenAdapter currentScreen, ScreenAdapter nextScreen, int time) {
 		this.transition(currentScreen, nextScreen, time, false);
@@ -63,26 +65,29 @@ public class FadeTransitionScreen extends ScreenAdapter {
 
 	@Override
 	public void show() {
+		
+		synchronizer = new Synchronizer();
+		
 		overlay = resourceManager.getResourceValue("OverlaySprite");
 		overlay.setPosition(0, 0);
 		overlay.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		if (currentScreen == null) {
 			currentScreen = nextScreen;
-			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
+			synchronizer.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
 				@Override
 				public void onTransitionFinished(Transition transition) {
 					game.setScreen(nextScreen);
 				}
 			});
 		} else {
-			Synchronizers.transition(fadeColor, Transitions.transitionBuilder(endColor).end(startColor).time(time / 2), new TransitionEventHandler() {
+			synchronizer.transition(fadeColor, Transitions.transitionBuilder(endColor).end(startColor).time(time / 2), new TransitionEventHandler() {
 				@Override
 				public void onTransitionFinished(Transition transition) {
 					if (shouldDisposeCurrent)
 						currentScreen.dispose();
 					currentScreen = nextScreen;
-					Synchronizers.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
+					synchronizer.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
 						@Override
 						public void onTransitionFinished(Transition transition) {
 							game.setScreen(nextScreen);
@@ -92,7 +97,7 @@ public class FadeTransitionScreen extends ScreenAdapter {
 			});
 		}
 	}
-
+	
 	@Override
 	public void internalRender(float delta) {
 		if (currentScreen != null)
@@ -110,9 +115,9 @@ public class FadeTransitionScreen extends ScreenAdapter {
 	@Override
 	public void internalUpdate(float delta) {
 		long deltaInMs = (long) (delta * 1000f);
-		Synchronizers.synchronize(deltaInMs);
+		synchronizer.synchronize(deltaInMs);
 	}
-
+	
 	@Override
 	public void dispose() {
 		resourceManager.unloadAll();
