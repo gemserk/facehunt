@@ -65,6 +65,17 @@ public class ScoreGameState extends GameStateImpl {
 
 		tryAgainButton = new TextButton(font, buttonText, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
 		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.3f);
+		
+		Color notOverColor = new Color(1f, 1f, 1f, 1f);
+		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
+		
+		tryAgainButton.setNotOverColor(notOverColor);
+		tryAgainButton.setOverColor(overColor);
+		tryAgainButton.setColor(notOverColor);
+		
+		mainMenuButton.setNotOverColor(notOverColor);
+		mainMenuButton.setOverColor(overColor);
+		mainMenuButton.setColor(notOverColor);
 	}
 
 	@Override

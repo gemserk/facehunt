@@ -64,6 +64,7 @@ public class MenuGameState extends GameStateImpl {
 
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
+		backgroundSprite.setSize(viewportWidth, viewportHeight);
 		
 		happyFaceSprite = resourceManager.getResourceValue("HappyFaceSprite");
 

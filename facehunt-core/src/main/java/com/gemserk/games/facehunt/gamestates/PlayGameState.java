@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.gemserk.animation4j.interpolator.function.InterpolationFunctions;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
@@ -46,6 +47,7 @@ import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
+import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.components.FaceControllerComponent;
@@ -95,6 +97,41 @@ public class PlayGameState extends GameStateImpl {
 
 	private Sprite heartSprite;
 
+	private Color waveIntroductionColor = new Color();
+
+	static class Wave {
+
+		public String introduction;
+
+		public int time;
+
+		public int normal = 0;
+
+		public int normal2 = 0;
+
+	}
+
+	private Wave[] waves = new Wave[] { 
+		new Wave() {{
+			introduction = "Don't let the faces to escape,\nkill'em all by touching over them.";
+			time = 5000;
+			normal = 2;
+		}}, 
+		new Wave() {{
+			introduction = "Nicely done but don't celebrate yet,\nmore faces are coming!";
+			time = 3000;
+			normal = 10;
+		}}, 
+	};
+
+	private int currentWave;
+
+	enum InternalGameState {
+		INTRO, PLAYING, PREPARE_INTRO
+	}
+
+	InternalGameState internalGameState;
+
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -111,7 +148,7 @@ public class PlayGameState extends GameStateImpl {
 
 		cameraData = new CameraImpl(0f, 0f, 1f, 0f);
 		gameData = new GameData();
-		
+
 		gameData.killedCritters = 0;
 		gameData.lives = 2;
 
@@ -120,7 +157,7 @@ public class PlayGameState extends GameStateImpl {
 		new LibgdxResourceBuilder(resourceManager) {
 			{
 				setCacheWhenLoad(true);
-				
+
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				texture("HappyFaceTexture", "data/face-happy-64x64.png");
 				texture("SadFaceTexture", "data/face-sad-64x64.png");
@@ -140,7 +177,7 @@ public class PlayGameState extends GameStateImpl {
 		};
 
 		spriteBatch = new SpriteBatch();
-		
+
 		heartSprite = resourceManager.getResourceValue("HeartSprite");
 		font = resourceManager.getResourceValue("Font");
 
@@ -174,12 +211,17 @@ public class PlayGameState extends GameStateImpl {
 		createBorder(viewportWidth, viewportHeight * 0.5f, 10, viewportHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
-		createStaticSprite(backgroundSprite, viewportWidth * 0.5f, viewportHeight * 0.5f, 1024, 512, 0f, -101, 0.5f, 0.5f, Color.WHITE);
+
+		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
 		createFaceSpawner(new Rectangle(64, 64, viewportWidth - 128, viewportHeight - 128));
 
 		world.loopStart();
-		
+
 		Gdx.input.setCatchBackKey(true);
+
+		currentWave = 0;
+
+		internalGameState = InternalGameState.PREPARE_INTRO;
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -311,10 +353,10 @@ public class PlayGameState extends GameStateImpl {
 
 				world.deleteEntity(e);
 				gameData.killedCritters++;
-				
+
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				sound.play();
-				
+
 				return true;
 			}
 		}));
@@ -355,22 +397,30 @@ public class PlayGameState extends GameStateImpl {
 
 		if (Gdx.input.isKeyPressed(Keys.D))
 			box2dDebugRenderer.render(physicsWorld);
-		
+
 		spriteBatch.begin();
-		
+
+		// font.setScale(1f);
 		font.setColor(Color.RED);
 		font.draw(spriteBatch, "Points: " + gameData.killedCritters * 100, 10, Gdx.graphics.getHeight());
-		
-		
+
 		float startX = Gdx.graphics.getWidth() - 64f;
 		float y = Gdx.graphics.getHeight() - 32f;
-		
+
 		for (int i = 0; i < gameData.lives; i++) {
 			heartSprite.setPosition(startX, y);
 			heartSprite.draw(spriteBatch);
-			startX-= 32f;
+			startX -= 32f;
 		}
-		
+
+		if (internalGameState == InternalGameState.INTRO) {
+			// font.setScale(1f);
+			font.setColor(waveIntroductionColor);
+			Wave wave = waves[currentWave];
+			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
+					wave.introduction, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
+		}
+
 		spriteBatch.end();
 	}
 
@@ -379,17 +429,45 @@ public class PlayGameState extends GameStateImpl {
 		Synchronizers.synchronize();
 
 		controller.update(delta);
-		worldWrapper.update(delta);
+
+		if (internalGameState == InternalGameState.PLAYING) {
+			worldWrapper.update(delta);
+
+			// on wave finished, next current wave.
+
+		}
+
+		if (internalGameState == InternalGameState.PREPARE_INTRO) {
+			Color endColor = new Color(Color.BLUE);
+			endColor.a = 0.1f;
+
+			Wave wave = waves[currentWave];
+			Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder(Color.BLUE).time(wave.time).end(endColor) //
+					.functions(InterpolationFunctions.ease(), InterpolationFunctions.ease(), InterpolationFunctions.ease(), InterpolationFunctions.ease()), //
+					new TransitionEventHandler() {
+						@Override
+						public void onTransitionFinished(Transition transition) {
+							internalGameState = InternalGameState.PLAYING;
+						}
+					});
+
+			internalGameState = InternalGameState.INTRO;
+		}
+
+		if (Gdx.input.isKeyPressed(Keys.N) && internalGameState == InternalGameState.PLAYING) {
+			internalGameState = internalGameState.PREPARE_INTRO;
+			currentWave++;
+		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
 			game.transition(game.scoreScreen);
-		
+
 		if (gameData.lives <= 0) {
 			gameOver = true;
 			game.scoreGameState.setGameData(gameData);
 			game.transition(game.scoreScreen, true);
 		}
-		
+
 	}
 
 	@Override
