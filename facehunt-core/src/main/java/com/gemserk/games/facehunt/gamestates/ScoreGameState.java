@@ -90,7 +90,7 @@ public class ScoreGameState extends GameStateImpl {
 		if (game.playGameState.gameOver && gameData != null) {
 			font.setColor(Color.RED);
 			SpriteBatchUtils.drawCentered(spriteBatch, font, "Game Over", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.7f);
-			SpriteBatchUtils.drawCentered(spriteBatch, font, "Score: " + gameData.killedCritters * 100, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
+			SpriteBatchUtils.drawCentered(spriteBatch, font, "Score: " + gameData.points, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
 		}
 
 		tryAgainButton.draw(spriteBatch);

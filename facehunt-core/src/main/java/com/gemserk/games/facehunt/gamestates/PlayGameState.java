@@ -51,6 +51,7 @@ import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.components.FaceControllerComponent;
+import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
@@ -111,18 +112,19 @@ public class PlayGameState extends GameStateImpl {
 
 	}
 
-	private Wave[] waves = new Wave[] { 
-		new Wave() {{
+	private Wave[] waves = new Wave[] { new Wave() {
+		{
 			introduction = "Don't let the faces to escape,\nkill'em all by touching over them.";
 			time = 5000;
 			normal = 2;
-		}}, 
-		new Wave() {{
+		}
+	}, new Wave() {
+		{
 			introduction = "Nicely done but don't celebrate yet,\nmore faces are coming!";
 			time = 3000;
 			normal = 10;
-		}}, 
-	};
+		}
+	}, };
 
 	private int currentWave;
 
@@ -150,6 +152,7 @@ public class PlayGameState extends GameStateImpl {
 		gameData = new GameData();
 
 		gameData.killedCritters = 0;
+		gameData.points = 0;
 		gameData.lives = 2;
 
 		resourceManager = new ResourceManagerImpl<String>();
@@ -318,6 +321,7 @@ public class PlayGameState extends GameStateImpl {
 		entity.addComponent(new PhysicsComponent(body));
 		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, 64f, 64f)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
+		entity.addComponent(new PointsComponent(100));
 		entity.addComponent(new HitComponent(new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
@@ -334,7 +338,6 @@ public class PlayGameState extends GameStateImpl {
 				return true;
 			}
 		}));
-
 		entity.addComponent(new FaceControllerComponent(controller, new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
@@ -353,6 +356,11 @@ public class PlayGameState extends GameStateImpl {
 
 				world.deleteEntity(e);
 				gameData.killedCritters++;
+
+				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
+				if (pointsComponent != null) {
+					gameData.points += pointsComponent.getPoints();
+				}
 
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				sound.play();
@@ -402,7 +410,7 @@ public class PlayGameState extends GameStateImpl {
 
 		// font.setScale(1f);
 		font.setColor(Color.RED);
-		font.draw(spriteBatch, "Points: " + gameData.killedCritters * 100, 10, Gdx.graphics.getHeight());
+		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
 
 		float startX = Gdx.graphics.getWidth() - 64f;
 		float y = Gdx.graphics.getHeight() - 32f;
