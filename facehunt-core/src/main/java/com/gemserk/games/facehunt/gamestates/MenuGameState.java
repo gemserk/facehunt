@@ -1,9 +1,15 @@
 package com.gemserk.games.facehunt.gamestates;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
@@ -34,8 +40,10 @@ public class MenuGameState extends GameStateImpl {
 	private BitmapFont titleFont;
 
 	private Sprite happyFaceSprite;
-	
+
 	private float happyFaceAngle = 0f;
+
+	private ParticleEmitter particleEmitter;
 
 	public MenuGameState(FaceHuntGame game) {
 		this.game = game;
@@ -57,40 +65,48 @@ public class MenuGameState extends GameStateImpl {
 				sprite("BackgroundSprite", "BackgroundTexture");
 				font("Font", "data/titlefont.png", "data/titlefont.fnt", true);
 				font("TitleFont", "data/titlefont.png", "data/titlefont.fnt", true);
-				
+
 				texture("HappyFaceTexture", "data/face-happy-64x64.png");
 				sprite("HappyFaceSprite", "HappyFaceTexture");
-				
+
 			}
 		};
 
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
 		backgroundSprite.setSize(viewportWidth, viewportHeight);
-		
+
 		happyFaceSprite = resourceManager.getResourceValue("HappyFaceSprite");
+
+		try {
+			particleEmitter = new ParticleEmitter(new BufferedReader(new InputStreamReader(Gdx.files.internal("data/emitters/FaceEmitter").read())));
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to load face particle emitter", e);
+		}
+
+		particleEmitter.setSprite(new Sprite(happyFaceSprite));
 
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
 		titleFont.setScale(1f * viewportWidth / 800f);
-		
+
 		font = resourceManager.getResourceValue("Font");
 		font.setScale(1f * viewportWidth / 800f);
 
 		playButton = new TextButton(font, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
 		exitButton = new TextButton(font, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
-		
+
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
-		
+
 		playButton.setNotOverColor(notOverColor);
 		playButton.setOverColor(overColor);
 		playButton.setColor(notOverColor);
-		
+
 		exitButton.setNotOverColor(notOverColor);
 		exitButton.setOverColor(overColor);
 		exitButton.setColor(notOverColor);
-		
+
 	}
 
 	@Override
@@ -98,15 +114,22 @@ public class MenuGameState extends GameStateImpl {
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
 		backgroundSprite.draw(spriteBatch);
+		
+		if (Gdx.app.getType() == ApplicationType.Android) {
+			if (Gdx.input.isTouched())
+				particleEmitter.draw(spriteBatch, ((float) delta) * 0.001f);
+		} else
+			particleEmitter.draw(spriteBatch, ((float) delta) * 0.001f);
+
 		playButton.draw(spriteBatch);
 		exitButton.draw(spriteBatch);
-		
+
 		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
-		
+
 		happyFaceSprite.setColor(1f, 1f, 0f, 1f);
 		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f, happyFaceAngle);
 		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f, -happyFaceAngle);
-		
+
 		happyFaceAngle += 0.05f * delta;
 
 		spriteBatch.end();
@@ -118,11 +141,13 @@ public class MenuGameState extends GameStateImpl {
 		playButton.update();
 		exitButton.update();
 
-		if (playButton.isReleased()) 
+		if (playButton.isReleased())
 			game.transition(game.gameScreen, true);
 
-		if (exitButton.isReleased()) 
+		if (exitButton.isReleased())
 			System.exit(0);
+
+		particleEmitter.setPosition(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 	}
 
 	@Override
