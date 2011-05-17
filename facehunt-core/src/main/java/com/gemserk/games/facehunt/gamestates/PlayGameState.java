@@ -18,7 +18,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.gemserk.animation4j.interpolator.function.InterpolationFunctions;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
@@ -104,35 +103,31 @@ public class PlayGameState extends GameStateImpl {
 
 		public String introduction;
 
-		public int time;
-
-		public int normal = 0;
-
-		public int normal2 = 0;
+		public int normalCritters = 0;
 
 	}
 
 	private Wave[] waves = new Wave[] { new Wave() {
 		{
 			introduction = "Don't let the faces to escape,\nkill'em all by touching over them.";
-			time = 5000;
-			normal = 2;
+			normalCritters = 5;
 		}
 	}, new Wave() {
 		{
 			introduction = "Nicely done but don't celebrate yet,\nmore faces are coming!";
-			time = 3000;
-			normal = 10;
+			normalCritters = 15;
 		}
 	}, };
 
-	private int currentWave;
+	private int currentWaveIndex;
 
 	enum InternalGameState {
 		INTRO, PLAYING, PREPARE_INTRO
 	}
 
 	InternalGameState internalGameState;
+
+	private Wave currentWave;
 
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
@@ -222,7 +217,7 @@ public class PlayGameState extends GameStateImpl {
 
 		Gdx.input.setCatchBackKey(true);
 
-		currentWave = 0;
+		currentWaveIndex = 0;
 
 		internalGameState = InternalGameState.PREPARE_INTRO;
 	}
@@ -421,12 +416,18 @@ public class PlayGameState extends GameStateImpl {
 			startX -= 32f;
 		}
 
-		if (internalGameState == InternalGameState.INTRO) {
-			// font.setScale(1f);
+		if (currentWave != null) {
 			font.setColor(waveIntroductionColor);
-			Wave wave = waves[currentWave];
 			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
-					wave.introduction, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
+					currentWave.introduction, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
+		}
+		
+		if (internalGameState == InternalGameState.INTRO) {
+			font.setColor(waveIntroductionColor);
+			font.setScale(0.7f);
+			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
+					"tap to continue", (Gdx.graphics.getWidth() * 0.8f), (Gdx.graphics.getHeight() * 0.1f));
+			font.setScale(1f);
 		}
 
 		spriteBatch.end();
@@ -441,40 +442,57 @@ public class PlayGameState extends GameStateImpl {
 		if (internalGameState == InternalGameState.PLAYING) {
 			worldWrapper.update(delta);
 
-			// on wave finished, next current wave.
+			// for now, allow N to process next state...
+			if (gameData.killedCritters >= currentWave.normalCritters || Gdx.input.isKeyPressed(Keys.N)) {
+				internalGameState = InternalGameState.PREPARE_INTRO;
+				currentWaveIndex++;
+			}
+
+			if (gameData.lives <= 0) {
+				gameOver = true;
+				game.scoreGameState.setGameData(gameData);
+				game.transition(game.scoreScreen, true);
+			}
+
+		}
+
+		if (internalGameState == InternalGameState.INTRO) {
+
+			if (Gdx.input.isTouched()) {
+				internalGameState = InternalGameState.PLAYING;
+				gameData.killedCritters = 0;
+
+				Color endColor = new Color(Color.BLUE);
+				endColor.a = 0f;
+
+				Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor));
+			}
 
 		}
 
 		if (internalGameState == InternalGameState.PREPARE_INTRO) {
 			Color endColor = new Color(Color.BLUE);
-			endColor.a = 0.1f;
+			endColor.a = 1f;
+			waveIntroductionColor.a = 0f;
 
-			Wave wave = waves[currentWave];
-			Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder(Color.BLUE).time(wave.time).end(endColor) //
-					.functions(InterpolationFunctions.ease(), InterpolationFunctions.ease(), InterpolationFunctions.ease(), InterpolationFunctions.ease()), //
+			if (currentWaveIndex >= waves.length) {
+				game.transition(game.scoreScreen, true);
+				return;
+			}
+
+			currentWave = waves[currentWaveIndex];
+			Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor), //
 					new TransitionEventHandler() {
 						@Override
 						public void onTransitionFinished(Transition transition) {
-							internalGameState = InternalGameState.PLAYING;
+							internalGameState = InternalGameState.INTRO;
 						}
 					});
 
-			internalGameState = InternalGameState.INTRO;
-		}
-
-		if (Gdx.input.isKeyPressed(Keys.N) && internalGameState == InternalGameState.PLAYING) {
-			internalGameState = internalGameState.PREPARE_INTRO;
-			currentWave++;
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
 			game.transition(game.scoreScreen);
-
-		if (gameData.lives <= 0) {
-			gameOver = true;
-			game.scoreGameState.setGameData(gameData);
-			game.transition(game.scoreScreen, true);
-		}
 
 	}
 
