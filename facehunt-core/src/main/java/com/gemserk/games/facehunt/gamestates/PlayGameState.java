@@ -82,10 +82,6 @@ public class PlayGameState extends GameStateImpl {
 
 	public boolean gameOver = true;
 
-	private static final Color hideColor = new Color(1f, 1f, 1f, 0f);
-
-	private static final Color showColor = new Color(1f, 1f, 1f, 1f);
-
 	private com.badlogic.gdx.physics.box2d.World physicsWorld;
 
 	private BodyBuilder bodyBuilder;
@@ -126,10 +122,9 @@ public class PlayGameState extends GameStateImpl {
 		}
 	}, new Wave() {
 		{
-			texts = new String[] { "Well well, it seems like someone\n is improving his skills", "But, this war is just starting..." };
-			firstTypeCritters = 25;
-			secondTypeCritters = 10;
-			// third type critters?
+			texts = new String[] { "Well well, it seems like someone\n is improving their skills.", "But, this war is just starting..." };
+			firstTypeCritters = 10000;
+			secondTypeCritters = 10000;
 		}
 	}, };
 
@@ -292,7 +287,7 @@ public class PlayGameState extends GameStateImpl {
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime);
+				createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -343,13 +338,16 @@ public class PlayGameState extends GameStateImpl {
 		entity.refresh();
 	}
 
-	Entity createFaceFirstType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
+	Entity createFaceFirstType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
 		Entity entity = world.createEntity();
 		entity.setGroup(Groups.FaceGroup);
 
 		Sprite sprite = resourceManager.getResourceValue("SadFaceSprite");
 
-		final Color faceColor = new Color();
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+
+		final Color faceColor = new Color(color);
 
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
 			@Override
@@ -427,7 +425,7 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	void createFaceSecondType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Entity e = createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime);
+		Entity e = createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
 	}
@@ -438,6 +436,7 @@ public class PlayGameState extends GameStateImpl {
 
 		Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
+		Color hideColor = new Color(currentColor.r, currentColor.g, currentColor.b, 0f);
 		final Color faceColor = new Color();
 
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(currentColor).end(hideColor).time(500));
