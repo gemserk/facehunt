@@ -2,7 +2,9 @@ package com.gemserk.games.facehunt.values;
 
 public class GameData {
 	
-	public int killedCritters = 0;
+	public int normalCrittersKilled = 0;
+	
+	public int secondCrittersKilled = 0;
 	
 	public int lives = 0;
 	
