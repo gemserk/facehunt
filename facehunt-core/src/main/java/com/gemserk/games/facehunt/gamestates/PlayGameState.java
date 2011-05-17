@@ -101,7 +101,7 @@ public class PlayGameState extends GameStateImpl {
 
 	static class Wave {
 
-		public String introduction;
+		public String texts;
 
 		public int normalCritters = 0;
 
@@ -109,12 +109,12 @@ public class PlayGameState extends GameStateImpl {
 
 	private Wave[] waves = new Wave[] { new Wave() {
 		{
-			introduction = "Don't let the faces to escape,\nkill'em all by touching over them.";
+			texts = "Don't let the faces escape,\nkill 5 faces by touching over them.";
 			normalCritters = 5;
 		}
 	}, new Wave() {
 		{
-			introduction = "Nicely done but don't celebrate yet,\nmore faces are coming!";
+			texts = "Nicely done but don't celebrate yet,\nmore faces are coming!";
 			normalCritters = 15;
 		}
 	}, };
@@ -419,17 +419,14 @@ public class PlayGameState extends GameStateImpl {
 		if (currentWave != null) {
 			font.setColor(waveIntroductionColor);
 			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
-					currentWave.introduction, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
-		}
-		
-		if (internalGameState == InternalGameState.INTRO) {
-			font.setColor(waveIntroductionColor);
+					currentWave.texts, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
+			
 			font.setScale(0.7f);
 			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
 					"tap to continue", (Gdx.graphics.getWidth() * 0.8f), (Gdx.graphics.getHeight() * 0.1f));
 			font.setScale(1f);
 		}
-
+		
 		spriteBatch.end();
 	}
 

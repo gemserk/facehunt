@@ -34,6 +34,8 @@ public class MenuGameState extends GameStateImpl {
 	private BitmapFont titleFont;
 
 	private Sprite happyFaceSprite;
+	
+	private float happyFaceAngle = 0f;
 
 	public MenuGameState(FaceHuntGame game) {
 		this.game = game;
@@ -101,8 +103,10 @@ public class MenuGameState extends GameStateImpl {
 		
 		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
 		
-		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f, 0f);
-		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f, 0f);
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f, happyFaceAngle);
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f, -happyFaceAngle);
+		
+		happyFaceAngle += 0.05f * delta;
 
 		spriteBatch.end();
 	}
