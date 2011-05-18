@@ -446,12 +446,8 @@ public class PlayGameState extends GameStateImpl {
 	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
 		for (int i = 0; i < count; i++) {
 			Entity entity = world.createEntity();
-			createDeadFacePart(entity, getRandomFacePart(), spatial, aliveTime, color);
+			entityFactory.deadFacePartTemplate(entity, getRandomFacePart(), spatial, aliveTime, color);
 		}
-	}
-
-	void createDeadFacePart(Entity entity, Sprite sprite, Spatial spatial, final int aliveTime, Color color) {
-		entityFactory.createDeadFacePart(entity, sprite, spatial, aliveTime, color);
 	}
 
 	@Override

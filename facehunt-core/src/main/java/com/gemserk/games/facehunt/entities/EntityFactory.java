@@ -32,7 +32,7 @@ public class EntityFactory {
 		this.bodyBuilder = bodyBuilder;
 	}
 
-	public void createDeadFacePart(Entity entity, Sprite sprite, Spatial spatial, final int aliveTime, Color color) {
+	public void deadFacePartTemplate(Entity entity, Sprite sprite, Spatial spatial, int aliveTime, Color color) {
 		entity.setGroup(Groups.FaceGroup);
 
 		Color hideColor = new Color(color.r, color.g, color.b, 0f);
