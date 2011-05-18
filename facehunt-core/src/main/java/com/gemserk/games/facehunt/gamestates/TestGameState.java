@@ -83,6 +83,8 @@ public class TestGameState extends GameStateImpl {
 	private FaceHuntController controller;
 
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
+	
+	private final Vector2 mousePosition = new Vector2();
 
 	public TestGameState(FaceHuntGame game) {
 		this.game = game;
@@ -161,10 +163,13 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
 
-		createBorder(viewportWidth * 0.5f, 0, viewportWidth, 10);
-		createBorder(viewportWidth * 0.5f, viewportHeight, viewportWidth, 10);
-		createBorder(0, viewportHeight * 0.5f, 10, viewportHeight);
-		createBorder(viewportWidth, viewportHeight * 0.5f, 10, viewportHeight);
+		float worldWidth = viewportWidth;
+		float worldHeight = viewportHeight;
+		
+		createBorder(worldWidth * 0.5f, 0, worldWidth, 10);
+		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 10);
+		createBorder(0, worldHeight * 0.5f, 10, worldHeight);
+		createBorder(worldWidth, worldHeight * 0.5f, 10, worldHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 
@@ -310,15 +315,15 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.update(delta);
 
 		if (inputDevicesMonitor.getButton("insertFace1").isPressed()) {
-			float x = Gdx.input.getX();
-			float y = Gdx.graphics.getHeight() - Gdx.input.getY();
-			createFaceFirstType(x, y, new Vector2(10f, 0f), 0f, 10000, Color.WHITE);
+			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+			worldCamera.unproject(mousePosition);
+			createFaceFirstType(mousePosition.x, mousePosition.y, new Vector2(10f, 0f), 0f, 10000, Color.WHITE);
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
-			float x = Gdx.input.getX();
-			float y = Gdx.graphics.getHeight() - Gdx.input.getY();
-			createFaceSecondType(x, y, new Vector2(10f, 0f), 0f, 10000);
+			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+			worldCamera.unproject(mousePosition);
+			createFaceSecondType(mousePosition.x, mousePosition.y, new Vector2(10f, 0f), 0f, 10000);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
