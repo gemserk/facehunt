@@ -40,6 +40,7 @@ import com.gemserk.commons.artemis.systems.SpriteRendererSystem;
 import com.gemserk.commons.artemis.systems.SpriteUpdateSystem;
 import com.gemserk.commons.artemis.systems.TimerSystem;
 import com.gemserk.commons.artemis.triggers.AbstractTrigger;
+import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
 import com.gemserk.commons.gdx.camera.Camera;
@@ -309,7 +310,7 @@ public class PlayGameState extends GameStateImpl {
 		Entity entity = world.createEntity();
 		final int minTime = 3000;
 		final int maxTime = 5000;
-		entity.addComponent(new TimerComponent(MathUtils.random(minTime, maxTime), new AbstractTrigger() {
+		Trigger firstSpawnerTrigger = new AbstractTrigger() {
 			@Override
 			public boolean handle(Entity e) {
 
@@ -341,8 +342,8 @@ public class PlayGameState extends GameStateImpl {
 
 				return false;
 			}
-		}));
-		entity.refresh();
+		};
+		entityFactory.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
 	}
 
 	Entity createFaceFirstType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {

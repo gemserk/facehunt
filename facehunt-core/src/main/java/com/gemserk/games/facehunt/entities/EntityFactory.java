@@ -18,6 +18,7 @@ import com.gemserk.commons.artemis.components.SpatialPhysicsImpl;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
 import com.gemserk.commons.artemis.triggers.AbstractTrigger;
+import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
 import com.gemserk.games.facehunt.Groups;
 
@@ -30,6 +31,11 @@ public class EntityFactory {
 	public EntityFactory(World world, BodyBuilder bodyBuilder) {
 		this.world = world;
 		this.bodyBuilder = bodyBuilder;
+	}
+	
+	public void spawnerTemplate(Entity entity, int time, Trigger onSpawnTrigger) {
+		entity.addComponent(new TimerComponent(time, onSpawnTrigger));
+		entity.refresh();
 	}
 
 	public void deadFacePartTemplate(Entity entity, Sprite sprite, Spatial spatial, int aliveTime, Color color) {
