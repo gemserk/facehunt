@@ -25,15 +25,13 @@ public class RandomMovementBehaviorSystem extends EntityProcessingSystem {
 		if (randomMovementComponent.getCurrentTime() > 0)
 			return;
 
-		randomDirectionImpulse.set(2000f, 0f);
+		randomDirectionImpulse.set(3f, 0f);
 		randomDirectionImpulse.rotate(MathUtils.random(360f));
 
 		PhysicsComponent physicsComponent = e.getComponent(PhysicsComponent.class);
 		Body body = physicsComponent.getBody();
 
 		body.applyLinearImpulse(randomDirectionImpulse, body.getTransform().getPosition());
-
-		// body.setLinearVelocity(randomDirectionImpulse);
 
 		randomMovementComponent.setCurrentTime(randomMovementComponent.getTime());
 	}

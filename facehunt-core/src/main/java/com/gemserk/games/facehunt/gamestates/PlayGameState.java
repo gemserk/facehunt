@@ -158,7 +158,7 @@ public class PlayGameState extends GameStateImpl {
 		// worldCamera.center(viewportWidth / 2, viewportHeight / 2);
 		worldCamera.center(0f, 0f);
 
-		cameraData = new CameraImpl(0f, 0f, 1f, 0f);
+		cameraData = new CameraImpl(0f, 0f, 64f, 0f);
 		gameData = new GameData();
 
 		gameData.normalCrittersKilled = 0;
@@ -205,7 +205,7 @@ public class PlayGameState extends GameStateImpl {
 		renderLayers.add(new RenderLayer(-1000, -100, backgroundLayerCamera));
 		renderLayers.add(new RenderLayer(-100, 100, worldCamera));
 
-		controller = new FaceHuntControllerImpl(new LibgdxPointer(0), new LibgdxPointer(1));
+		controller = new FaceHuntControllerImpl(new LibgdxPointer(0, worldCamera), new LibgdxPointer(1, worldCamera));
 
 		physicsWorld = new com.badlogic.gdx.physics.box2d.World(new Vector2(0f, 0f), false);
 		bodyBuilder = new BodyBuilder(physicsWorld);
@@ -223,19 +223,23 @@ public class PlayGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
+		
+		entityFactory = new EntityFactory(world, bodyBuilder);
 
-		createBorder(viewportWidth * 0.5f, 0, viewportWidth, 10);
-		createBorder(viewportWidth * 0.5f, viewportHeight, viewportWidth, 10);
+		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
+		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
 
-		createBorder(0, viewportHeight * 0.5f, 10, viewportHeight);
-		createBorder(viewportWidth, viewportHeight * 0.5f, 10, viewportHeight);
+		createBorder(worldWidth * 0.5f, 0, worldWidth, 0.1f);
+		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 0.1f);
+		createBorder(0, worldHeight * 0.5f, 0.1f, worldHeight);
+		createBorder(worldWidth, worldHeight * 0.5f, 0.1f, worldHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 
 		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
 
-		createFirstTypeFaceSpawner(new Rectangle(64, 64, viewportWidth - 128, viewportHeight - 128));
-		createSecondTypeFaceSpawner(new Rectangle(64, 64, viewportWidth - 128, viewportHeight - 128));
+		createFirstTypeFaceSpawner(new Rectangle(1, 1, worldWidth - 2, worldHeight - 2));
+		createSecondTypeFaceSpawner(new Rectangle(1, 1, worldWidth - 2, worldHeight - 2));
 
 		world.loopStart();
 
@@ -245,7 +249,7 @@ public class PlayGameState extends GameStateImpl {
 
 		internalGameState = InternalGameState.PREPARE_INTRO;
 		
-		entityFactory = new EntityFactory(world, bodyBuilder);
+
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -291,12 +295,12 @@ public class PlayGameState extends GameStateImpl {
 					angularVelocity = -angularVelocity;
 
 				Vector2 linearVelocity = new Vector2(0f, 0f);
-				linearVelocity.x = MathUtils.random(50f, 150f);
+				linearVelocity.x = MathUtils.random(1f, 4f);
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
+				createFaceFirstType(x, y, 1f, 1f, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -331,12 +335,12 @@ public class PlayGameState extends GameStateImpl {
 					angularVelocity = -angularVelocity;
 
 				Vector2 linearVelocity = new Vector2(0f, 0f);
-				linearVelocity.x = MathUtils.random(50f, 150f);
+				linearVelocity.x = MathUtils.random(1f, 4f);
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFaceSecondType(x, y, linearVelocity, angularVelocity, aliveTime);
+				createFaceSecondType(x, y, 1f, 1f, linearVelocity, angularVelocity, aliveTime);
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -347,7 +351,7 @@ public class PlayGameState extends GameStateImpl {
 		entityFactory.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
 	}
 
-	Entity createFaceFirstType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
+	Entity createFaceFirstType(float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
 		Entity entity = world.createEntity();
 		entity.setGroup(Groups.FaceGroup);
 
@@ -367,7 +371,7 @@ public class PlayGameState extends GameStateImpl {
 
 		Body body = getBodyBuilder() //
 				.type(BodyType.DynamicBody) //
-				.circleShape(32f) //
+				.circleShape(width * 0.5f) //
 				.mass(1f)//
 				.friction(0f)//
 				.restitution(1f)//
@@ -379,7 +383,7 @@ public class PlayGameState extends GameStateImpl {
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		entity.addComponent(new PhysicsComponent(body));
-		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, 64f, 64f)));
+		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, width, height)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new PointsComponent(100));
 		entity.addComponent(new HitComponent(new AbstractTrigger() {
@@ -430,8 +434,8 @@ public class PlayGameState extends GameStateImpl {
 		return entity;
 	}
 
-	void createFaceSecondType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Entity e = createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
+	void createFaceSecondType(float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
+		Entity e = createFaceFirstType(x, y, width, height, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
 	}
