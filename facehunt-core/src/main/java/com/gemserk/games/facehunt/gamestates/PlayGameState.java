@@ -24,12 +24,10 @@ import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
-import com.gemserk.commons.artemis.components.HitComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpatialImpl;
-import com.gemserk.commons.artemis.components.SpatialPhysicsImpl;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
 import com.gemserk.commons.artemis.systems.HitDetectionSystem;
@@ -52,8 +50,6 @@ import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Groups;
-import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
-import com.gemserk.games.facehunt.components.FaceControllerComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
@@ -357,56 +353,25 @@ public class PlayGameState extends GameStateImpl {
 
 	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
 
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-
-		final Color faceColor = new Color(color);
-
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
-			@Override
-			public void onTransitionFinished(Transition<Color> transition) {
-				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
-			}
-		});
-
-		Entity entity = world.createEntity();
-		entity.setGroup(Groups.FaceGroup);
-
-		Body body = getBodyBuilder() //
-				.type(BodyType.DynamicBody) //
-				.circleShape(spatial.getWidth() * 0.5f) //
-				.mass(1f)//
-				.friction(0f)//
-				.restitution(1f)//
-				.userData(entity)//
-				.position(spatial.getX(), spatial.getY())//
-				.build();
-
-		body.setLinearVelocity(linearVelocity);
-		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
-
-		entity.addComponent(new PhysicsComponent(body));
-		entity.addComponent(new BounceSmallVelocityFixComponent());
-		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
-		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
-		entity.addComponent(new PointsComponent(100));
-		entity.addComponent(new HitComponent(new AbstractTrigger() {
+		AbstractTrigger hitTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
 				sound.play();
 				return false;
 			}
-		}));
-		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
+		};
+
+		AbstractTrigger timerTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
 				world.deleteEntity(e);
 				gameData.lives--;
 				return true;
 			}
-		}));
-		entity.addComponent(new FaceControllerComponent(controller, new AbstractTrigger() {
+		};
+
+		AbstractTrigger touchTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
 				// world.add animation face...
@@ -432,9 +397,27 @@ public class PlayGameState extends GameStateImpl {
 
 				return true;
 			}
-		}));
+		};
+
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+
+		final Color faceColor = new Color(color);
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
+			@Override
+			public void onTransitionFinished(Transition<Color> transition) {
+				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
+			}
+		});
+
+		Entity entity = world.createEntity();
+
+		entityFactory.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
+		entityFactory.touchableTemplate(entity, controller, touchTrigger);
 
 		entity.refresh();
+
 		return entity;
 	}
 
@@ -455,8 +438,9 @@ public class PlayGameState extends GameStateImpl {
 
 	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
 		for (int i = 0; i < count; i++) {
-			Entity entity = world.createEntity();
-			entityFactory.deadFacePartTemplate(entity, getRandomFacePart(), spatial, aliveTime, color);
+			Entity e = world.createEntity();
+			entityFactory.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color);
+			e.refresh();
 		}
 	}
 
