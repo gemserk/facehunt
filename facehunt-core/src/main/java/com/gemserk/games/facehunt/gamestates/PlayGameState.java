@@ -52,12 +52,14 @@ import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Groups;
+import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
 import com.gemserk.games.facehunt.components.FaceControllerComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.EntityFactory;
+import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.games.facehunt.values.GameData;
@@ -188,7 +190,7 @@ public class PlayGameState extends GameStateImpl {
 				sprite("Part04", "FaceSpriteSheet", 64 * 3, 64 * 0, 64, 64);
 				sprite("Part05", "FaceSpriteSheet", 64 * 0, 64 * 1, 64, 64);
 
-				sound("CritterKilledSound", "data/critter-killed.wav");
+				sound("CritterKilledSound", "data/bounce.wav");
 				sound("CritterSpawnedSound", "data/critter-spawned.wav");
 				sound("CritterBounceSound", "data/bounce.wav");
 
@@ -217,13 +219,14 @@ public class PlayGameState extends GameStateImpl {
 		worldWrapper.addRenderSystem(new SpriteUpdateSystem());
 		worldWrapper.addRenderSystem(new SpriteRendererSystem(renderLayers));
 		worldWrapper.addUpdateSystem(new PhysicsSystem(physicsWorld));
+		worldWrapper.addUpdateSystem(new BounceSmallVelocityFixSystem());
 		worldWrapper.addUpdateSystem(new HitDetectionSystem());
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
-		
+
 		entityFactory = new EntityFactory(world, bodyBuilder);
 
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
@@ -248,7 +251,6 @@ public class PlayGameState extends GameStateImpl {
 		currentText = "";
 
 		internalGameState = InternalGameState.PREPARE_INTRO;
-		
 
 	}
 
@@ -300,7 +302,8 @@ public class PlayGameState extends GameStateImpl {
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFaceFirstType(new SpatialImpl(x, y, 1f, 1f, 0f), linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
+				Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+				createFaceFirstType(new SpatialImpl(x, y, 1f, 1f, 0f), sprite, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -340,7 +343,8 @@ public class PlayGameState extends GameStateImpl {
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFaceSecondType(new SpatialImpl(x, y, 1f, 1f, 0f), linearVelocity, angularVelocity, aliveTime);
+				Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+				createFaceSecondType(new SpatialImpl(x, y, 1f, 1f, 0f), sprite, linearVelocity, angularVelocity, aliveTime);
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -351,11 +355,7 @@ public class PlayGameState extends GameStateImpl {
 		entityFactory.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
 	}
 
-	Entity createFaceFirstType(Spatial spatial, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
-		Entity entity = world.createEntity();
-		entity.setGroup(Groups.FaceGroup);
-		
-		Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
 
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
@@ -368,6 +368,9 @@ public class PlayGameState extends GameStateImpl {
 				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
 			}
 		});
+
+		Entity entity = world.createEntity();
+		entity.setGroup(Groups.FaceGroup);
 
 		Body body = getBodyBuilder() //
 				.type(BodyType.DynamicBody) //
@@ -383,6 +386,7 @@ public class PlayGameState extends GameStateImpl {
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		entity.addComponent(new PhysicsComponent(body));
+		entity.addComponent(new BounceSmallVelocityFixComponent());
 		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new PointsComponent(100));
@@ -413,7 +417,7 @@ public class PlayGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 10, 1500, currentColor);
+				createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 				gameData.normalCrittersKilled++;
@@ -434,8 +438,8 @@ public class PlayGameState extends GameStateImpl {
 		return entity;
 	}
 
-	void createFaceSecondType(Spatial spatial, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Entity e = createFaceFirstType(spatial, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
+	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
+		Entity e = createFaceFirstType(spatial, sprite, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
 	}

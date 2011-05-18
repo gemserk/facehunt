@@ -48,12 +48,14 @@ import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Groups;
+import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
 import com.gemserk.games.facehunt.components.FaceControllerComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.EntityFactory;
+import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.resources.ResourceManager;
@@ -157,6 +159,7 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addRenderSystem(new SpriteUpdateSystem());
 		worldWrapper.addRenderSystem(new SpriteRendererSystem(renderLayers));
 		worldWrapper.addUpdateSystem(new PhysicsSystem(physicsWorld));
+		worldWrapper.addUpdateSystem(new BounceSmallVelocityFixSystem());
 		worldWrapper.addUpdateSystem(new HitDetectionSystem());
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
@@ -194,8 +197,15 @@ public class TestGameState extends GameStateImpl {
 
 	void createBorder(float x, float y, float w, float h) {
 		Entity entity = world.createEntity();
-		Body body = getBodyBuilder().type(BodyType.StaticBody).boxShape(w * 0.5f, h * 0.5f).mass(1f)//
-				.friction(0f).userData(entity).position(x, y).build();
+		Body body = getBodyBuilder() //
+				.type(BodyType.StaticBody) //
+				.boxShape(w * 0.5f, h * 0.5f) //
+				.restitution(1f) //
+				.mass(1f)//
+				.friction(0f) //
+				.userData(entity) //
+				.position(x, y) //
+				.build();
 		entity.addComponent(new PhysicsComponent(body));
 		entity.refresh();
 	}
@@ -228,10 +238,12 @@ public class TestGameState extends GameStateImpl {
 				.position(x, y)//
 				.build();
 
-		body.setLinearVelocity(linearVelocity);
+		body.applyLinearImpulse(linearVelocity, body.getTransform().getPosition());
+		// body.setLinearVelocity(linearVelocity);
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		entity.addComponent(new PhysicsComponent(body));
+		entity.addComponent(new BounceSmallVelocityFixComponent());
 		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, width, height)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new PointsComponent(100));
@@ -261,7 +273,7 @@ public class TestGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 10, 1500, currentColor);
+				createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -318,13 +330,13 @@ public class TestGameState extends GameStateImpl {
 		if (inputDevicesMonitor.getButton("insertFace1").isPressed()) {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
-			createFaceFirstType(mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(1f, 0f), 0f, 10000, new Color(1f, 1f, 0f, 1f));
+			createFaceFirstType(mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(0.9f, 0f), 0f, 10000, new Color(1f, 1f, 0f, 1f));
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
-			createFaceSecondType(mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(1f, 0f), 0f, 10000);
+			createFaceSecondType(mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(0.9f, 0f), 0f, 10000);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))

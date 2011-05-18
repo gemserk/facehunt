@@ -47,12 +47,13 @@ public class EntityFactory {
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(color).end(hideColor).time(aliveTime) //
 				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
 
-		float radius = MathUtils.random(spatial.getWidth() * 0.1f, spatial.getWidth() * 0.3f);
+		float radius = MathUtils.random(spatial.getWidth() * 0.1f, spatial.getWidth() * 0.2f);
 
 		Body body = bodyBuilder //
 				.type(BodyType.DynamicBody) //
 				.circleShape(radius) //
 				.mass(1f)//
+				.bullet()//
 				.friction(0f)//
 				.restitution(1f)//
 				.userData(entity)//
@@ -61,13 +62,13 @@ public class EntityFactory {
 
 		Vector2 impulse = new Vector2(1f, 0f);
 		impulse.rotate(MathUtils.random(0f, 360f));
-		impulse.mul(MathUtils.random(2f, 5f));
+		impulse.mul(MathUtils.random(1f, 3f));
 
 		body.applyLinearImpulse(impulse, body.getTransform().getPosition());
 		body.setAngularVelocity(MathUtils.random(-5f, 5f));
 
 		entity.addComponent(new PhysicsComponent(body));
-		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, radius * 3, radius * 3)));
+		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial.getWidth() * 0.6f, spatial.getHeight() * 0.6f)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
 			@Override
