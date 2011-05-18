@@ -300,7 +300,7 @@ public class PlayGameState extends GameStateImpl {
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFaceFirstType(x, y, 1f, 1f, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
+				createFaceFirstType(new SpatialImpl(x, y, 1f, 1f, 0f), linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -340,7 +340,7 @@ public class PlayGameState extends GameStateImpl {
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
-				createFaceSecondType(x, y, 1f, 1f, linearVelocity, angularVelocity, aliveTime);
+				createFaceSecondType(new SpatialImpl(x, y, 1f, 1f, 0f), linearVelocity, angularVelocity, aliveTime);
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -351,10 +351,10 @@ public class PlayGameState extends GameStateImpl {
 		entityFactory.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
 	}
 
-	Entity createFaceFirstType(float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
+	Entity createFaceFirstType(Spatial spatial, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
 		Entity entity = world.createEntity();
 		entity.setGroup(Groups.FaceGroup);
-
+		
 		Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
@@ -371,19 +371,19 @@ public class PlayGameState extends GameStateImpl {
 
 		Body body = getBodyBuilder() //
 				.type(BodyType.DynamicBody) //
-				.circleShape(width * 0.5f) //
+				.circleShape(spatial.getWidth() * 0.5f) //
 				.mass(1f)//
 				.friction(0f)//
 				.restitution(1f)//
 				.userData(entity)//
-				.position(x, y)//
+				.position(spatial.getX(), spatial.getY())//
 				.build();
 
 		body.setLinearVelocity(linearVelocity);
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		entity.addComponent(new PhysicsComponent(body));
-		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, width, height)));
+		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new PointsComponent(100));
 		entity.addComponent(new HitComponent(new AbstractTrigger() {
@@ -434,8 +434,8 @@ public class PlayGameState extends GameStateImpl {
 		return entity;
 	}
 
-	void createFaceSecondType(float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Entity e = createFaceFirstType(x, y, width, height, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
+	void createFaceSecondType(Spatial spatial, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
+		Entity e = createFaceFirstType(spatial, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
 	}
