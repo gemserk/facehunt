@@ -8,13 +8,15 @@ import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizer;
-import com.gemserk.commons.gdx.ScreenAdapter;
+import com.gemserk.commons.gdx.GameStateImpl;
+import com.gemserk.commons.gdx.Screen;
+import com.gemserk.commons.gdx.ScreenImpl;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class FadeTransitionScreen extends ScreenAdapter {
+public class FadeTransitionScreen extends ScreenImpl {
 
 	private final FaceHuntGame game;
 
@@ -30,21 +32,33 @@ public class FadeTransitionScreen extends ScreenAdapter {
 
 	private Sprite overlay;
 
-	private ScreenAdapter currentScreen;
+	private Screen currentScreen;
 
-	private ScreenAdapter nextScreen;
+	private Screen nextScreen;
 
 	private int time;
 
 	private boolean shouldDisposeCurrent;
 	
 	private Synchronizer synchronizer;
+	
+	private Screen getCurrentScreen() {
+		return currentScreen;
+	}
+	
+	private Screen getNextScreen() {
+		return nextScreen;
+	}
+	
+	private void setCurrentScreen(Screen currentScreen) {
+		this.currentScreen = currentScreen;
+	}
 
-	public void transition(ScreenAdapter currentScreen, ScreenAdapter nextScreen, int time) {
+	public void transition(Screen currentScreen, Screen nextScreen, int time) {
 		this.transition(currentScreen, nextScreen, time, false);
 	}
 	
-	public void transition(ScreenAdapter currentScreen, ScreenAdapter nextScreen, int time, boolean shouldDisposeCurrent) {
+	public void transition(Screen currentScreen, Screen nextScreen, int time, boolean shouldDisposeCurrent) {
 		this.currentScreen = currentScreen;
 		this.nextScreen = nextScreen;
 		this.time = time;
@@ -52,6 +66,7 @@ public class FadeTransitionScreen extends ScreenAdapter {
 	}
 
 	public FadeTransitionScreen(FaceHuntGame game) {
+		super(new GameStateImpl());
 		this.game = game;
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
@@ -64,33 +79,40 @@ public class FadeTransitionScreen extends ScreenAdapter {
 	}
 
 	@Override
-	public void show() {
-		
+	public void resume() {
 		synchronizer = new Synchronizer();
 		
 		overlay = resourceManager.getResourceValue("OverlaySprite");
 		overlay.setPosition(0, 0);
 		overlay.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-		if (currentScreen == null) {
-			currentScreen = nextScreen;
+		
+		if (getCurrentScreen() == null) {
+			setCurrentScreen(getNextScreen());
+			getCurrentScreen().init();
+			getCurrentScreen().show();
 			synchronizer.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
 				@Override
 				public void onTransitionFinished(Transition transition) {
-					game.setScreen(nextScreen);
+					getCurrentScreen().resume();
+					game.setScreen(getCurrentScreen());
 				}
 			});
 		} else {
+			getCurrentScreen().pause();
 			synchronizer.transition(fadeColor, Transitions.transitionBuilder(endColor).end(startColor).time(time / 2), new TransitionEventHandler() {
 				@Override
 				public void onTransitionFinished(Transition transition) {
+					getCurrentScreen().hide();
 					if (shouldDisposeCurrent)
-						currentScreen.dispose();
-					currentScreen = nextScreen;
+						getCurrentScreen().dispose();
+					setCurrentScreen(getNextScreen());
+					getCurrentScreen().init();
+					getCurrentScreen().show();
 					synchronizer.transition(fadeColor, Transitions.transitionBuilder(startColor).end(endColor).time(time / 2), new TransitionEventHandler() {
 						@Override
 						public void onTransitionFinished(Transition transition) {
-							game.setScreen(nextScreen);
+							getCurrentScreen().resume();
+							game.setScreen(getCurrentScreen());
 						}
 					});
 				}
@@ -99,9 +121,9 @@ public class FadeTransitionScreen extends ScreenAdapter {
 	}
 	
 	@Override
-	public void internalRender(float delta) {
+	public void render(int delta) {
 		if (currentScreen != null)
-			currentScreen.internalRender(delta);
+			currentScreen.render(delta);
 
 		if (spriteBatch == null)
 			return;
@@ -113,9 +135,8 @@ public class FadeTransitionScreen extends ScreenAdapter {
 	}
 
 	@Override
-	public void internalUpdate(float delta) {
-		long deltaInMs = (long) (delta * 1000f);
-		synchronizer.synchronize(deltaInMs);
+	public void update(int delta) {
+		synchronizer.synchronize(delta);
 	}
 	
 	@Override

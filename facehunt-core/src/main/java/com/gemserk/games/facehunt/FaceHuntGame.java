@@ -1,12 +1,12 @@
 package com.gemserk.games.facehunt;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
-import com.gemserk.commons.gdx.InternalScreen;
-import com.gemserk.commons.gdx.ScreenAdapter;
+import com.gemserk.commons.gdx.Game;
+import com.gemserk.commons.gdx.Screen;
+import com.gemserk.commons.gdx.ScreenImpl;
 import com.gemserk.games.facehunt.gamestates.MenuGameState;
 import com.gemserk.games.facehunt.gamestates.PlayGameState;
 import com.gemserk.games.facehunt.gamestates.ScoreGameState;
@@ -17,13 +17,13 @@ public class FaceHuntGame extends Game {
 
 	public FadeTransitionScreen fadeTransitionScreen;
 
-	public InternalScreen splashScreen;
+	public Screen splashScreen;
 	
-	public InternalScreen gameScreen;
+	public Screen gameScreen;
 
-	public InternalScreen menuScreen;
+	public Screen menuScreen;
 
-	public InternalScreen scoreScreen;
+	public Screen scoreScreen;
 
 	public ScoreGameState scoreGameState;
 
@@ -37,27 +37,36 @@ public class FaceHuntGame extends Game {
 		playGameState = new PlayGameState(this);
 		scoreGameState = new ScoreGameState(this);
 
-		menuScreen = new InternalScreen(new MenuGameState(this));
-		gameScreen = new InternalScreen(playGameState);
-		scoreScreen = new InternalScreen(scoreGameState);
-		splashScreen = new InternalScreen(new SplashGameState(this));
+		menuScreen = new ScreenImpl(new MenuGameState(this));
+		gameScreen = new ScreenImpl(playGameState);
+		scoreScreen = new ScreenImpl(scoreGameState);
+		splashScreen = new ScreenImpl(new SplashGameState(this));
 
 		fadeTransitionScreen = new FadeTransitionScreen(this);
 
 		transition(null, splashScreen);
 	}
+	
+	@Override
+	public void setScreen(Screen screen) {
+		this.screen = screen;
+	}
 
-	public void transition(ScreenAdapter nextScreen) {
+	public void transition(Screen nextScreen) {
 		this.transition(nextScreen, false);
 	}
 
-	public void transition(ScreenAdapter nextScreen, boolean shouldDisposeCurrent) {
-		fadeTransitionScreen.transition((ScreenAdapter) this.getScreen(), nextScreen, 1000, shouldDisposeCurrent);
+	public void transition(Screen nextScreen, boolean shouldDisposeCurrent) {
+		fadeTransitionScreen.transition(getScreen(), nextScreen, 1000, shouldDisposeCurrent);
+		fadeTransitionScreen.resume();
+		fadeTransitionScreen.show();
 		setScreen(fadeTransitionScreen);
 	}
 
-	public void transition(ScreenAdapter currentScreen, ScreenAdapter nextScreen) {
+	public void transition(Screen currentScreen, Screen nextScreen) {
 		fadeTransitionScreen.transition(currentScreen, nextScreen, 1000);
+		fadeTransitionScreen.resume();
+		fadeTransitionScreen.show();
 		setScreen(fadeTransitionScreen);
 	}
 
