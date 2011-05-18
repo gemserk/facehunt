@@ -19,18 +19,22 @@ public class RandomMovementBehaviorSystem extends EntityProcessingSystem {
 	@Override
 	protected void process(Entity e) {
 		RandomMovementBehaviorComponent randomMovementComponent = e.getComponent(RandomMovementBehaviorComponent.class);
-		
+
 		randomMovementComponent.setCurrentTime(randomMovementComponent.getCurrentTime() - world.getDelta());
-		
+
 		if (randomMovementComponent.getCurrentTime() > 0)
 			return;
-		
-		randomDirectionImpulse.set(500f, 0f);
+
+		randomDirectionImpulse.set(2000f, 0f);
 		randomDirectionImpulse.rotate(MathUtils.random(360f));
+
 		PhysicsComponent physicsComponent = e.getComponent(PhysicsComponent.class);
 		Body body = physicsComponent.getBody();
+
 		body.applyLinearImpulse(randomDirectionImpulse, body.getTransform().getPosition());
-		
+
+		// body.setLinearVelocity(randomDirectionImpulse);
+
 		randomMovementComponent.setCurrentTime(randomMovementComponent.getTime());
 	}
 

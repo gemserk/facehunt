@@ -131,7 +131,8 @@ public class TestGameState extends GameStateImpl {
 		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
 		
 		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {{ 
-			monitorMouseRightButton("insertFace");
+			monitorKey("insertFace1", Keys.NUM_1);
+			monitorKey("insertFace2", Keys.NUM_2);
 		}};
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
@@ -345,10 +346,16 @@ public class TestGameState extends GameStateImpl {
 		inputDevicesMonitor.update();
 		worldWrapper.update(delta);
 		
-		if (inputDevicesMonitor.getButton("insertFace").isPressed()) {
+		if (inputDevicesMonitor.getButton("insertFace1").isPressed()) {
 			float x = Gdx.input.getX();
 			float y = Gdx.graphics.getHeight() - Gdx.input.getY();
 			createFaceFirstType(x, y, new Vector2(10f, 0f), 0f, 10000, Color.WHITE);
+		}
+		
+		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
+			float x = Gdx.input.getX();
+			float y = Gdx.graphics.getHeight() - Gdx.input.getY();
+			createFaceSecondType(x, y, new Vector2(10f, 0f), 0f, 10000);
 		}
 		
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
