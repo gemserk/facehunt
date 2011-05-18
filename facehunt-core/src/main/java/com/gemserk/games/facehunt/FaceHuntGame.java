@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
-import com.gemserk.commons.gdx.Game;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.ScreenImpl;
 import com.gemserk.games.facehunt.gamestates.MenuGameState;
@@ -14,18 +13,18 @@ import com.gemserk.games.facehunt.gamestates.SplashGameState;
 import com.gemserk.games.facehunt.gamestates.TestGameState;
 import com.gemserk.games.facehunt.screens.FadeTransitionScreen;
 
-public class FaceHuntGame extends Game {
+public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	public FadeTransitionScreen fadeTransitionScreen;
 
 	public Screen splashScreen;
-	
+
 	public Screen gameScreen;
 
 	public Screen menuScreen;
 
 	public Screen scoreScreen;
-	
+
 	public Screen testScreen;
 
 	public ScoreGameState scoreGameState;
@@ -50,7 +49,7 @@ public class FaceHuntGame extends Game {
 
 		transition(null, splashScreen);
 	}
-	
+
 	@Override
 	public void setScreen(Screen screen) {
 		this.screen = screen;
