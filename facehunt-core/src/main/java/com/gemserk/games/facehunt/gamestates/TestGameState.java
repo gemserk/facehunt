@@ -4,17 +4,13 @@ import java.util.ArrayList;
 
 import com.artemis.Entity;
 import com.artemis.World;
-import com.artemis.utils.ImmutableBag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -46,8 +42,9 @@ import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
-import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
+import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
+import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.FaceControllerComponent;
@@ -57,17 +54,14 @@ import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
-import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class PlayGameState extends GameStateImpl {
+public class TestGameState extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
 	private ResourceManager<String> resourceManager;
-
-	private SpriteBatch spriteBatch;
 
 	private Libgdx2dCameraTransformImpl worldCamera = new Libgdx2dCameraTransformImpl();
 
@@ -79,8 +73,6 @@ public class PlayGameState extends GameStateImpl {
 
 	private World world;
 
-	public boolean gameOver = true;
-
 	private com.badlogic.gdx.physics.box2d.World physicsWorld;
 
 	private BodyBuilder bodyBuilder;
@@ -89,78 +81,20 @@ public class PlayGameState extends GameStateImpl {
 
 	private FaceHuntController controller;
 
-	private GameData gameData;
+	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
 
-	private BitmapFont font;
-
-	private Sprite heartSprite;
-
-	private Color waveIntroductionColor = new Color();
-
-	static class Wave {
-
-		public String[] texts;
-
-		public int firstTypeCritters = 0;
-
-		public int secondTypeCritters = 0;
-
-	}
-
-	private Wave[] waves = new Wave[] { new Wave() {
-		{
-			texts = new String[] { "Don't let the faces escape,\ntouch over them to kill'em.", "Let's practice, kill 15 faces..." };
-			firstTypeCritters = 15;
-			secondTypeCritters = 0;
-		}
-	}, new Wave() {
-		{
-			texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "And they have new powers..." };
-			firstTypeCritters = 15;
-			secondTypeCritters = 5;
-		}
-	}, new Wave() {
-		{
-			texts = new String[] { "Well well, it seems like someone\n is improving their skills.", "But, this war is just starting..." };
-			firstTypeCritters = 10000;
-			secondTypeCritters = 10000;
-		}
-	}, };
-
-	private int currentWaveIndex;
-
-	private int currentTextIndex;
-
-	private Wave currentWave;
-
-	private String currentText;
-
-	enum InternalGameState {
-		INTRO, PLAYING, PREPARE_INTRO
-	}
-
-	InternalGameState internalGameState;
-
-	public PlayGameState(FaceHuntGame game) {
+	public TestGameState(FaceHuntGame game) {
 		this.game = game;
 	}
 
-	public void restartGame() {
-
-		gameOver = false;
-
+	@Override
+	public void init() {
 		int viewportWidth = Gdx.graphics.getWidth();
 		int viewportHeight = Gdx.graphics.getHeight();
 
-		// worldCamera.center(viewportWidth / 2, viewportHeight / 2);
 		worldCamera.center(0f, 0f);
 
 		cameraData = new CameraImpl(0f, 0f, 1f, 0f);
-		gameData = new GameData();
-
-		gameData.normalCrittersKilled = 0;
-		gameData.points = 0;
-		gameData.lives = 2;
 
 		resourceManager = new ResourceManagerImpl<String>();
 
@@ -185,13 +119,15 @@ public class PlayGameState extends GameStateImpl {
 				font("Font", "data/font.png", "data/font.fnt");
 			}
 		};
-
-		spriteBatch = new SpriteBatch();
-
-		heartSprite = resourceManager.getResourceValue("HeartSprite");
-		font = resourceManager.getResourceValue("Font");
+		
+		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
+		
+		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {{ 
+			monitorMouseRightButton("insertFace");
+		}};
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
+		
 		renderLayers.add(new RenderLayer(-1000, -100, backgroundLayerCamera));
 		renderLayers.add(new RenderLayer(-100, 100, worldCamera));
 
@@ -216,24 +152,14 @@ public class PlayGameState extends GameStateImpl {
 
 		createBorder(viewportWidth * 0.5f, 0, viewportWidth, 10);
 		createBorder(viewportWidth * 0.5f, viewportHeight, viewportWidth, 10);
-
 		createBorder(0, viewportHeight * 0.5f, 10, viewportHeight);
 		createBorder(viewportWidth, viewportHeight * 0.5f, 10, viewportHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 
 		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
-
-		createFirstTypeFaceSpawner(new Rectangle(64, 64, viewportWidth - 128, viewportHeight - 128));
-		createSecondTypeFaceSpawner(new Rectangle(64, 64, viewportWidth - 128, viewportHeight - 128));
-
+		
 		world.loopStart();
-
-		currentWaveIndex = 0;
-		currentTextIndex = 0;
-		currentText = "";
-
-		internalGameState = InternalGameState.PREPARE_INTRO;
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -252,86 +178,6 @@ public class PlayGameState extends GameStateImpl {
 		Body body = getBodyBuilder().type(BodyType.StaticBody).boxShape(w * 0.5f, h * 0.5f).mass(1f)//
 				.friction(0f).userData(entity).position(x, y).build();
 		entity.addComponent(new PhysicsComponent(body));
-		entity.refresh();
-	}
-
-	void createFirstTypeFaceSpawner(final Rectangle spawnArea) {
-		Entity entity = world.createEntity();
-		final int minTime = 1000;
-		final int maxTime = 2000;
-		entity.addComponent(new TimerComponent(MathUtils.random(minTime, maxTime), new AbstractTrigger() {
-			@Override
-			public boolean handle(Entity e) {
-
-				if (gameData.normalCrittersKilled == currentWave.firstTypeCritters)
-					return false;
-
-				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
-				timerComponent.reset();
-				timerComponent.setCurrentTime(MathUtils.random(minTime, maxTime));
-
-				float x = MathUtils.random(spawnArea.x, spawnArea.width);
-				float y = MathUtils.random(spawnArea.y, spawnArea.height);
-
-				float angularVelocity = MathUtils.random(30f, 180f);
-
-				if (MathUtils.randomBoolean())
-					angularVelocity = -angularVelocity;
-
-				Vector2 linearVelocity = new Vector2(0f, 0f);
-				linearVelocity.x = MathUtils.random(50f, 150f);
-				linearVelocity.rotate(MathUtils.random(0f, 360f));
-
-				int aliveTime = MathUtils.random(3000, 7000);
-
-				createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
-
-				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
-				sound.play();
-
-				return false;
-			}
-		}));
-		entity.refresh();
-	}
-
-	void createSecondTypeFaceSpawner(final Rectangle spawnArea) {
-		Entity entity = world.createEntity();
-		final int minTime = 3000;
-		final int maxTime = 5000;
-		entity.addComponent(new TimerComponent(MathUtils.random(minTime, maxTime), new AbstractTrigger() {
-			@Override
-			public boolean handle(Entity e) {
-
-				if (gameData.secondCrittersKilled == currentWave.secondTypeCritters)
-					return false;
-
-				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
-				timerComponent.reset();
-				timerComponent.setCurrentTime(MathUtils.random(minTime, maxTime));
-
-				float x = MathUtils.random(spawnArea.x, spawnArea.width);
-				float y = MathUtils.random(spawnArea.y, spawnArea.height);
-
-				float angularVelocity = MathUtils.random(30f, 180f);
-
-				if (MathUtils.randomBoolean())
-					angularVelocity = -angularVelocity;
-
-				Vector2 linearVelocity = new Vector2(0f, 0f);
-				linearVelocity.x = MathUtils.random(50f, 150f);
-				linearVelocity.rotate(MathUtils.random(0f, 360f));
-
-				int aliveTime = MathUtils.random(3000, 7000);
-
-				createFaceSecondType(x, y, linearVelocity, angularVelocity, aliveTime);
-
-				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
-				sound.play();
-
-				return false;
-			}
-		}));
 		entity.refresh();
 	}
 
@@ -382,7 +228,6 @@ public class PlayGameState extends GameStateImpl {
 			@Override
 			protected boolean handle(Entity e) {
 				world.deleteEntity(e);
-				gameData.lives--;
 				return true;
 			}
 		}));
@@ -397,18 +242,9 @@ public class PlayGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 5, 500, currentColor);
+				createDeadFace(spatial, 5, 1000, currentColor);
 
 				world.deleteEntity(e);
-				gameData.normalCrittersKilled++;
-
-				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
-				if (pointsComponent != null) {
-					gameData.points += pointsComponent.getPoints();
-				}
-
-				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
 
 				return true;
 			}
@@ -484,34 +320,6 @@ public class PlayGameState extends GameStateImpl {
 
 		if (Gdx.input.isKeyPressed(Keys.D))
 			box2dDebugRenderer.render(physicsWorld);
-
-		spriteBatch.begin();
-
-		// font.setScale(1f);
-		font.setColor(Color.RED);
-		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
-
-		float startX = Gdx.graphics.getWidth() - 64f;
-		float y = Gdx.graphics.getHeight() - 32f;
-
-		for (int i = 0; i < gameData.lives; i++) {
-			heartSprite.setPosition(startX, y);
-			heartSprite.draw(spriteBatch);
-			startX -= 32f;
-		}
-
-		if (currentWave != null) {
-			font.setColor(waveIntroductionColor);
-			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
-					currentText, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
-
-			font.setScale(0.7f);
-			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
-					"tap to continue", (Gdx.graphics.getWidth() * 0.8f), (Gdx.graphics.getHeight() * 0.1f));
-			font.setScale(1f);
-		}
-
-		spriteBatch.end();
 	}
 
 	@Override
@@ -519,91 +327,20 @@ public class PlayGameState extends GameStateImpl {
 		Synchronizers.synchronize(delta);
 
 		controller.update(delta);
-
-		if (internalGameState == InternalGameState.PLAYING) {
-			worldWrapper.update(delta);
-
-			ImmutableBag<Entity> faces = world.getGroupManager().getEntities(Groups.FaceGroup);
-
-			// for now, allow N to process next state...
-			if (gameData.normalCrittersKilled >= currentWave.firstTypeCritters && faces.isEmpty()) {
-				internalGameState = InternalGameState.PREPARE_INTRO;
-				currentWaveIndex++;
-			}
-
-			if (Gdx.input.isKeyPressed(Keys.N)) {
-				internalGameState = InternalGameState.PREPARE_INTRO;
-				currentWaveIndex++;
-			}
-
-			if (gameData.lives <= 0) {
-				gameOver = true;
-				game.scoreGameState.setGameData(gameData);
-				game.transition(game.scoreScreen, true);
-			}
-
+		inputDevicesMonitor.update();
+		worldWrapper.update(delta);
+		
+		if (inputDevicesMonitor.getButton("insertFace").isPressed()) {
+			float x = Gdx.input.getX();
+			float y = Gdx.graphics.getHeight() - Gdx.input.getY();
+			createFaceFirstType(x, y, new Vector2(10f, 0f), 0f, 10000, Color.WHITE);
 		}
-
-		if (internalGameState == InternalGameState.INTRO) {
-
-			if (Gdx.input.justTouched()) {
-				currentTextIndex++;
-
-				if (currentTextIndex >= currentWave.texts.length) {
-					internalGameState = InternalGameState.PLAYING;
-					gameData.normalCrittersKilled = 0;
-
-					Color endColor = new Color(Color.BLUE);
-					endColor.a = 0f;
-
-					Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor));
-				} else {
-					currentText = currentWave.texts[currentTextIndex];
-				}
-
-			}
-
-		}
-
-		if (internalGameState == InternalGameState.PREPARE_INTRO) {
-			Color endColor = new Color(Color.BLUE);
-			endColor.a = 1f;
-			waveIntroductionColor.a = 0f;
-
-			gameData.normalCrittersKilled = 0;
-			gameData.secondCrittersKilled = 0;
-
-			currentTextIndex = 0;
-
-			if (currentWaveIndex >= waves.length) {
-				game.transition(game.scoreScreen, true);
-				return;
-			}
-
-			currentWave = waves[currentWaveIndex];
-			currentText = currentWave.texts[currentTextIndex];
-
-			Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor), //
-					new TransitionEventHandler() {
-						@Override
-						public void onTransitionFinished(Transition transition) {
-							internalGameState = InternalGameState.INTRO;
-						}
-					});
-
-		}
-
+		
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
-			game.transition(game.scoreScreen);
+			game.transition(game.menuScreen);
 
 	}
 
-	@Override
-	public void init() {
-		if (gameOver)
-			restartGame();
-	}
-	
 	@Override
 	public void resume() {
 		Gdx.input.setCatchBackKey(true);
@@ -617,10 +354,7 @@ public class PlayGameState extends GameStateImpl {
 	@Override
 	public void dispose() {
 		resourceManager.unloadAll();
-		spriteBatch.dispose();
-		spriteBatch = null;
 		physicsWorld.dispose();
-		gameOver = true;
 	}
 
 }

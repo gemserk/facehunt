@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -147,8 +148,10 @@ public class MenuGameState extends GameStateImpl {
 
 		if (exitButton.isReleased())
 			System.exit(0);
+		
+		if (Gdx.input.isKeyPressed(Keys.T))
+			game.transition(game.testScreen, true);
 
-		// particleEmitter.setPosition(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 	}
 
 	@Override

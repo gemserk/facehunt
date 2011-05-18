@@ -11,6 +11,7 @@ import com.gemserk.games.facehunt.gamestates.MenuGameState;
 import com.gemserk.games.facehunt.gamestates.PlayGameState;
 import com.gemserk.games.facehunt.gamestates.ScoreGameState;
 import com.gemserk.games.facehunt.gamestates.SplashGameState;
+import com.gemserk.games.facehunt.gamestates.TestGameState;
 import com.gemserk.games.facehunt.screens.FadeTransitionScreen;
 
 public class FaceHuntGame extends Game {
@@ -24,6 +25,8 @@ public class FaceHuntGame extends Game {
 	public Screen menuScreen;
 
 	public Screen scoreScreen;
+	
+	public Screen testScreen;
 
 	public ScoreGameState scoreGameState;
 
@@ -41,6 +44,7 @@ public class FaceHuntGame extends Game {
 		gameScreen = new ScreenImpl(playGameState);
 		scoreScreen = new ScreenImpl(scoreGameState);
 		splashScreen = new ScreenImpl(new SplashGameState(this));
+		testScreen = new ScreenImpl(new TestGameState(this));
 
 		fadeTransitionScreen = new FadeTransitionScreen(this);
 
