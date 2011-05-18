@@ -19,7 +19,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.gemserk.animation4j.interpolator.function.InterpolationFunctions;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
@@ -56,6 +55,7 @@ import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
+import com.gemserk.games.facehunt.entities.EntityFactory;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.games.facehunt.values.GameData;
@@ -242,6 +242,8 @@ public class PlayGameState extends GameStateImpl {
 		currentText = "";
 
 		internalGameState = InternalGameState.PREPARE_INTRO;
+		
+		entityFactory = new EntityFactory(world, bodyBuilder);
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -434,6 +436,8 @@ public class PlayGameState extends GameStateImpl {
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
+	private EntityFactory entityFactory;
+
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(4);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
@@ -447,46 +451,7 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	void createDeadFacePart(Entity entity, Sprite sprite, Spatial spatial, final int aliveTime, Color color) {
-		entity.setGroup(Groups.FaceGroup);
-
-		Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color faceColor = new Color();
-
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(color).end(hideColor).time(aliveTime) //
-				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
-
-		float radius = MathUtils.random(6f, 16f);
-
-		Body body = getBodyBuilder() //
-				.type(BodyType.DynamicBody) //
-				.circleShape(radius) //
-				.mass(1f)//
-				.friction(0f)//
-				.restitution(1f)//
-				.userData(entity)//
-				.position(spatial.getX(), spatial.getY())//
-				.build();
-
-		Vector2 impulse = new Vector2(1f, 0f);
-		impulse.rotate(MathUtils.random(0f, 360f));
-		impulse.mul(MathUtils.random(200f, 500f));
-		
-		// body.applyLinearImpulse(impulse, body.getTransform().getPosition());
-		body.setLinearVelocity(impulse);
-		body.setAngularVelocity(MathUtils.random(-5f, 5f));
-
-		entity.addComponent(new PhysicsComponent(body));
-		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, radius * 3, radius * 3)));
-		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
-		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
-			@Override
-			protected boolean handle(Entity e) {
-				world.deleteEntity(e);
-				return true;
-			}
-		}));
-		
-		entity.refresh();
+		entityFactory.createDeadFacePart(entity, sprite, spatial, aliveTime, color);
 	}
 
 	@Override
