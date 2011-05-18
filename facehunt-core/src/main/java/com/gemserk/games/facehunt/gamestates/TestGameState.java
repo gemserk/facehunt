@@ -42,6 +42,7 @@ import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
+import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
@@ -83,7 +84,7 @@ public class TestGameState extends GameStateImpl {
 	private FaceHuntController controller;
 
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
-	
+
 	private final Vector2 mousePosition = new Vector2();
 
 	public TestGameState(FaceHuntGame game) {
@@ -97,7 +98,7 @@ public class TestGameState extends GameStateImpl {
 
 		worldCamera.center(0f, 0f);
 
-		cameraData = new CameraImpl(0f, 0f, 1f, 0f);
+		cameraData = new CameraImpl(0f, 0f, 64f, 0f);
 
 		resourceManager = new ResourceManagerImpl<String>();
 
@@ -144,7 +145,7 @@ public class TestGameState extends GameStateImpl {
 		renderLayers.add(new RenderLayer(-1000, -100, backgroundLayerCamera));
 		renderLayers.add(new RenderLayer(-100, 100, worldCamera));
 
-		controller = new FaceHuntControllerImpl();
+		controller = new FaceHuntControllerImpl(new LibgdxPointer(0, worldCamera), new LibgdxPointer(1, worldCamera));
 
 		physicsWorld = new com.badlogic.gdx.physics.box2d.World(new Vector2(0f, 0f), false);
 		bodyBuilder = new BodyBuilder(physicsWorld);
@@ -163,13 +164,13 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
 
-		float worldWidth = viewportWidth;
-		float worldHeight = viewportHeight;
-		
-		createBorder(worldWidth * 0.5f, 0, worldWidth, 10);
-		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 10);
-		createBorder(0, worldHeight * 0.5f, 10, worldHeight);
-		createBorder(worldWidth, worldHeight * 0.5f, 10, worldHeight);
+		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
+		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
+
+		createBorder(worldWidth * 0.5f, 0, worldWidth, 0.1f);
+		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 0.1f);
+		createBorder(0, worldHeight * 0.5f, 0.1f, worldHeight);
+		createBorder(worldWidth, worldHeight * 0.5f, 0.1f, worldHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 
@@ -199,7 +200,7 @@ public class TestGameState extends GameStateImpl {
 		entity.refresh();
 	}
 
-	Entity createFaceFirstType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
+	Entity createFaceFirstType(float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
 		Entity entity = world.createEntity();
 		entity.setGroup(Groups.FaceGroup);
 
@@ -219,7 +220,7 @@ public class TestGameState extends GameStateImpl {
 
 		Body body = getBodyBuilder() //
 				.type(BodyType.DynamicBody) //
-				.circleShape(32f) //
+				.circleShape(width * 0.5f) //
 				.mass(1f)//
 				.friction(0f)//
 				.restitution(1f)//
@@ -231,7 +232,7 @@ public class TestGameState extends GameStateImpl {
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		entity.addComponent(new PhysicsComponent(body));
-		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, 64f, 64f)));
+		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, width, height)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new PointsComponent(100));
 		entity.addComponent(new HitComponent(new AbstractTrigger() {
@@ -272,8 +273,8 @@ public class TestGameState extends GameStateImpl {
 		return entity;
 	}
 
-	void createFaceSecondType(float x, float y, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Entity e = createFaceFirstType(x, y, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
+	void createFaceSecondType(float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
+		Entity e = createFaceFirstType(x, y, width, height, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
 	}
@@ -317,13 +318,13 @@ public class TestGameState extends GameStateImpl {
 		if (inputDevicesMonitor.getButton("insertFace1").isPressed()) {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
-			createFaceFirstType(mousePosition.x, mousePosition.y, new Vector2(10f, 0f), 0f, 10000, Color.WHITE);
+			createFaceFirstType(mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(1f, 0f), 0f, 10000, new Color(1f, 1f, 0f, 1f));
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
-			createFaceSecondType(mousePosition.x, mousePosition.y, new Vector2(10f, 0f), 0f, 10000);
+			createFaceSecondType(mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(1f, 0f), 0f, 10000);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))

@@ -25,14 +25,14 @@ import com.gemserk.games.facehunt.Groups;
 public class EntityFactory {
 
 	private final World world;
-	
+
 	private final BodyBuilder bodyBuilder;
 
 	public EntityFactory(World world, BodyBuilder bodyBuilder) {
 		this.world = world;
 		this.bodyBuilder = bodyBuilder;
 	}
-	
+
 	public void spawnerTemplate(Entity entity, int time, Trigger onSpawnTrigger) {
 		entity.addComponent(new TimerComponent(time, onSpawnTrigger));
 		entity.refresh();
@@ -47,7 +47,7 @@ public class EntityFactory {
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(color).end(hideColor).time(aliveTime) //
 				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
 
-		float radius = MathUtils.random(6f, 16f);
+		float radius = MathUtils.random(spatial.getWidth() * 0.1f, spatial.getWidth() * 0.3f);
 
 		Body body = bodyBuilder //
 				.type(BodyType.DynamicBody) //
@@ -61,10 +61,9 @@ public class EntityFactory {
 
 		Vector2 impulse = new Vector2(1f, 0f);
 		impulse.rotate(MathUtils.random(0f, 360f));
-		impulse.mul(MathUtils.random(200f, 500f));
+		impulse.mul(MathUtils.random(2f, 5f));
 
-		// body.applyLinearImpulse(impulse, body.getTransform().getPosition());
-		body.setLinearVelocity(impulse);
+		body.applyLinearImpulse(impulse, body.getTransform().getPosition());
 		body.setAngularVelocity(MathUtils.random(-5f, 5f));
 
 		entity.addComponent(new PhysicsComponent(body));

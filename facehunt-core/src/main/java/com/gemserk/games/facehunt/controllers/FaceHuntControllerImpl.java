@@ -12,9 +12,9 @@ public class FaceHuntControllerImpl implements FaceHuntController {
 	
 	private ArrayList<Vector2> touchedPositions = new ArrayList<Vector2>();
 	
-	public FaceHuntControllerImpl() {
-		libgdxPointers.add(new LibgdxPointer(0));
-		libgdxPointers.add(new LibgdxPointer(1));
+	public FaceHuntControllerImpl(LibgdxPointer pointer0, LibgdxPointer pointer1) {
+		libgdxPointers.add(pointer0);
+		libgdxPointers.add(pointer1);
 	}
 
 	@Override
