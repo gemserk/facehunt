@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.gemserk.animation4j.interpolator.function.InterpolationFunctions;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
@@ -106,11 +107,18 @@ public class TestGameState extends GameStateImpl {
 				texture("HappyFaceTexture", "data/face-happy-64x64.png");
 				texture("SadFaceTexture", "data/face-sad-64x64.png");
 				texture("HeartTexture", "data/heart-32x32.png");
+				texture("FaceSpriteSheet", "data/face-parts.png");
 
 				sprite("BackgroundSprite", "BackgroundTexture");
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
 				sprite("HeartSprite", "HeartTexture");
+				
+				sprite("Part01", "FaceSpriteSheet", 64 * 0, 64 * 0, 64, 64);
+				sprite("Part02", "FaceSpriteSheet", 64 * 1, 64 * 0, 64, 64);
+				sprite("Part03", "FaceSpriteSheet", 64 * 2, 64 * 0, 64, 64);
+				sprite("Part04", "FaceSpriteSheet", 64 * 3, 64 * 0, 64, 64);
+				sprite("Part05", "FaceSpriteSheet", 64 * 0, 64 * 1, 64, 64);
 
 				sound("CritterKilledSound", "data/critter-killed.wav");
 				sound("CritterSpawnedSound", "data/critter-spawned.wav");
@@ -242,7 +250,7 @@ public class TestGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 5, 1000, currentColor);
+				createDeadFace(spatial, 10, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -260,22 +268,28 @@ public class TestGameState extends GameStateImpl {
 		e.refresh();
 	}
 
-	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color currentColor) {
+	private String[] partsIds = new String[] {"Part01", "Part02", "Part03", "Part04", "Part05"};
+
+	private Sprite getRandomFacePart() {
+		int partIndex = MathUtils.random(4);
+		return resourceManager.getResourceValue(partsIds[partIndex]);
+	}
+	
+	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
 		for (int i = 0; i < count; i++) {
 			Entity entity = world.createEntity();
-			createDeadFacePart(entity, spatial, aliveTime, currentColor);
+			createDeadFacePart(entity, getRandomFacePart(), spatial, aliveTime, color);
 		}
 	}
 
-	private void createDeadFacePart(Entity entity, Spatial spatial, final int aliveTime, Color currentColor) {
+	void createDeadFacePart(Entity entity, Sprite sprite, Spatial spatial, final int aliveTime, Color color) {
 		entity.setGroup(Groups.FaceGroup);
 
-		Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
-
-		Color hideColor = new Color(currentColor.r, currentColor.g, currentColor.b, 0f);
+		Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color faceColor = new Color();
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(currentColor).end(hideColor).time(aliveTime));
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(color).end(hideColor).time(aliveTime) //
+				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
 
 		float radius = MathUtils.random(6f, 16f);
 
@@ -291,13 +305,14 @@ public class TestGameState extends GameStateImpl {
 
 		Vector2 impulse = new Vector2(1f, 0f);
 		impulse.rotate(MathUtils.random(0f, 360f));
-		impulse.mul(MathUtils.random(10f, 100f));
+		impulse.mul(MathUtils.random(200f, 500f));
 		
-		body.applyLinearImpulse(impulse, body.getTransform().getPosition());
+		// body.applyLinearImpulse(impulse, body.getTransform().getPosition());
+		body.setLinearVelocity(impulse);
 		body.setAngularVelocity(MathUtils.random(-5f, 5f));
 
 		entity.addComponent(new PhysicsComponent(body));
-		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, radius * 2, radius * 2)));
+		entity.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, radius * 3, radius * 3)));
 		entity.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
 		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
 			@Override
