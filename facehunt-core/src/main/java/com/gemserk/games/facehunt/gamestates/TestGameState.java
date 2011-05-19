@@ -184,8 +184,7 @@ public class TestGameState extends GameStateImpl {
 
 	void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		Entity entity = world.createEntity();
-		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
-		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
+		entityFactory.staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
 		entity.refresh();
 	}
 

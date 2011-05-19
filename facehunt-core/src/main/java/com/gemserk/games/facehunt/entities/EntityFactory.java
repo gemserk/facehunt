@@ -15,6 +15,7 @@ import com.gemserk.commons.artemis.components.HitComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
+import com.gemserk.commons.artemis.components.SpatialImpl;
 import com.gemserk.commons.artemis.components.SpatialPhysicsImpl;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
@@ -37,6 +38,11 @@ public class EntityFactory {
 		this.world = world;
 		this.bodyBuilder = bodyBuilder;
 	}
+	
+	public void staticSpriteTemplate(Entity entity, Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
+		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
+		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
+	}
 
 	public void spawnerTemplate(Entity entity, int time, Trigger onSpawnTrigger) {
 		entity.addComponent(new TimerComponent(time, onSpawnTrigger));
@@ -56,7 +62,7 @@ public class EntityFactory {
 				.circleShape(spatial.getWidth() * 0.5f) //
 				.mass(1f)//
 				.friction(0f)//
-				.restitution(1f)//
+				.restitution(0.9f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
 				.build();
@@ -77,9 +83,9 @@ public class EntityFactory {
 		e.setGroup(Groups.FaceGroup);
 
 		Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color faceColor = new Color();
+		final Color faceColor = new Color(color.r, color.g, color.b, 1f);
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(color).end(hideColor).time(aliveTime) //
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(faceColor).end(hideColor).time(aliveTime) //
 				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
 
 		float radius = MathUtils.random(spatial.getWidth() * 0.1f, spatial.getWidth() * 0.2f);
@@ -87,17 +93,16 @@ public class EntityFactory {
 		Body body = bodyBuilder //
 				.type(BodyType.DynamicBody) //
 				.circleShape(radius) //
-				.mass(1f)//
-				.bullet()//
-				.friction(0f)//
-				.restitution(1f)//
+				.mass(0.2f)//
+				.friction(0.5f)//
+				.restitution(0f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
 				.build();
 
 		Vector2 impulse = new Vector2(1f, 0f);
 		impulse.rotate(MathUtils.random(0f, 360f));
-		impulse.mul(MathUtils.random(1f, 3f));
+		impulse.mul(MathUtils.random(1f, 1.5f));
 
 		body.applyLinearImpulse(impulse, body.getTransform().getPosition());
 		body.setAngularVelocity(MathUtils.random(-5f, 5f));
