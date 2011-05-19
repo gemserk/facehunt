@@ -144,6 +144,8 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	InternalGameState internalGameState;
+	
+
 
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
@@ -327,44 +329,39 @@ public class PlayGameState extends GameStateImpl {
 	void createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color) {
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-
 		final Color faceColor = new Color(color);
-
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
 		entity.refresh();
 	}
 
 	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
 		Color color = new Color(0f, 1f, 0f, 1f);
-
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-
 		final Color faceColor = new Color(color);
-
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor);
-		randomMovementFaceTemplate(entity, 500);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
+		entity.addComponent(new RandomMovementBehaviorComponent(500));
 		entity.refresh();
 	}
 
-	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color) {
+	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
+		Entity entity = world.createEntity();
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f);
+		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
+		entity.refresh();
+	}
+	
+	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond, getFaceHitTrigger());
+		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, createFaceTouchTrigger());
+	}
 
-		Trigger hitTrigger = new AbstractTrigger() {
-			@Override
-			protected boolean handle(Entity e) {
-				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
-				sound.play();
-				return false;
-			}
-		};
-
-		Trigger touchTrigger = new AbstractTrigger() {
+	private Trigger createFaceTouchTrigger() {
+		return new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
 				// world.add animation face...
@@ -395,7 +392,7 @@ public class PlayGameState extends GameStateImpl {
 
 				healthComponent = player.getComponent(HealthComponent.class);
 				health = healthComponent.getHealth();
-				health.add(10f);
+				health.add(5f);
 
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				sound.play();
@@ -403,20 +400,17 @@ public class PlayGameState extends GameStateImpl {
 				return true;
 			}
 		};
-
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, hitTrigger);
-		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 	}
 
-	void randomMovementFaceTemplate(Entity entity, int randomMovementTime) {
-		entity.addComponent(new RandomMovementBehaviorComponent(randomMovementTime));
-	}
-
-	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
-		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f));
-		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
-		entity.refresh();
+	private Trigger getFaceHitTrigger() {
+		return new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
+				sound.play();
+				return false;
+			}
+		};
 	}
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };

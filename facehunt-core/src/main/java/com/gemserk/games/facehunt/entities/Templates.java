@@ -71,7 +71,7 @@ public class Templates {
 	}
 	
 	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Container health, // 
-			float resistance, Color color, Trigger hitTrigger) {
+			float resistance, Color color, float damagePerSecond, Trigger hitTrigger) {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
@@ -94,7 +94,7 @@ public class Templates {
 		e.addComponent(new PointsComponent(100));
 		e.addComponent(new HitComponent(hitTrigger));
 		e.addComponent(new HealthComponent(health, resistance));
-		e.addComponent(new DamageComponent(5f));
+		e.addComponent(new DamageComponent(damagePerSecond));
 	}
 	
 	public void invulnerableFaceTemplate(Entity entity, final Color vulnerableColor, final Color invulnerableColor, int toggleTime) {
