@@ -29,6 +29,7 @@ import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.IntermittentInvulnerabilityComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
+import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 
@@ -42,12 +43,51 @@ public class Templates {
 		this.world = world;
 		this.bodyBuilder = bodyBuilder;
 	}
-	
+
+	public void createFaceFirstType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Color color, Trigger hitTrigger, Trigger touchTrigger) {
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+		final Color faceColor = new Color(color);
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
+		Entity entity = world.createEntity();
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
+		collidableTemplate(entity, hitTrigger);
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+		entity.refresh();
+	}
+
+	public void createFaceSecondType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
+		Color color = new Color(0f, 1f, 0f, 1f);
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+		final Color faceColor = new Color(color);
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
+		Entity entity = world.createEntity();
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
+		collidableTemplate(entity, hitTrigger);
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+		entity.addComponent(new RandomMovementBehaviorComponent(500));
+		entity.refresh();
+	}
+
+	public void createFaceInvulnerableType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
+		Entity entity = world.createEntity();
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f);
+		collidableTemplate(entity, hitTrigger);
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+		invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
+		entity.refresh();
+	}
+
+	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
+		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond);
+	}
+
 	public void staticSpriteTemplate(Entity entity, Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
 		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
 	}
-	
+
 	public void staticBoxTemplate(Entity entity, float x, float y, float w, float h) {
 		Body body = bodyBuilder //
 				.type(BodyType.StaticBody) //
@@ -65,13 +105,13 @@ public class Templates {
 		entity.addComponent(new TimerComponent(time, onSpawnTrigger));
 		entity.refresh();
 	}
-	
+
 	public void touchableTemplate(Entity e, FaceHuntController controller, float touchTreshold, Trigger trigger) {
 		e.addComponent(new TouchableComponent(controller, touchTreshold, trigger));
 	}
-	
-	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Container health, // 
-			float resistance, Color color, float damagePerSecond, Trigger hitTrigger) {
+
+	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Container health, //
+			float resistance, Color color, float damagePerSecond) {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
@@ -92,11 +132,14 @@ public class Templates {
 		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
 		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), color));
 		e.addComponent(new PointsComponent(100));
-		e.addComponent(new HitComponent(hitTrigger));
 		e.addComponent(new HealthComponent(health, resistance));
 		e.addComponent(new DamageComponent(damagePerSecond));
 	}
-	
+
+	public void collidableTemplate(Entity e, Trigger hitTrigger) {
+		e.addComponent(new HitComponent(hitTrigger));
+	}
+
 	public void invulnerableFaceTemplate(Entity entity, final Color vulnerableColor, final Color invulnerableColor, int toggleTime) {
 		AbstractTrigger onEnabledTrigger = new AbstractTrigger() {
 			@Override

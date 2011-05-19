@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
 import com.gemserk.commons.artemis.components.Spatial;
@@ -44,7 +43,6 @@ import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
-import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.Templates;
@@ -213,41 +211,7 @@ public class TestGameState extends GameStateImpl {
 		entity.refresh();
 	}
 
-	void createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color) {
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-		final Color faceColor = new Color(color);
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
-		entity.refresh();
-	}
-
-	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
-		Color color = new Color(0f, 1f, 0f, 1f);
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-		final Color faceColor = new Color(color);
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
-		entity.addComponent(new RandomMovementBehaviorComponent(500));
-		entity.refresh();
-	}
-
-	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
-		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f);
-		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
-		entity.refresh();
-	}
-	
-	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond, getFaceHitTrigger());
-		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, createFaceTouchTrigger());
-	}
-
-	private Trigger createFaceTouchTrigger() {
+	private Trigger getFaceTouchTrigger() {
 		return new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
@@ -384,7 +348,7 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
-			createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, linearImpulse, 0f, new Color(1f, 1f, 0f, 1f));
+			templates.createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, new Color(1f, 1f, 0f, 1f), getFaceHitTrigger(), getFaceTouchTrigger());
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
@@ -396,7 +360,7 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
-			createFaceSecondType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, linearImpulse, 0f);
+			templates.createFaceSecondType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceTouchTrigger());
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace3").isPressed()) {
@@ -408,7 +372,7 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
-			createFaceInvulnerableType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, linearImpulse, 0f);
+			templates.createFaceInvulnerableType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceTouchTrigger());
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))

@@ -52,7 +52,6 @@ import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.Spawner;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
-import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.Templates;
@@ -311,11 +310,11 @@ public class PlayGameState extends GameStateImpl {
 				Spatial spatial = new SpatialImpl(x, y, 1f, 1f, 0f);
 
 				if (type == 0)
-					createFaceFirstType(spatial, sprite, linearVelocity, angularVelocity, new Color(1f, 1f, 0f, 1f));
+					templates.createFaceFirstType(spatial, sprite, controller, linearVelocity, angularVelocity, new Color(1f, 1f, 0f, 1f), getFaceHitTrigger(), getFaceTouchTrigger());
 				else if (type == 1)
-					createFaceSecondType(spatial, sprite, linearVelocity, angularVelocity);
+					templates.createFaceSecondType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
 				else if (type == 2)
-					createFaceInvulnerableType(spatial, sprite, linearVelocity, angularVelocity);
+					templates.createFaceInvulnerableType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -326,41 +325,7 @@ public class PlayGameState extends GameStateImpl {
 		entity.refresh();
 	}
 
-	void createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color) {
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-		final Color faceColor = new Color(color);
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
-		entity.refresh();
-	}
-
-	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
-		Color color = new Color(0f, 1f, 0f, 1f);
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-		final Color faceColor = new Color(color);
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
-		entity.addComponent(new RandomMovementBehaviorComponent(500));
-		entity.refresh();
-	}
-
-	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
-		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f);
-		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
-		entity.refresh();
-	}
-	
-	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond, getFaceHitTrigger());
-		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, createFaceTouchTrigger());
-	}
-
-	private Trigger createFaceTouchTrigger() {
+	private Trigger getFaceTouchTrigger() {
 		return new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
