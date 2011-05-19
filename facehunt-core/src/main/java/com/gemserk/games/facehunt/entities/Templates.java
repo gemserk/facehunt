@@ -43,6 +43,19 @@ public class Templates {
 		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
 		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
 	}
+	
+	public void staticBoxTemplate(Entity entity, float x, float y, float w, float h) {
+		Body body = bodyBuilder //
+				.type(BodyType.StaticBody) //
+				.boxShape(w * 0.5f, h * 0.5f) //
+				.restitution(0.5f) //
+				.mass(1f)//
+				.friction(0.5f) //
+				.userData(entity) //
+				.position(x, y) //
+				.build();
+		entity.addComponent(new PhysicsComponent(body));
+	}
 
 	public void spawnerTemplate(Entity entity, int time, Trigger onSpawnTrigger) {
 		entity.addComponent(new TimerComponent(time, onSpawnTrigger));
@@ -53,7 +66,7 @@ public class Templates {
 		e.addComponent(new FaceControllerComponent(controller, touchTreshold, trigger));
 	}
 	
-	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime, // 
+	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, // 
 			Color color, Trigger hitTrigger, Trigger timerTrigger) {
 		e.setGroup(Groups.FaceGroup);
 
@@ -61,13 +74,13 @@ public class Templates {
 				.type(BodyType.DynamicBody) //
 				.circleShape(spatial.getWidth() * 0.5f) //
 				.mass(1f)//
-				.friction(0f)//
-				.restitution(0.9f)//
+				.friction(0.5f)//
+				.restitution(0.5f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
 				.build();
 
-		body.applyLinearImpulse(linearVelocity, body.getTransform().getPosition());
+		body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		e.addComponent(new PhysicsComponent(body));

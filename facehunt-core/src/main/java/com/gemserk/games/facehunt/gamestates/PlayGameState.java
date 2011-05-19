@@ -16,15 +16,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
-import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpatialImpl;
@@ -259,16 +256,13 @@ public class PlayGameState extends GameStateImpl {
 
 	void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		Entity entity = world.createEntity();
-		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
-		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
+		templates.staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
 		entity.refresh();
 	}
 
 	void createBorder(float x, float y, float w, float h) {
 		Entity entity = world.createEntity();
-		Body body = getBodyBuilder().type(BodyType.StaticBody).boxShape(w * 0.5f, h * 0.5f).mass(1f)//
-				.friction(0f).userData(entity).position(x, y).build();
-		entity.addComponent(new PhysicsComponent(body));
+		templates.staticBoxTemplate(entity, x, y, w, h);
 		entity.refresh();
 	}
 
@@ -340,14 +334,14 @@ public class PlayGameState extends GameStateImpl {
 				if (MathUtils.randomBoolean())
 					angularVelocity = -angularVelocity;
 
-				Vector2 linearVelocity = new Vector2(0f, 0f);
-				linearVelocity.x = MathUtils.random(1f, 4f);
-				linearVelocity.rotate(MathUtils.random(0f, 360f));
+				Vector2 linearImpulse = new Vector2(1f, 0f);
+				linearImpulse.rotate(MathUtils.random(360f));
+				linearImpulse.mul(MathUtils.random(1f, 5f));
 
 				int aliveTime = MathUtils.random(3000, 7000);
 
 				Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
-				createFaceSecondType(new SpatialImpl(x, y, 1f, 1f, 0f), sprite, linearVelocity, angularVelocity, aliveTime);
+				createFaceSecondType(new SpatialImpl(x, y, 1f, 1f, 0f), sprite, linearImpulse, angularVelocity, aliveTime);
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -358,7 +352,7 @@ public class PlayGameState extends GameStateImpl {
 		templates.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
 	}
 
-	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
+	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
 
 		AbstractTrigger hitTrigger = new AbstractTrigger() {
 			@Override
@@ -420,7 +414,7 @@ public class PlayGameState extends GameStateImpl {
 
 		Entity entity = world.createEntity();
 
-		templates.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 
 		entity.refresh();
@@ -428,8 +422,8 @@ public class PlayGameState extends GameStateImpl {
 		return entity;
 	}
 
-	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Entity e = createFaceFirstType(spatial, sprite, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
+	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+		Entity e = createFaceFirstType(spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
 	}

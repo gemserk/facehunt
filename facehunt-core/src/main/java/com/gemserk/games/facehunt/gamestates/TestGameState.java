@@ -12,15 +12,12 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
-import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpatialImpl;
@@ -160,6 +157,8 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
+		
+		templates = new Templates(world, bodyBuilder);
 
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
@@ -174,8 +173,6 @@ public class TestGameState extends GameStateImpl {
 		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
 
 		world.loopStart();
-
-		templates = new Templates(world, bodyBuilder);
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -190,20 +187,11 @@ public class TestGameState extends GameStateImpl {
 
 	void createBorder(float x, float y, float w, float h) {
 		Entity entity = world.createEntity();
-		Body body = getBodyBuilder() //
-				.type(BodyType.StaticBody) //
-				.boxShape(w * 0.5f, h * 0.5f) //
-				.restitution(1f) //
-				.mass(1f)//
-				.friction(0f) //
-				.userData(entity) //
-				.position(x, y) //
-				.build();
-		entity.addComponent(new PhysicsComponent(body));
+		templates.staticBoxTemplate(entity, x, y, w, h);
 		entity.refresh();
 	}
 
-	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
+	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
 		
 		Trigger hitTrigger = new AbstractTrigger() {
 			@Override
@@ -253,7 +241,7 @@ public class TestGameState extends GameStateImpl {
 		
 		Entity entity = world.createEntity();
 		
-		templates.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 
 		entity.refresh();
@@ -261,8 +249,7 @@ public class TestGameState extends GameStateImpl {
 		return entity;
 	}
 
-	void createFaceSecondType(float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Sprite sprite = resourceManager.getResourceValue("SadFaceSprite");
+	void createFaceSecondType(Sprite sprite, float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
 		Entity e = createFaceFirstType(new SpatialImpl(x, y, width, height, 0f), sprite, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
@@ -308,14 +295,20 @@ public class TestGameState extends GameStateImpl {
 		if (inputDevicesMonitor.getButton("insertFace1").isPressed()) {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
-			Sprite sprite = resourceManager.getResourceValue("SadFaceSprite");
-			createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, new Vector2(0.9f, 0f), 0f, 10000, new Color(1f, 1f, 0f, 1f));
+			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+			
+			Vector2 linearImpulse = new Vector2(1f, 0f);
+			linearImpulse.rotate(MathUtils.random(360f));
+			linearImpulse.mul(MathUtils.random(1f, 5f));
+			
+			createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, linearImpulse, 0f, 10000, new Color(1f, 1f, 0f, 1f));
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
-			createFaceSecondType(mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(0.9f, 0f), 0f, 10000);
+			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+			createFaceSecondType(sprite, mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(0.9f, 0f), 0f, 10000);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
