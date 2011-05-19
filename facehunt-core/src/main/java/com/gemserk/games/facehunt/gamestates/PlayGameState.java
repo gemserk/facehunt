@@ -381,7 +381,9 @@ public class PlayGameState extends GameStateImpl {
 				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
 				Container health = healthComponent.getHealth();
 				float damagePerMs = 10f / 1000f; // 10 damage per second
-				health.remove(damagePerMs * (float) world.getDelta());
+				
+				float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
+				health.remove(damage);
 				
 				if (!health.isEmpty())
 					return false;
@@ -423,7 +425,7 @@ public class PlayGameState extends GameStateImpl {
 
 		Entity entity = world.createEntity();
 
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), faceColor, hitTrigger, timerTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), 0f, faceColor, hitTrigger, timerTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 
 		entity.refresh();

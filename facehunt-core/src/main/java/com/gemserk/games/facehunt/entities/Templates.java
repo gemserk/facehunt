@@ -69,7 +69,7 @@ public class Templates {
 	}
 	
 	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, // 
-			Container health, Color color, Trigger hitTrigger, Trigger timerTrigger) {
+			Container health, float resistance, Color color, Trigger hitTrigger, Trigger timerTrigger) {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
@@ -92,7 +92,7 @@ public class Templates {
 		e.addComponent(new PointsComponent(100));
 		e.addComponent(new HitComponent(hitTrigger));
 		e.addComponent(new TimerComponent(aliveTime, timerTrigger));
-		e.addComponent(new HealthComponent(health));
+		e.addComponent(new HealthComponent(health, resistance));
 	}
 
 	public void facePartTemplate(Entity e, Sprite sprite, Spatial spatial, int aliveTime, Color color) {

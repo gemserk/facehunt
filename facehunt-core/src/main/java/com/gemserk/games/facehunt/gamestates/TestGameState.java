@@ -44,12 +44,14 @@ import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.components.HealthComponent;
+import com.gemserk.games.facehunt.components.IntermittentInvulnerabilityComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
+import com.gemserk.games.facehunt.systems.IntermittentInvulnerabilitySystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -157,6 +159,7 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new HitDetectionSystem());
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
+		worldWrapper.addUpdateSystem(new IntermittentInvulnerabilitySystem());
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
@@ -229,7 +232,7 @@ public class TestGameState extends GameStateImpl {
 		
 		Entity entity = world.createEntity();
 		firstFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
-		secondFaceTemplate(entity);
+		randomMovementFaceTemplate(entity, 500);
 		entity.refresh();
 	}
 
@@ -258,7 +261,9 @@ public class TestGameState extends GameStateImpl {
 				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
 				Container health = healthComponent.getHealth();
 				float damagePerMs = 10f / 1000f; // 10 damage per second
-				health.remove(damagePerMs * (float) world.getDelta());
+				
+				float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
+				health.remove(damage);
 				
 				if (!health.isEmpty())
 					return false;
@@ -277,16 +282,32 @@ public class TestGameState extends GameStateImpl {
 			}
 		};
 
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), color, hitTrigger, timerTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), 0f, color, hitTrigger, timerTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 	}
 
-	void secondFaceTemplate(Entity entity) {
-		entity.addComponent(new RandomMovementBehaviorComponent(500));
+	void randomMovementFaceTemplate(Entity entity, int randomMovementTime) {
+		entity.addComponent(new RandomMovementBehaviorComponent(randomMovementTime));
 	}
 
-	void createFaceInvulnerableType(SpatialImpl spatialImpl, Sprite sprite, Vector2 linearImpulse, float angularVelocity, int aliveTime) {
+	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+		Color color = new Color(1f, 0f, 0f, 1f);
 		
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+
+		final Color faceColor = new Color(color);
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
+		
+		Entity entity = world.createEntity();
+		firstFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		invulnerableFaceTemplate(entity);
+		entity.refresh();
+	}
+
+	void invulnerableFaceTemplate(Entity entity) {
+		entity.addComponent(new IntermittentInvulnerabilityComponent(1000));
 	}
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
