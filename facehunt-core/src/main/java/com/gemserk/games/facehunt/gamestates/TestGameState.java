@@ -48,7 +48,7 @@ import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
-import com.gemserk.games.facehunt.entities.EntityFactory;
+import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
@@ -175,7 +175,7 @@ public class TestGameState extends GameStateImpl {
 
 		world.loopStart();
 
-		entityFactory = new EntityFactory(world, bodyBuilder);
+		templates = new Templates(world, bodyBuilder);
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -184,7 +184,7 @@ public class TestGameState extends GameStateImpl {
 
 	void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		Entity entity = world.createEntity();
-		entityFactory.staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
+		templates.staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
 		entity.refresh();
 	}
 
@@ -253,8 +253,8 @@ public class TestGameState extends GameStateImpl {
 		
 		Entity entity = world.createEntity();
 		
-		entityFactory.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
-		entityFactory.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
+		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 
 		entity.refresh();
 		
@@ -270,7 +270,7 @@ public class TestGameState extends GameStateImpl {
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
-	private EntityFactory entityFactory;
+	private Templates templates;
 
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(4);
@@ -280,7 +280,7 @@ public class TestGameState extends GameStateImpl {
 	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
 		for (int i = 0; i < count; i++) {
 			Entity e = world.createEntity();
-			entityFactory.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color);
+			templates.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color);
 			e.refresh();
 		}
 	}

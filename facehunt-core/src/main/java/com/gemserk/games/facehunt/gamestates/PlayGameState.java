@@ -54,7 +54,7 @@ import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
-import com.gemserk.games.facehunt.entities.EntityFactory;
+import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
@@ -226,7 +226,7 @@ public class PlayGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
 
-		entityFactory = new EntityFactory(world, bodyBuilder);
+		templates = new Templates(world, bodyBuilder);
 
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
@@ -355,7 +355,7 @@ public class PlayGameState extends GameStateImpl {
 				return false;
 			}
 		};
-		entityFactory.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
+		templates.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
 	}
 
 	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime, Color color) {
@@ -420,8 +420,8 @@ public class PlayGameState extends GameStateImpl {
 
 		Entity entity = world.createEntity();
 
-		entityFactory.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
-		entityFactory.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
+		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 
 		entity.refresh();
 
@@ -436,7 +436,7 @@ public class PlayGameState extends GameStateImpl {
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
-	private EntityFactory entityFactory;
+	private Templates templates;
 
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(4);
@@ -446,7 +446,7 @@ public class PlayGameState extends GameStateImpl {
 	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
 		for (int i = 0; i < count; i++) {
 			Entity e = world.createEntity();
-			entityFactory.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color);
+			templates.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color);
 			e.refresh();
 		}
 	}

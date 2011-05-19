@@ -28,13 +28,13 @@ import com.gemserk.games.facehunt.components.FaceControllerComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 
-public class EntityFactory {
+public class Templates {
 
 	private final World world;
 
 	private final BodyBuilder bodyBuilder;
 
-	public EntityFactory(World world, BodyBuilder bodyBuilder) {
+	public Templates(World world, BodyBuilder bodyBuilder) {
 		this.world = world;
 		this.bodyBuilder = bodyBuilder;
 	}
