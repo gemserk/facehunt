@@ -32,7 +32,7 @@ public class FaceHuntControllerSystem extends EntityProcessingSystem {
 			return;
 
 		Spatial spatial = spatialComponent.getSpatial();
-		float radius = spatial.getWidth() * 0.5f;
+		float radius = spatial.getWidth() * 0.5f + faceControllerComponent.getTreshold();
 		position.set(spatial.getX(), spatial.getY());
 
 		Trigger trigger = faceControllerComponent.getTrigger();

@@ -414,7 +414,7 @@ public class PlayGameState extends GameStateImpl {
 		Entity entity = world.createEntity();
 
 		entityFactory.faceTemplate(entity, spatial, sprite, linearVelocity, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
-		entityFactory.touchableTemplate(entity, controller, touchTrigger);
+		entityFactory.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 
 		entity.refresh();
 

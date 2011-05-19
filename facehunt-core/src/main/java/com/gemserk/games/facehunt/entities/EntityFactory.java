@@ -43,8 +43,8 @@ public class EntityFactory {
 		entity.refresh();
 	}
 	
-	public void touchableTemplate(Entity e, FaceHuntController controller, Trigger trigger) {
-		e.addComponent(new FaceControllerComponent(controller, trigger));
+	public void touchableTemplate(Entity e, FaceHuntController controller, float touchTreshold, Trigger trigger) {
+		e.addComponent(new FaceControllerComponent(controller, touchTreshold, trigger));
 	}
 	
 	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearVelocity, float angularVelocity, final int aliveTime, // 
