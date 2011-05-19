@@ -105,7 +105,7 @@ public class PlayGameState extends GameStateImpl {
 		public int firstTypeCritters = 0;
 
 		public int secondTypeCritters = 0;
-
+		
 	}
 
 	private Wave[] waves = new Wave[] { new Wave() {
@@ -160,6 +160,9 @@ public class PlayGameState extends GameStateImpl {
 		gameData = new GameData();
 
 		gameData.normalCrittersKilled = 0;
+		gameData.normalCrittersSpawned = 0;
+		gameData.secondCrittersKilled = 0;
+		gameData.secondCrittersSpawned = 0;
 		gameData.points = 0;
 		gameData.lives = 2;
 
@@ -277,8 +280,10 @@ public class PlayGameState extends GameStateImpl {
 			@Override
 			public boolean handle(Entity e) {
 
-				if (gameData.normalCrittersKilled == currentWave.firstTypeCritters)
+				if (gameData.normalCrittersSpawned >= currentWave.firstTypeCritters)
 					return false;
+				
+				gameData.normalCrittersSpawned++;
 
 				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
 				timerComponent.reset();
@@ -318,8 +323,10 @@ public class PlayGameState extends GameStateImpl {
 			@Override
 			public boolean handle(Entity e) {
 
-				if (gameData.secondCrittersKilled == currentWave.secondTypeCritters)
+				if (gameData.secondCrittersSpawned >= currentWave.secondTypeCritters)
 					return false;
+				
+				gameData.secondCrittersSpawned++;
 
 				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
 				timerComponent.reset();
@@ -496,7 +503,9 @@ public class PlayGameState extends GameStateImpl {
 			ImmutableBag<Entity> faces = world.getGroupManager().getEntities(Groups.FaceGroup);
 
 			// for now, allow N to process next state...
-			if (gameData.normalCrittersKilled >= currentWave.firstTypeCritters && faces.isEmpty()) {
+			if (gameData.normalCrittersSpawned >= currentWave.firstTypeCritters &&
+					gameData.secondCrittersSpawned >= currentWave.secondTypeCritters
+					&& faces.isEmpty()) {
 				internalGameState = InternalGameState.PREPARE_INTRO;
 				currentWaveIndex++;
 			}
@@ -541,6 +550,9 @@ public class PlayGameState extends GameStateImpl {
 
 			gameData.normalCrittersKilled = 0;
 			gameData.secondCrittersKilled = 0;
+			
+			gameData.normalCrittersSpawned = 0;
+			gameData.secondCrittersSpawned = 0;
 
 			currentTextIndex = 0;
 

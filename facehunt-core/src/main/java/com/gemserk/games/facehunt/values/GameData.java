@@ -4,7 +4,11 @@ public class GameData {
 	
 	public int normalCrittersKilled = 0;
 	
+	public int normalCrittersSpawned = 0;
+	
 	public int secondCrittersKilled = 0;
+	
+	public int secondCrittersSpawned = 0;
 	
 	public int lives = 0;
 	
