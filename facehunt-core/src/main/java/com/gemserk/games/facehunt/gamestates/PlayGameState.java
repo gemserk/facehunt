@@ -354,9 +354,48 @@ public class PlayGameState extends GameStateImpl {
 		templates.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
 	}
 
-	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
+	void createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
 
-		AbstractTrigger hitTrigger = new AbstractTrigger() {
+		final Color faceColor = new Color(color);
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
+			@Override
+			public void onTransitionFinished(Transition<Color> transition) {
+				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
+			}
+		});
+		
+		Entity entity = world.createEntity();
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		entity.refresh();
+	}
+	
+	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+		Color color = new Color(0f, 1f, 0f, 1f);
+		
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+
+		final Color faceColor = new Color(color);
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
+			@Override
+			public void onTransitionFinished(Transition<Color> transition) {
+				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
+			}
+		});
+		
+		Entity entity = world.createEntity();
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		randomMovementFaceTemplate(entity, 500);
+		entity.refresh();
+	}
+
+	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
+		
+		Trigger hitTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
@@ -365,7 +404,7 @@ public class PlayGameState extends GameStateImpl {
 			}
 		};
 
-		AbstractTrigger timerTrigger = new AbstractTrigger() {
+		Trigger timerTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
 				world.deleteEntity(e);
@@ -374,7 +413,7 @@ public class PlayGameState extends GameStateImpl {
 			}
 		};
 
-		AbstractTrigger touchTrigger = new AbstractTrigger() {
+		Trigger touchTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
 				// world.add animation face...
@@ -411,32 +450,29 @@ public class PlayGameState extends GameStateImpl {
 			}
 		};
 
+
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), 0f, color, hitTrigger, timerTrigger);
+		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+	}
+
+	void randomMovementFaceTemplate(Entity entity, int randomMovementTime) {
+		entity.addComponent(new RandomMovementBehaviorComponent(randomMovementTime));
+	}
+
+	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+		Color color = new Color(1f, 1f, 0f, 1f);
+
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
 
 		final Color faceColor = new Color(color);
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
-			@Override
-			public void onTransitionFinished(Transition<Color> transition) {
-				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
-			}
-		});
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
 
 		Entity entity = world.createEntity();
-
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), 0f, faceColor, hitTrigger, timerTrigger);
-		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
-
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
 		entity.refresh();
-
-		return entity;
-	}
-
-	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, int aliveTime) {
-		Entity e = createFaceFirstType(spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
-		e.addComponent(new RandomMovementBehaviorComponent(500));
-		e.refresh();
 	}
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
@@ -444,15 +480,18 @@ public class PlayGameState extends GameStateImpl {
 	private Templates templates;
 
 	private Sprite getRandomFacePart() {
-		int partIndex = MathUtils.random(4);
+		int partIndex = MathUtils.random(partsIds.length);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
 	}
 
 	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
+		float angle = MathUtils.random(0f, 360f);
+		float angleIncrement = 360f / count;
 		for (int i = 0; i < count; i++) {
 			Entity e = world.createEntity();
-			templates.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color);
+			templates.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color, angle);
 			e.refresh();
+			angle += angleIncrement;
 		}
 	}
 

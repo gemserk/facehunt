@@ -26,6 +26,7 @@ import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
+import com.gemserk.games.facehunt.components.IntermittentInvulnerabilityComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
@@ -94,8 +95,30 @@ public class Templates {
 		e.addComponent(new TimerComponent(aliveTime, timerTrigger));
 		e.addComponent(new HealthComponent(health, resistance));
 	}
+	
+	public void invulnerableFaceTemplate(Entity entity, final Color vulnerableColor, final Color invulnerableColor, int toggleTime) {
+		AbstractTrigger onEnabledTrigger = new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+				Color color = spriteComponent.getColor();
+				Synchronizers.transition(color, Transitions.transitionBuilder().end(invulnerableColor).time(250));
+				return false;
+			}
+		};
+		AbstractTrigger onDisabledTrigger = new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+				Color color = spriteComponent.getColor();
+				Synchronizers.transition(color, Transitions.transitionBuilder().end(vulnerableColor).time(250));
+				return false;
+			}
+		};
+		entity.addComponent(new IntermittentInvulnerabilityComponent(toggleTime, onEnabledTrigger, onDisabledTrigger));
+	}
 
-	public void facePartTemplate(Entity e, Sprite sprite, Spatial spatial, int aliveTime, Color color) {
+	public void facePartTemplate(Entity e, Sprite sprite, Spatial spatial, int aliveTime, Color color, float angle) {
 		e.setGroup(Groups.FaceGroup);
 
 		Color hideColor = new Color(color.r, color.g, color.b, 0f);
@@ -117,7 +140,7 @@ public class Templates {
 				.build();
 
 		Vector2 impulse = new Vector2(1f, 0f);
-		impulse.rotate(MathUtils.random(0f, 360f));
+		impulse.rotate(angle);
 		impulse.mul(MathUtils.random(1f, 1.5f));
 
 		body.applyLinearImpulse(impulse, body.getTransform().getPosition());
