@@ -3,6 +3,7 @@ package com.gemserk.games.facehunt.gamestates;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -39,6 +40,8 @@ public class ScoreGameState extends GameStateImpl {
 	private GameData gameData;
 
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
+
+	private Sound pressedSound;
 	
 	public ScoreGameState(FaceHuntGame game) {
 		this.game = game;
@@ -56,6 +59,8 @@ public class ScoreGameState extends GameStateImpl {
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				sprite("BackgroundSprite", "BackgroundTexture");
 				font("Font", "data/font.png", "data/font.fnt");
+				
+				sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
 			}
 		};
 
@@ -93,6 +98,8 @@ public class ScoreGameState extends GameStateImpl {
 			else 
 				monitorKey("back", Keys.ESCAPE);
 		}};
+		
+		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 	}
 	
 	@Override
@@ -130,10 +137,12 @@ public class ScoreGameState extends GameStateImpl {
 		mainMenuButton.update();
 
 		if (tryAgainButton.isReleased()) {
+			pressedSound.play();
 			game.transition(game.gameScreen, true);
 		}
 
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
+			pressedSound.play();
 			game.transition(game.menuScreen, true);
 			game.gameScreen.dispose();
 			setGameData(null);

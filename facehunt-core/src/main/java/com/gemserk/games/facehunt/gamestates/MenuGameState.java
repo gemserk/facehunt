@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -47,6 +48,8 @@ public class MenuGameState extends GameStateImpl {
 
 	private ParticleEmitter particleEmitter2;
 
+	private Sound pressedSound;
+
 	public MenuGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -62,7 +65,7 @@ public class MenuGameState extends GameStateImpl {
 
 		new LibgdxResourceBuilder(resourceManager) {
 			{
-				setCacheWhenLoad(true);
+				// setCacheWhenLoad(true);
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				sprite("BackgroundSprite", "BackgroundTexture");
 				font("Font", "data/titlefont.png", "data/titlefont.fnt", true);
@@ -71,6 +74,7 @@ public class MenuGameState extends GameStateImpl {
 				texture("HappyFaceTexture", "data/face-happy-64x64.png");
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 
+				sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
 			}
 		};
 
@@ -109,6 +113,8 @@ public class MenuGameState extends GameStateImpl {
 		exitButton.setNotOverColor(notOverColor);
 		exitButton.setOverColor(overColor);
 		exitButton.setColor(notOverColor);
+		
+		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 
 		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f);
 		particleEmitter2.setPosition(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f);
@@ -143,12 +149,14 @@ public class MenuGameState extends GameStateImpl {
 		playButton.update();
 		exitButton.update();
 
-		if (playButton.isReleased())
+		if (playButton.isReleased()) {
 			game.transition(game.gameScreen, true);
+			pressedSound.play();
+		}
 
 		if (exitButton.isReleased())
 			System.exit(0);
-		
+
 		if (Gdx.input.isKeyPressed(Keys.T))
 			game.transition(game.testScreen, true);
 

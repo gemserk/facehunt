@@ -189,9 +189,9 @@ public class PlayGameState extends GameStateImpl {
 				sprite("Part04", "FaceSpriteSheet", 64 * 3, 64 * 0, 64, 64);
 				sprite("Part05", "FaceSpriteSheet", 64 * 0, 64 * 1, 64, 64);
 
-				sound("CritterKilledSound", "data/bounce.wav");
-				sound("CritterSpawnedSound", "data/critter-spawned.wav");
-				sound("CritterBounceSound", "data/bounce.wav");
+				sound("CritterKilledSound", "data/sounds/bounce.wav");
+				sound("CritterSpawnedSound", "data/sounds/critter-spawned.wav");
+				sound("CritterBounceSound", "data/sounds/bounce.wav");
 
 				font("Font", "data/font.png", "data/font.fnt");
 			}
