@@ -130,6 +130,7 @@ public class TestGameState extends GameStateImpl {
 			{
 				monitorKey("insertFace1", Keys.NUM_1);
 				monitorKey("insertFace2", Keys.NUM_2);
+				monitorKey("insertFace3", Keys.NUM_3);
 			}
 		};
 
@@ -157,7 +158,7 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
-		
+
 		templates = new Templates(world, bodyBuilder);
 
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
@@ -191,7 +192,46 @@ public class TestGameState extends GameStateImpl {
 		entity.refresh();
 	}
 
-	Entity createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
+	void createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+
+		final Color faceColor = new Color(color);
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
+			@Override
+			public void onTransitionFinished(Transition<Color> transition) {
+				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
+			}
+		});
+		
+		Entity entity = world.createEntity();
+		firstFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		entity.refresh();
+	}
+	
+	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+		Color color = new Color(0f, 1f, 0f, 1f);
+		
+		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color showColor = new Color(color.r, color.g, color.b, 1f);
+
+		final Color faceColor = new Color(color);
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
+			@Override
+			public void onTransitionFinished(Transition<Color> transition) {
+				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
+			}
+		});
+		
+		Entity entity = world.createEntity();
+		firstFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		secondFaceTemplate(entity);
+		entity.refresh();
+	}
+
+	void firstFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
 		
 		Trigger hitTrigger = new AbstractTrigger() {
 			@Override
@@ -201,7 +241,7 @@ public class TestGameState extends GameStateImpl {
 				return false;
 			}
 		};
-		
+
 		Trigger timerTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
@@ -209,7 +249,7 @@ public class TestGameState extends GameStateImpl {
 				return true;
 			}
 		};
-		
+
 		Trigger touchTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
@@ -226,33 +266,17 @@ public class TestGameState extends GameStateImpl {
 				return true;
 			}
 		};
-		
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
 
-		final Color faceColor = new Color(color);
-
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
-			@Override
-			public void onTransitionFinished(Transition<Color> transition) {
-				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
-			}
-		});
-		
-		Entity entity = world.createEntity();
-		
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor, hitTrigger, timerTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, color, hitTrigger, timerTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
-
-		entity.refresh();
-		
-		return entity;
 	}
 
-	void createFaceSecondType(Sprite sprite, float x, float y, float width, float height, Vector2 linearVelocity, float angularVelocity, final int aliveTime) {
-		Entity e = createFaceFirstType(new SpatialImpl(x, y, width, height, 0f), sprite, linearVelocity, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
-		e.addComponent(new RandomMovementBehaviorComponent(500));
-		e.refresh();
+	void secondFaceTemplate(Entity entity) {
+		entity.addComponent(new RandomMovementBehaviorComponent(500));
+	}
+
+	void createFaceInvulnerableType(SpatialImpl spatialImpl, Sprite sprite, Vector2 linearImpulse, float angularVelocity, int aliveTime) {
+		
 	}
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
@@ -296,11 +320,11 @@ public class TestGameState extends GameStateImpl {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
-			
+
 			Vector2 linearImpulse = new Vector2(1f, 0f);
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
-			
+
 			createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, linearImpulse, 0f, 10000, new Color(1f, 1f, 0f, 1f));
 		}
 
@@ -308,7 +332,24 @@ public class TestGameState extends GameStateImpl {
 			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 			worldCamera.unproject(mousePosition);
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
-			createFaceSecondType(sprite, mousePosition.x, mousePosition.y, 1f, 1f, new Vector2(0.9f, 0f), 0f, 10000);
+
+			Vector2 linearImpulse = new Vector2(1f, 0f);
+			linearImpulse.rotate(MathUtils.random(360f));
+			linearImpulse.mul(MathUtils.random(1f, 5f));
+
+			createFaceSecondType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, linearImpulse, 0f, 10000);
+		}
+
+		if (inputDevicesMonitor.getButton("insertFace3").isPressed()) {
+			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+			worldCamera.unproject(mousePosition);
+			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+
+			Vector2 linearImpulse = new Vector2(1f, 0f);
+			linearImpulse.rotate(MathUtils.random(360f));
+			linearImpulse.mul(MathUtils.random(1f, 5f));
+
+			createFaceInvulnerableType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, linearImpulse, 0f, 10000);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))

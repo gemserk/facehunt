@@ -422,7 +422,7 @@ public class PlayGameState extends GameStateImpl {
 		return entity;
 	}
 
-	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, int aliveTime) {
 		Entity e = createFaceFirstType(spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Color(0f, 1f, 0f, 1f));
 		e.addComponent(new RandomMovementBehaviorComponent(500));
 		e.refresh();
