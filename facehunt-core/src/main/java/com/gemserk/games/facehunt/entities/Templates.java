@@ -24,7 +24,7 @@ import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
 import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
-import com.gemserk.games.facehunt.components.FaceControllerComponent;
+import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 
@@ -63,7 +63,7 @@ public class Templates {
 	}
 	
 	public void touchableTemplate(Entity e, FaceHuntController controller, float touchTreshold, Trigger trigger) {
-		e.addComponent(new FaceControllerComponent(controller, touchTreshold, trigger));
+		e.addComponent(new TouchableComponent(controller, touchTreshold, trigger));
 	}
 	
 	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, // 

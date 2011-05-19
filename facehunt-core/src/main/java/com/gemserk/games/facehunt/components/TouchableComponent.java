@@ -4,7 +4,7 @@ import com.artemis.Component;
 import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 
-public class FaceControllerComponent extends Component {
+public class TouchableComponent extends Component {
 
 	private final FaceHuntController faceHuntController;
 	
@@ -27,7 +27,7 @@ public class FaceControllerComponent extends Component {
 		return treshold;
 	}
 
-	public FaceControllerComponent(FaceHuntController faceHuntController, float treshold, Trigger trigger) {
+	public TouchableComponent(FaceHuntController faceHuntController, float treshold, Trigger trigger) {
 		this.faceHuntController = faceHuntController;
 		this.trigger = trigger;
 		this.treshold = treshold;
