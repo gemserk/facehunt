@@ -25,6 +25,7 @@ import com.gemserk.commons.gdx.box2d.BodyBuilder;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
+import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.IntermittentInvulnerabilityComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
@@ -69,8 +70,8 @@ public class Templates {
 		e.addComponent(new TouchableComponent(controller, touchTreshold, trigger));
 	}
 	
-	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, // 
-			Container health, float resistance, Color color, Trigger hitTrigger, Trigger timerTrigger) {
+	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Container health, // 
+			float resistance, Color color, Trigger hitTrigger) {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
@@ -92,8 +93,8 @@ public class Templates {
 		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), color));
 		e.addComponent(new PointsComponent(100));
 		e.addComponent(new HitComponent(hitTrigger));
-		e.addComponent(new TimerComponent(aliveTime, timerTrigger));
 		e.addComponent(new HealthComponent(health, resistance));
+		e.addComponent(new DamageComponent(5f));
 	}
 	
 	public void invulnerableFaceTemplate(Entity entity, final Color vulnerableColor, final Color invulnerableColor, int toggleTime) {

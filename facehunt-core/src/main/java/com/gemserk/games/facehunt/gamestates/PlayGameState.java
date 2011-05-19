@@ -57,6 +57,7 @@ import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
+import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.IntermittentInvulnerabilitySystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
@@ -95,8 +96,6 @@ public class PlayGameState extends GameStateImpl {
 	private GameData gameData;
 
 	private BitmapFont font;
-
-	private Sprite heartSprite;
 
 	private Color waveIntroductionColor = new Color();
 
@@ -157,14 +156,12 @@ public class PlayGameState extends GameStateImpl {
 		int viewportWidth = Gdx.graphics.getWidth();
 		int viewportHeight = Gdx.graphics.getHeight();
 
-		// worldCamera.center(viewportWidth / 2, viewportHeight / 2);
 		worldCamera.center(0f, 0f);
 
 		cameraData = new CameraImpl(0f, 0f, 64f, 0f);
 		gameData = new GameData();
 
 		gameData.points = 0;
-		gameData.lives = 2;
 
 		resourceManager = new ResourceManagerImpl<String>();
 
@@ -175,13 +172,13 @@ public class PlayGameState extends GameStateImpl {
 				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
 				texture("HappyFaceTexture", "data/face-happy-64x64.png");
 				texture("SadFaceTexture", "data/face-sad-64x64.png");
-				texture("HeartTexture", "data/heart-32x32.png");
 				texture("FaceSpriteSheet", "data/face-parts.png");
+				texture("OverlayTexture", "data/white-rectangle.png");
 
 				sprite("BackgroundSprite", "BackgroundTexture");
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 				sprite("SadFaceSprite", "SadFaceTexture");
-				sprite("HeartSprite", "HeartTexture");
+				sprite("OverlaySprite", "OverlayTexture");
 
 				sprite("Part01", "FaceSpriteSheet", 64 * 0, 64 * 0, 64, 64);
 				sprite("Part02", "FaceSpriteSheet", 64 * 1, 64 * 0, 64, 64);
@@ -199,7 +196,6 @@ public class PlayGameState extends GameStateImpl {
 
 		spriteBatch = new SpriteBatch();
 
-		heartSprite = resourceManager.getResourceValue("HeartSprite");
 		font = resourceManager.getResourceValue("Font");
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
@@ -225,6 +221,7 @@ public class PlayGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new IntermittentInvulnerabilitySystem());
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
+		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
 		worldWrapper.init();
 
 		templates = new Templates(world, bodyBuilder);
@@ -233,15 +230,21 @@ public class PlayGameState extends GameStateImpl {
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
 
 		createBorder(worldWidth * 0.5f, 0, worldWidth, 0.1f);
-		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 0.1f);
+		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 1f);
 		createBorder(0, worldHeight * 0.5f, 0.1f, worldHeight);
 		createBorder(worldWidth, worldHeight * 0.5f, 0.1f, worldHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
+		whiteRectangle = resourceManager.getResourceValue("OverlaySprite");
 
 		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
 
 		createFirstTypeFaceSpawner(new Rectangle(1, 1, worldWidth - 2, worldHeight - 2));
+		
+		player = world.createEntity();
+		player.setTag("Player");
+		player.addComponent(new HealthComponent(new Container(100f, 100f), 0f));
+		player.refresh();
 
 		world.loopStart();
 
@@ -250,7 +253,7 @@ public class PlayGameState extends GameStateImpl {
 		currentText = "";
 
 		internalGameState = InternalGameState.PREPARE_INTRO;
-
+		
 	}
 
 	BodyBuilder getBodyBuilder() {
@@ -285,23 +288,6 @@ public class PlayGameState extends GameStateImpl {
 
 				spawner.remove(type, 1);
 
-				// if (gameData.normalCrittersSpawned >= currentWave.firstTypeCritters)
-				// return false;
-				//
-				// gameData.normalCrittersSpawned++;
-
-				// float random = MathUtils.random(1f);
-				//
-				// EnemyType[] enemyTypes = currentWave.types;
-				// int type = 0;
-				// int total = 0;
-				//
-				// for (int i = 0; i < enemyTypes.length; i++) {
-				// EnemyType enemyType = enemyTypes[i];
-				// float probability = enemyType.count * enemyType.probability;
-				// total += enemyType.count;
-				// }
-
 				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
 				timerComponent.reset();
 				timerComponent.setCurrentTime(MathUtils.random(minTime, maxTime));
@@ -318,18 +304,16 @@ public class PlayGameState extends GameStateImpl {
 				linearVelocity.x = MathUtils.random(1f, 4f);
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
 
-				int aliveTime = MathUtils.random(3000, 7000);
-
 				Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 				Spatial spatial = new SpatialImpl(x, y, 1f, 1f, 0f);
 
 				if (type == 0)
-					createFaceFirstType(spatial, sprite, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
+					createFaceFirstType(spatial, sprite, linearVelocity, angularVelocity, new Color(1f, 1f, 0f, 1f));
 				else if (type == 1)
-					createFaceSecondType(spatial, sprite, linearVelocity, angularVelocity, aliveTime);
+					createFaceSecondType(spatial, sprite, linearVelocity, angularVelocity);
 				else if (type == 2)
-					createFaceInvulnerableType(spatial, sprite, linearVelocity, angularVelocity, aliveTime);
+					createFaceInvulnerableType(spatial, sprite, linearVelocity, angularVelocity);
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -340,76 +324,20 @@ public class PlayGameState extends GameStateImpl {
 		entity.refresh();
 	}
 
-	void createSecondTypeFaceSpawner(final Rectangle spawnArea) {
-		Entity entity = world.createEntity();
-		final int minTime = 3000;
-		final int maxTime = 5000;
-		Trigger firstSpawnerTrigger = new AbstractTrigger() {
-			@Override
-			public boolean handle(Entity e) {
-
-				if (spawner.isEmpty())
-					return false;
-
-				float probability = MathUtils.random(1f);
-				int type = spawner.getType(probability);
-
-				spawner.remove(type, 1);
-
-				// if (gameData.secondCrittersSpawned >= currentWave.secondTypeCritters)
-				// return false;
-				//
-				// gameData.secondCrittersSpawned++;
-
-				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
-				timerComponent.reset();
-				timerComponent.setCurrentTime(MathUtils.random(minTime, maxTime));
-
-				float x = MathUtils.random(spawnArea.x, spawnArea.width);
-				float y = MathUtils.random(spawnArea.y, spawnArea.height);
-
-				float angularVelocity = MathUtils.random(30f, 180f);
-
-				if (MathUtils.randomBoolean())
-					angularVelocity = -angularVelocity;
-
-				Vector2 linearImpulse = new Vector2(1f, 0f);
-				linearImpulse.rotate(MathUtils.random(360f));
-				linearImpulse.mul(MathUtils.random(1f, 5f));
-
-				int aliveTime = MathUtils.random(3000, 7000);
-
-				Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
-				createFaceSecondType(new SpatialImpl(x, y, 1f, 1f, 0f), sprite, linearImpulse, angularVelocity, aliveTime);
-
-				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
-				sound.play();
-
-				return false;
-			}
-		};
-		templates.spawnerTemplate(entity, MathUtils.random(minTime, maxTime), firstSpawnerTrigger);
-	}
-
-	void createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
+	void createFaceFirstType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color) {
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
 
 		final Color faceColor = new Color(color);
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
-			@Override
-			public void onTransitionFinished(Transition<Color> transition) {
-				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
-			}
-		});
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
 
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor);
 		entity.refresh();
 	}
 
-	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
 		Color color = new Color(0f, 1f, 0f, 1f);
 
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
@@ -417,20 +345,15 @@ public class PlayGameState extends GameStateImpl {
 
 		final Color faceColor = new Color(color);
 
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500), new TransitionEventHandler<Color>() {
-			@Override
-			public void onTransitionFinished(Transition<Color> transition) {
-				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
-			}
-		});
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
 
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor);
 		randomMovementFaceTemplate(entity, 500);
 		entity.refresh();
 	}
 
-	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
+	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color) {
 
 		Trigger hitTrigger = new AbstractTrigger() {
 			@Override
@@ -438,15 +361,6 @@ public class PlayGameState extends GameStateImpl {
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
 				sound.play();
 				return false;
-			}
-		};
-
-		Trigger timerTrigger = new AbstractTrigger() {
-			@Override
-			protected boolean handle(Entity e) {
-				world.deleteEntity(e);
-				gameData.lives--;
-				return true;
 			}
 		};
 
@@ -479,6 +393,10 @@ public class PlayGameState extends GameStateImpl {
 					gameData.points += pointsComponent.getPoints();
 				}
 
+				healthComponent = player.getComponent(HealthComponent.class);
+				health = healthComponent.getHealth();
+				health.add(10f);
+
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				sound.play();
 
@@ -486,7 +404,7 @@ public class PlayGameState extends GameStateImpl {
 			}
 		};
 
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), 0f, color, hitTrigger, timerTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, hitTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 	}
 
@@ -494,9 +412,9 @@ public class PlayGameState extends GameStateImpl {
 		entity.addComponent(new RandomMovementBehaviorComponent(randomMovementTime));
 	}
 
-	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
+	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity) {
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Color(1f, 0f, 0f, 0f));
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f));
 		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
 		entity.refresh();
 	}
@@ -504,6 +422,10 @@ public class PlayGameState extends GameStateImpl {
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
 	private Templates templates;
+
+	private Entity player;
+
+	private Sprite whiteRectangle;
 
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);
@@ -533,19 +455,11 @@ public class PlayGameState extends GameStateImpl {
 			box2dDebugRenderer.render(physicsWorld);
 
 		spriteBatch.begin();
+		
+		renderHealthBar(spriteBatch, whiteRectangle, Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getHeight() - 25, Gdx.graphics.getWidth() * 0.6f, 10f);
 
-		// font.setScale(1f);
 		font.setColor(Color.RED);
 		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
-
-		float startX = Gdx.graphics.getWidth() - 64f;
-		float y = Gdx.graphics.getHeight() - 32f;
-
-		for (int i = 0; i < gameData.lives; i++) {
-			heartSprite.setPosition(startX, y);
-			heartSprite.draw(spriteBatch);
-			startX -= 32f;
-		}
 
 		if (currentWave != null) {
 			font.setColor(waveIntroductionColor);
@@ -561,6 +475,30 @@ public class PlayGameState extends GameStateImpl {
 		spriteBatch.end();
 	}
 
+	private void renderHealthBar(SpriteBatch spriteBatch, Sprite rectangle, float x, int y, float width, float height) {
+		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+		Container health = healthComponent.getHealth();
+		renderBar(spriteBatch, rectangle, health, x, y, width, height);
+	}
+
+	private void renderBar(SpriteBatch spriteBatch, Sprite rectangle, Container health, float x, int y, float width, float height) {
+		float border = 1f;
+		
+		rectangle.setColor(Color.BLACK);
+		rectangle.setPosition(x - border, y - border);
+		rectangle.setSize(width + border * 2f, height + border * 2f);
+		rectangle.draw(spriteBatch);
+
+		rectangle.setColor(Color.RED);
+		rectangle.setPosition(x, y);
+		rectangle.setSize(width, height);
+		rectangle.draw(spriteBatch);
+
+		rectangle.setColor(Color.GREEN);
+		rectangle.setPosition(x, y);
+		rectangle.setSize(width * health.getPercentage(), height);
+		rectangle.draw(spriteBatch);
+	}
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize(delta);
@@ -583,7 +521,10 @@ public class PlayGameState extends GameStateImpl {
 				currentWaveIndex++;
 			}
 
-			if (gameData.lives <= 0) {
+			HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+			Container health = healthComponent.getHealth();
+			
+			if (health.isEmpty()) {
 				gameOver = true;
 				game.scoreGameState.setGameData(gameData);
 				game.transition(game.scoreScreen, true);
