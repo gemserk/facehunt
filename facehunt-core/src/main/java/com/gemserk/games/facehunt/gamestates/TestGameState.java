@@ -284,7 +284,6 @@ public class TestGameState extends GameStateImpl {
 				createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
-				gameData.normalCrittersKilled++;
 
 				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
 				if (pointsComponent != null) {
@@ -327,7 +326,7 @@ public class TestGameState extends GameStateImpl {
 	private Templates templates;
 
 	private Sprite getRandomFacePart() {
-		int partIndex = MathUtils.random(partsIds.length);
+		int partIndex = MathUtils.random(partsIds.length - 1);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
 	}
 

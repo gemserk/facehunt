@@ -46,8 +46,10 @@ import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.componentsengine.utils.Container;
+import com.gemserk.games.facehunt.EnemySpawnInfo;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Groups;
+import com.gemserk.games.facehunt.Spawner;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
@@ -56,6 +58,7 @@ import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
+import com.gemserk.games.facehunt.systems.IntermittentInvulnerabilitySystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
@@ -101,29 +104,24 @@ public class PlayGameState extends GameStateImpl {
 
 		public String[] texts;
 
-		public int firstTypeCritters = 0;
+		EnemySpawnInfo[] types;
 
-		public int secondTypeCritters = 0;
-		
 	}
 
 	private Wave[] waves = new Wave[] { new Wave() {
 		{
 			texts = new String[] { "Don't let the faces escape,\ntouch over them to kill'em.", "Let's practice, kill 15 faces..." };
-			firstTypeCritters = 15;
-			secondTypeCritters = 0;
+			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 15, 1f) };
 		}
 	}, new Wave() {
 		{
 			texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "And they have new powers..." };
-			firstTypeCritters = 15;
-			secondTypeCritters = 5;
+			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 15, 0.5f), new EnemySpawnInfo(1, 5, 0.5f), };
 		}
 	}, new Wave() {
 		{
 			texts = new String[] { "Well well, it seems like someone\n is improving their skills.", "But, this war is just starting..." };
-			firstTypeCritters = 10000;
-			secondTypeCritters = 10000;
+			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 1000, 0.4f), new EnemySpawnInfo(1, 1000, 0.3f), new EnemySpawnInfo(2, 1000, 0.3f), };
 		}
 	}, };
 
@@ -132,6 +130,8 @@ public class PlayGameState extends GameStateImpl {
 	private int currentTextIndex;
 
 	private Wave currentWave;
+
+	private Spawner spawner;
 
 	private String currentText;
 
@@ -158,10 +158,6 @@ public class PlayGameState extends GameStateImpl {
 		cameraData = new CameraImpl(0f, 0f, 64f, 0f);
 		gameData = new GameData();
 
-		gameData.normalCrittersKilled = 0;
-		gameData.normalCrittersSpawned = 0;
-		gameData.secondCrittersKilled = 0;
-		gameData.secondCrittersSpawned = 0;
 		gameData.points = 0;
 		gameData.lives = 2;
 
@@ -221,6 +217,7 @@ public class PlayGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new HitDetectionSystem());
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
+		worldWrapper.addUpdateSystem(new IntermittentInvulnerabilitySystem());
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.init();
@@ -240,7 +237,6 @@ public class PlayGameState extends GameStateImpl {
 		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
 
 		createFirstTypeFaceSpawner(new Rectangle(1, 1, worldWidth - 2, worldHeight - 2));
-		createSecondTypeFaceSpawner(new Rectangle(1, 1, worldWidth - 2, worldHeight - 2));
 
 		world.loopStart();
 
@@ -276,10 +272,30 @@ public class PlayGameState extends GameStateImpl {
 			@Override
 			public boolean handle(Entity e) {
 
-				if (gameData.normalCrittersSpawned >= currentWave.firstTypeCritters)
+				if (spawner.isEmpty())
 					return false;
-				
-				gameData.normalCrittersSpawned++;
+
+				float probability = MathUtils.random(1f);
+				int type = spawner.getType(probability);
+
+				spawner.remove(type, 1);
+
+				// if (gameData.normalCrittersSpawned >= currentWave.firstTypeCritters)
+				// return false;
+				//
+				// gameData.normalCrittersSpawned++;
+
+				// float random = MathUtils.random(1f);
+				//
+				// EnemyType[] enemyTypes = currentWave.types;
+				// int type = 0;
+				// int total = 0;
+				//
+				// for (int i = 0; i < enemyTypes.length; i++) {
+				// EnemyType enemyType = enemyTypes[i];
+				// float probability = enemyType.count * enemyType.probability;
+				// total += enemyType.count;
+				// }
 
 				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
 				timerComponent.reset();
@@ -300,7 +316,15 @@ public class PlayGameState extends GameStateImpl {
 				int aliveTime = MathUtils.random(3000, 7000);
 
 				Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
-				createFaceFirstType(new SpatialImpl(x, y, 1f, 1f, 0f), sprite, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
+
+				Spatial spatial = new SpatialImpl(x, y, 1f, 1f, 0f);
+
+				if (type == 0)
+					createFaceFirstType(spatial, sprite, linearVelocity, angularVelocity, aliveTime, new Color(1f, 1f, 0f, 1f));
+				else if (type == 1)
+					createFaceSecondType(spatial, sprite, linearVelocity, angularVelocity, aliveTime);
+				else if (type == 2)
+					createFaceInvulnerableType(spatial, sprite, linearVelocity, angularVelocity, aliveTime);
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -319,10 +343,18 @@ public class PlayGameState extends GameStateImpl {
 			@Override
 			public boolean handle(Entity e) {
 
-				if (gameData.secondCrittersSpawned >= currentWave.secondTypeCritters)
+				if (spawner.isEmpty())
 					return false;
-				
-				gameData.secondCrittersSpawned++;
+
+				float probability = MathUtils.random(1f);
+				int type = spawner.getType(probability);
+
+				spawner.remove(type, 1);
+
+				// if (gameData.secondCrittersSpawned >= currentWave.secondTypeCritters)
+				// return false;
+				//
+				// gameData.secondCrittersSpawned++;
 
 				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
 				timerComponent.reset();
@@ -366,15 +398,15 @@ public class PlayGameState extends GameStateImpl {
 				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
 			}
 		});
-		
+
 		Entity entity = world.createEntity();
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
 		entity.refresh();
 	}
-	
+
 	void createFaceSecondType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
 		Color color = new Color(0f, 1f, 0f, 1f);
-		
+
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
 
@@ -386,7 +418,7 @@ public class PlayGameState extends GameStateImpl {
 				Synchronizers.transition(faceColor, Transitions.transitionBuilder(showColor).end(hideColor).time(aliveTime - 500));
 			}
 		});
-		
+
 		Entity entity = world.createEntity();
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
 		randomMovementFaceTemplate(entity, 500);
@@ -394,7 +426,7 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, Color color) {
-		
+
 		Trigger hitTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
@@ -420,10 +452,10 @@ public class PlayGameState extends GameStateImpl {
 				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
 				Container health = healthComponent.getHealth();
 				float damagePerMs = 10f / 1000f; // 10 damage per second
-				
+
 				float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
 				health.remove(damage);
-				
+
 				if (!health.isEmpty())
 					return false;
 
@@ -436,7 +468,6 @@ public class PlayGameState extends GameStateImpl {
 				createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
-				gameData.normalCrittersKilled++;
 
 				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
 				if (pointsComponent != null) {
@@ -449,7 +480,6 @@ public class PlayGameState extends GameStateImpl {
 				return true;
 			}
 		};
-
 
 		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), 0f, color, hitTrigger, timerTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
@@ -480,7 +510,7 @@ public class PlayGameState extends GameStateImpl {
 	private Templates templates;
 
 	private Sprite getRandomFacePart() {
-		int partIndex = MathUtils.random(partsIds.length);
+		int partIndex = MathUtils.random(partsIds.length - 1);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
 	}
 
@@ -547,9 +577,7 @@ public class PlayGameState extends GameStateImpl {
 			ImmutableBag<Entity> faces = world.getGroupManager().getEntities(Groups.FaceGroup);
 
 			// for now, allow N to process next state...
-			if (gameData.normalCrittersSpawned >= currentWave.firstTypeCritters &&
-					gameData.secondCrittersSpawned >= currentWave.secondTypeCritters
-					&& faces.isEmpty()) {
+			if (spawner.isEmpty() && faces.isEmpty()) {
 				internalGameState = InternalGameState.PREPARE_INTRO;
 				currentWaveIndex++;
 			}
@@ -577,7 +605,6 @@ public class PlayGameState extends GameStateImpl {
 
 			if (currentTextIndex >= currentWave.texts.length) {
 				internalGameState = InternalGameState.PLAYING;
-				gameData.normalCrittersKilled = 0;
 
 				Color endColor = new Color(Color.BLUE);
 				endColor.a = 0f;
@@ -592,12 +619,6 @@ public class PlayGameState extends GameStateImpl {
 			endColor.a = 1f;
 			waveIntroductionColor.a = 0f;
 
-			gameData.normalCrittersKilled = 0;
-			gameData.secondCrittersKilled = 0;
-			
-			gameData.normalCrittersSpawned = 0;
-			gameData.secondCrittersSpawned = 0;
-
 			currentTextIndex = 0;
 
 			if (currentWaveIndex >= waves.length) {
@@ -607,6 +628,8 @@ public class PlayGameState extends GameStateImpl {
 
 			currentWave = waves[currentWaveIndex];
 			currentText = currentWave.texts[currentTextIndex];
+
+			spawner = new Spawner(currentWave.types);
 
 			Synchronizers.transition(waveIntroductionColor, Transitions.transitionBuilder().time(800).end(endColor), //
 					new TransitionEventHandler() {
