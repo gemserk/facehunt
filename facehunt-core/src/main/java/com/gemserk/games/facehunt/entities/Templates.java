@@ -22,10 +22,12 @@ import com.gemserk.commons.artemis.components.TimerComponent;
 import com.gemserk.commons.artemis.triggers.AbstractTrigger;
 import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
+import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
-import com.gemserk.games.facehunt.components.TouchableComponent;
+import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
+import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 
 public class Templates {
@@ -67,7 +69,7 @@ public class Templates {
 	}
 	
 	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime, // 
-			Color color, Trigger hitTrigger, Trigger timerTrigger) {
+			Container health, Color color, Trigger hitTrigger, Trigger timerTrigger) {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
@@ -90,6 +92,7 @@ public class Templates {
 		e.addComponent(new PointsComponent(100));
 		e.addComponent(new HitComponent(hitTrigger));
 		e.addComponent(new TimerComponent(aliveTime, timerTrigger));
+		e.addComponent(new HealthComponent(health));
 	}
 
 	public void facePartTemplate(Entity e, Sprite sprite, Spatial spatial, int aliveTime, Color color) {

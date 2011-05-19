@@ -41,7 +41,9 @@ import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
+import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.FaceHuntGame;
+import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
@@ -253,6 +255,14 @@ public class TestGameState extends GameStateImpl {
 		Trigger touchTrigger = new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
+				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
+				Container health = healthComponent.getHealth();
+				float damagePerMs = 10f / 1000f; // 10 damage per second
+				health.remove(damagePerMs * (float) world.getDelta());
+				
+				if (!health.isEmpty())
+					return false;
+				
 				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
 				Spatial spatial = spatialComponent.getSpatial();
 
@@ -267,7 +277,7 @@ public class TestGameState extends GameStateImpl {
 			}
 		};
 
-		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, color, hitTrigger, timerTrigger);
+		templates.faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Container(0.1f, 0.1f), color, hitTrigger, timerTrigger);
 		templates.touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 	}
 

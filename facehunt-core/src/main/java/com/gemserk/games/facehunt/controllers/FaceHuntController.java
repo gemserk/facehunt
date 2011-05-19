@@ -9,4 +9,6 @@ public interface FaceHuntController extends Controller {
 	
 	List<Vector2> getTouchedPositions();
 	
+	// should have damage?
+	
 }
