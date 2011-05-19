@@ -306,17 +306,8 @@ public class TestGameState extends GameStateImpl {
 	}
 
 	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
-		Color color = new Color(1f, 1f, 0f, 1f);
-
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-
-		final Color faceColor = new Color(color);
-
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Color(1f, 0f, 0f, 0f));
 		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
 		entity.refresh();
 	}

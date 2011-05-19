@@ -115,8 +115,13 @@ public class PlayGameState extends GameStateImpl {
 		}
 	}, new Wave() {
 		{
-			texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "And they have new powers..." };
-			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 15, 0.5f), new EnemySpawnInfo(1, 5, 0.5f), };
+			texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "Some of them are too fast..." };
+			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.5f), new EnemySpawnInfo(1, 5, 0.5f), };
+		}
+	}, new Wave() {
+		{
+			texts = new String[] { "And some of them just don't want to die." };
+			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.4f), new EnemySpawnInfo(2, 5, 0.6f), };
 		}
 	}, new Wave() {
 		{
@@ -490,17 +495,8 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	void createFaceInvulnerableType(Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, final int aliveTime) {
-		Color color = new Color(1f, 1f, 0f, 1f);
-
-		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
-		final Color showColor = new Color(color.r, color.g, color.b, 1f);
-
-		final Color faceColor = new Color(color);
-
-		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
-
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, faceColor);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, aliveTime, new Color(1f, 0f, 0f, 0f));
 		templates.invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
 		entity.refresh();
 	}
