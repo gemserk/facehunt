@@ -373,7 +373,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		if (health.isEmpty()) {
 			gameOver = true;
-			game.scoreGameState.setGameData(gameData);
+			game.pauseGameState.setGameData(gameData);
 			game.transition(game.scoreScreen, true);
 		}
 

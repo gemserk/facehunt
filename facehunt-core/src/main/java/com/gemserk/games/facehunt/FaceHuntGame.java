@@ -7,8 +7,8 @@ import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.ScreenImpl;
 import com.gemserk.games.facehunt.gamestates.MenuGameState;
-import com.gemserk.games.facehunt.gamestates.PlayGameState;
-import com.gemserk.games.facehunt.gamestates.ScoreGameState;
+import com.gemserk.games.facehunt.gamestates.TutorialModeGameState;
+import com.gemserk.games.facehunt.gamestates.PauseGameState;
 import com.gemserk.games.facehunt.gamestates.SplashGameState;
 import com.gemserk.games.facehunt.gamestates.SurvivalModeGameState;
 import com.gemserk.games.facehunt.gamestates.TestGameState;
@@ -30,22 +30,22 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	public Screen testScreen;
 
-	public ScoreGameState scoreGameState;
+	public PauseGameState pauseGameState;
 
-	public PlayGameState playGameState;
+	public TutorialModeGameState tutorialModeGameState;
 
 	@Override
 	public void create() {
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
 
-		playGameState = new PlayGameState(this);
-		scoreGameState = new ScoreGameState(this);
+		tutorialModeGameState = new TutorialModeGameState(this);
+		pauseGameState = new PauseGameState(this);
 
 		menuScreen = new ScreenImpl(new MenuGameState(this));
-		tutorialScreen = new ScreenImpl(playGameState);
+		tutorialScreen = new ScreenImpl(tutorialModeGameState);
 		gameScreen = new ScreenImpl(new SurvivalModeGameState(this));
-		scoreScreen = new ScreenImpl(scoreGameState);
+		scoreScreen = new ScreenImpl(pauseGameState);
 		splashScreen = new ScreenImpl(new SplashGameState(this));
 		testScreen = new ScreenImpl(new TestGameState(this));
 

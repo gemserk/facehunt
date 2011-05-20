@@ -63,7 +63,7 @@ import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
-public class PlayGameState extends GameStateImpl {
+public class TutorialModeGameState extends GameStateImpl {
 
 	static class Wave {
 
@@ -127,7 +127,7 @@ public class PlayGameState extends GameStateImpl {
 
 	private Sprite whiteRectangle;
 
-	public PlayGameState(FaceHuntGame game) {
+	public TutorialModeGameState(FaceHuntGame game) {
 		this.game = game;
 		this.gameData = new GameData();
 	}
@@ -421,7 +421,7 @@ public class PlayGameState extends GameStateImpl {
 
 			if (health.isEmpty()) {
 				gameData.gameOver = true;
-				game.scoreGameState.setGameData(gameData);
+				game.pauseGameState.setGameData(gameData);
 				game.transition(game.scoreScreen, true);
 			}
 
@@ -474,7 +474,7 @@ public class PlayGameState extends GameStateImpl {
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
-			game.scoreGameState.setGameData(gameData);
+			game.pauseGameState.setGameData(gameData);
 			game.transition(game.scoreScreen);
 		}
 
