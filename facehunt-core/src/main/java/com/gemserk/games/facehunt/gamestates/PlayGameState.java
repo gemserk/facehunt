@@ -105,27 +105,7 @@ public class PlayGameState extends GameStateImpl {
 
 	}
 
-	private Wave[] waves = new Wave[] { new Wave() {
-		{
-			texts = new String[] { "Don't let the faces escape,\ntouch over them to kill'em.", "Let's practice, kill 15 faces..." };
-			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 15, 1f) };
-		}
-	}, new Wave() {
-		{
-			texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "Some of them are too fast..." };
-			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.5f), new EnemySpawnInfo(1, 5, 0.5f), };
-		}
-	}, new Wave() {
-		{
-			texts = new String[] { "And some of them just don't want to die." };
-			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.4f), new EnemySpawnInfo(2, 5, 0.6f), };
-		}
-	}, new Wave() {
-		{
-			texts = new String[] { "Well well, it seems like someone\n is improving their skills.", "But, this war is just starting..." };
-			types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 1000, 0.4f), new EnemySpawnInfo(1, 1000, 0.3f), new EnemySpawnInfo(2, 1000, 0.3f), };
-		}
-	}, };
+	private Wave[] waves;
 
 	private int currentWaveIndex;
 
@@ -142,8 +122,6 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	InternalGameState internalGameState;
-	
-
 
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
@@ -202,18 +180,18 @@ public class PlayGameState extends GameStateImpl {
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
 
-		createBorder(worldWidth * 0.5f, 0, worldWidth, 0.1f);
-		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 1f);
-		createBorder(0, worldHeight * 0.5f, 0.1f, worldHeight);
-		createBorder(worldWidth, worldHeight * 0.5f, 0.1f, worldHeight);
+		templates.createBorder((worldWidth * 0.5f), 0, worldWidth, 0.1f);
+		templates.createBorder((worldWidth * 0.5f), worldHeight, worldWidth, 1f);
+		templates.createBorder(0, (worldHeight * 0.5f), 0.1f, worldHeight);
+		templates.createBorder(worldWidth, (worldHeight * 0.5f), 0.1f, worldHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		whiteRectangle = resourceManager.getResourceValue("OverlaySprite");
 
-		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
+		templates.createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, (-101), 0f, 0f, Color.WHITE);
 
 		createFirstTypeFaceSpawner(new Rectangle(1, 1, worldWidth - 2, worldHeight - 2));
-		
+
 		player = world.createEntity();
 		player.setTag("Player");
 		player.addComponent(new HealthComponent(new Container(100f, 100f), 0f));
@@ -226,23 +204,33 @@ public class PlayGameState extends GameStateImpl {
 		currentText = "";
 
 		internalGameState = InternalGameState.PREPARE_INTRO;
-		
+
+		waves = new Wave[] { new Wave() {
+			{
+				texts = new String[] { "Don't let the faces escape,\ntouch over them to kill'em.", "Let's practice, kill 15 faces..." };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 15, 1f) };
+			}
+		}, new Wave() {
+			{
+				texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "Some of them are too fast..." };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.5f), new EnemySpawnInfo(1, 5, 0.5f), };
+			}
+		}, new Wave() {
+			{
+				texts = new String[] { "And some of them just don't want to die." };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.4f), new EnemySpawnInfo(2, 5, 0.6f), };
+			}
+		}, new Wave() {
+			{
+				texts = new String[] { "Well well, it seems like someone\n is improving their skills.", "But, this war is just starting..." };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 1000, 0.4f), new EnemySpawnInfo(1, 1000, 0.3f), new EnemySpawnInfo(2, 1000, 0.3f), };
+			}
+		}, };
+
 	}
 
 	BodyBuilder getBodyBuilder() {
 		return bodyBuilder;
-	}
-
-	void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
-		Entity entity = world.createEntity();
-		templates.staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
-		entity.refresh();
-	}
-
-	void createBorder(float x, float y, float w, float h) {
-		Entity entity = world.createEntity();
-		templates.staticBoxTemplate(entity, x, y, w, h);
-		entity.refresh();
 	}
 
 	void createFirstTypeFaceSpawner(final Rectangle spawnArea) {
@@ -386,7 +374,7 @@ public class PlayGameState extends GameStateImpl {
 			box2dDebugRenderer.render(physicsWorld);
 
 		spriteBatch.begin();
-		
+
 		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 		Container health = healthComponent.getHealth();
 		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.3f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
@@ -407,7 +395,7 @@ public class PlayGameState extends GameStateImpl {
 
 		spriteBatch.end();
 	}
-	
+
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize(delta);
@@ -432,7 +420,7 @@ public class PlayGameState extends GameStateImpl {
 
 			HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 			Container health = healthComponent.getHealth();
-			
+
 			if (health.isEmpty()) {
 				gameOver = true;
 				game.scoreGameState.setGameData(gameData);

@@ -82,13 +82,25 @@ public class Templates {
 	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
 		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond);
 	}
+	
+	public void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
+		Entity entity = world.createEntity();
+		staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
+		entity.refresh();
+	}
 
-	public void staticSpriteTemplate(Entity entity, Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
+	void staticSpriteTemplate(Entity entity, Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
 		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
 	}
+	
+	public void createBorder(float x, float y, float w, float h) {
+		Entity entity = world.createEntity();
+		staticBoxTemplate(entity, x, y, w, h);
+		entity.refresh();
+	}
 
-	public void staticBoxTemplate(Entity entity, float x, float y, float w, float h) {
+	void staticBoxTemplate(Entity entity, float x, float y, float w, float h) {
 		Body body = bodyBuilder //
 				.type(BodyType.StaticBody) //
 				.boxShape(w * 0.5f, h * 0.5f) //

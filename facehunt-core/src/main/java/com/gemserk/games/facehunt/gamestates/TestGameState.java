@@ -145,15 +145,15 @@ public class TestGameState extends GameStateImpl {
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
 
-		createBorder(worldWidth * 0.5f, 0, worldWidth, 0.1f);
-		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 1f);
-		createBorder(0, worldHeight * 0.5f, 0.1f, worldHeight);
-		createBorder(worldWidth, worldHeight * 0.5f, 0.1f, worldHeight);
+		templates.createBorder((worldWidth * 0.5f), 0, worldWidth, 0.1f);
+		templates.createBorder((worldWidth * 0.5f), worldHeight, worldWidth, 1f);
+		templates.createBorder(0, (worldHeight * 0.5f), 0.1f, worldHeight);
+		templates.createBorder(worldWidth, (worldHeight * 0.5f), 0.1f, worldHeight);
 
 		Sprite backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		whiteRectangle = resourceManager.getResourceValue("OverlaySprite");
 
-		createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, -101, 0f, 0f, Color.WHITE);
+		templates.createStaticSprite(backgroundSprite, 0f, 0f, viewportWidth, viewportHeight, 0f, (-101), 0f, 0f, Color.WHITE);
 
 		player = world.createEntity();
 		player.setTag("Player");
@@ -167,18 +167,6 @@ public class TestGameState extends GameStateImpl {
 
 	BodyBuilder getBodyBuilder() {
 		return bodyBuilder;
-	}
-
-	void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
-		Entity entity = world.createEntity();
-		templates.staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
-		entity.refresh();
-	}
-
-	void createBorder(float x, float y, float w, float h) {
-		Entity entity = world.createEntity();
-		templates.staticBoxTemplate(entity, x, y, w, h);
-		entity.refresh();
 	}
 
 	private Trigger getFaceTouchTrigger() {
