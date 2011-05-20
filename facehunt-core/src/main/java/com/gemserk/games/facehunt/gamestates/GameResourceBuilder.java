@@ -27,8 +27,8 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		sprite("Part04", "FaceSpriteSheet", 64 * 3, 64 * 0, 64, 64);
 		sprite("Part05", "FaceSpriteSheet", 64 * 0, 64 * 1, 64, 64);
 
-		sound("CritterKilledSound", "data/sounds/bounce.wav");
-		sound("CritterSpawnedSound", "data/sounds/critter-spawned.wav");
+		sound("CritterKilledSound", "data/sounds/critter_killed.ogg");
+		sound("CritterSpawnedSound", "data/sounds/critter_spawned.ogg");
 		sound("CritterBounceSound", "data/sounds/bounce.wav");
 
 		font("Font", "data/font.png", "data/font.fnt");
