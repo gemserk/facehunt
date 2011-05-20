@@ -146,7 +146,7 @@ public class TestGameState extends GameStateImpl {
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
 
 		createBorder(worldWidth * 0.5f, 0, worldWidth, 0.1f);
-		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 0.1f);
+		createBorder(worldWidth * 0.5f, worldHeight, worldWidth, 1f);
 		createBorder(0, worldHeight * 0.5f, 0.1f, worldHeight);
 		createBorder(worldWidth, worldHeight * 0.5f, 0.1f, worldHeight);
 
@@ -268,39 +268,16 @@ public class TestGameState extends GameStateImpl {
 		worldCamera.rotate(cameraData.getAngle());
 		worldWrapper.render();
 
-		spriteBatch.begin();
-		renderHealthBar(spriteBatch, whiteRectangle, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() - 15, Gdx.graphics.getWidth() * 0.6f, 10f);
-		spriteBatch.end();
-
 		if (Gdx.input.isKeyPressed(Keys.D))
 			box2dDebugRenderer.render(physicsWorld);
-	}
-	
-	private void renderHealthBar(SpriteBatch spriteBatch, Sprite rectangle, float x, int y, float width, float height) {
+		
+		spriteBatch.begin();
 		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 		Container health = healthComponent.getHealth();
-		renderBar(spriteBatch, rectangle, health, x, y, width, height);
+		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.3f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
+		spriteBatch.end();
 	}
-
-	private void renderBar(SpriteBatch spriteBatch, Sprite rectangle, Container health, float x, int y, float width, float height) {
-		float border = 1f;
-		
-		rectangle.setColor(Color.BLACK);
-		rectangle.setPosition(x - border, y - border);
-		rectangle.setSize(width + border * 2f, height + border * 2f);
-		rectangle.draw(spriteBatch);
-
-		rectangle.setColor(Color.RED);
-		rectangle.setPosition(x, y);
-		rectangle.setSize(width, height);
-		rectangle.draw(spriteBatch);
-
-		rectangle.setColor(Color.GREEN);
-		rectangle.setPosition(x, y);
-		rectangle.setSize(width * health.getPercentage(), height);
-		rectangle.draw(spriteBatch);
-	}
-
+	
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize(delta);

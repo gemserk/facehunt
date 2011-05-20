@@ -387,7 +387,9 @@ public class PlayGameState extends GameStateImpl {
 
 		spriteBatch.begin();
 		
-		renderHealthBar(spriteBatch, whiteRectangle, Gdx.graphics.getWidth() * 0.3f, Gdx.graphics.getHeight() - 25, Gdx.graphics.getWidth() * 0.6f, 10f);
+		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+		Container health = healthComponent.getHealth();
+		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.3f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
 
 		font.setColor(Color.RED);
 		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
@@ -405,31 +407,7 @@ public class PlayGameState extends GameStateImpl {
 
 		spriteBatch.end();
 	}
-
-	private void renderHealthBar(SpriteBatch spriteBatch, Sprite rectangle, float x, int y, float width, float height) {
-		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
-		Container health = healthComponent.getHealth();
-		renderBar(spriteBatch, rectangle, health, x, y, width, height);
-	}
-
-	private void renderBar(SpriteBatch spriteBatch, Sprite rectangle, Container health, float x, int y, float width, float height) {
-		float border = 1f;
-		
-		rectangle.setColor(Color.BLACK);
-		rectangle.setPosition(x - border, y - border);
-		rectangle.setSize(width + border * 2f, height + border * 2f);
-		rectangle.draw(spriteBatch);
-
-		rectangle.setColor(Color.RED);
-		rectangle.setPosition(x, y);
-		rectangle.setSize(width, height);
-		rectangle.draw(spriteBatch);
-
-		rectangle.setColor(Color.GREEN);
-		rectangle.setPosition(x, y);
-		rectangle.setSize(width * health.getPercentage(), height);
-		rectangle.draw(spriteBatch);
-	}
+	
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize(delta);
