@@ -138,13 +138,13 @@ public class ScoreGameState extends GameStateImpl {
 
 		if (tryAgainButton.isReleased()) {
 			pressedSound.play();
-			game.transition(game.gameScreen, true);
+			game.transition(game.tutorialScreen, true);
 		}
 
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
 			pressedSound.play();
 			game.transition(game.menuScreen, true);
-			game.gameScreen.dispose();
+			game.tutorialScreen.dispose();
 			setGameData(null);
 		}
 	}

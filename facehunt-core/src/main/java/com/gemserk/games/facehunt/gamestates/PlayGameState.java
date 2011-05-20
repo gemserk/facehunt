@@ -64,6 +64,18 @@ import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
 public class PlayGameState extends GameStateImpl {
+	
+	static class Wave {
+
+		public String[] texts;
+
+		EnemySpawnInfo[] types;
+
+	}
+	
+	enum InternalGameState {
+		INTRO, PLAYING, PREPARE_INTRO
+	}
 
 	private final FaceHuntGame game;
 
@@ -97,14 +109,6 @@ public class PlayGameState extends GameStateImpl {
 
 	private Color waveIntroductionColor = new Color();
 
-	static class Wave {
-
-		public String[] texts;
-
-		EnemySpawnInfo[] types;
-
-	}
-
 	private Wave[] waves;
 
 	private int currentWaveIndex;
@@ -117,11 +121,13 @@ public class PlayGameState extends GameStateImpl {
 
 	private String currentText;
 
-	enum InternalGameState {
-		INTRO, PLAYING, PREPARE_INTRO
-	}
-
 	InternalGameState internalGameState;
+	
+	private Templates templates;
+
+	private Entity player;
+
+	private Sprite whiteRectangle;
 
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
@@ -339,12 +345,6 @@ public class PlayGameState extends GameStateImpl {
 	}
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
-
-	private Templates templates;
-
-	private Entity player;
-
-	private Sprite whiteRectangle;
 
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);

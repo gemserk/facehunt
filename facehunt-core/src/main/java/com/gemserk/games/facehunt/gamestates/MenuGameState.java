@@ -50,6 +50,8 @@ public class MenuGameState extends GameStateImpl {
 
 	private Sound pressedSound;
 
+	private TextButton survivalModeButton;
+
 	public MenuGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -100,8 +102,9 @@ public class MenuGameState extends GameStateImpl {
 		font = resourceManager.getResourceValue("Font");
 		font.setScale(1f * viewportWidth / 800f);
 
-		playButton = new TextButton(font, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-		exitButton = new TextButton(font, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
+		playButton = new TextButton(font, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.6f);
+		survivalModeButton = new TextButton(font, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.4f);
+		exitButton = new TextButton(font, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.2f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
@@ -109,6 +112,10 @@ public class MenuGameState extends GameStateImpl {
 		playButton.setNotOverColor(notOverColor);
 		playButton.setOverColor(overColor);
 		playButton.setColor(notOverColor);
+		
+		survivalModeButton.setNotOverColor(notOverColor);
+		survivalModeButton.setOverColor(overColor);
+		survivalModeButton.setColor(notOverColor);
 
 		exitButton.setNotOverColor(notOverColor);
 		exitButton.setOverColor(overColor);
@@ -127,6 +134,7 @@ public class MenuGameState extends GameStateImpl {
 		backgroundSprite.draw(spriteBatch);
 
 		playButton.draw(spriteBatch);
+		survivalModeButton.draw(spriteBatch);
 		exitButton.draw(spriteBatch);
 
 		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
@@ -146,10 +154,17 @@ public class MenuGameState extends GameStateImpl {
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize();
+		
 		playButton.update();
+		survivalModeButton.update();
 		exitButton.update();
 
 		if (playButton.isReleased()) {
+			game.transition(game.tutorialScreen, true);
+			pressedSound.play();
+		}
+		
+		if (survivalModeButton.isReleased()) {
 			game.transition(game.gameScreen, true);
 			pressedSound.play();
 		}
