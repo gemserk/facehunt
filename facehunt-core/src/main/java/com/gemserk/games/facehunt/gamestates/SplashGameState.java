@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteUtils;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
+import com.gemserk.componentsengine.utils.timers.CountDownTimer;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -21,7 +22,7 @@ public class SplashGameState extends GameStateImpl {
 
 	private Sprite gemserkLogoSprite;
 	
-	private int time;
+	private CountDownTimer timer;
 
 	public SplashGameState(FaceHuntGame game) {
 		this.game = game;
@@ -48,7 +49,7 @@ public class SplashGameState extends GameStateImpl {
 		SpriteUtils.resize(gemserkLogoSprite, width * 0.8f);
 		SpriteUtils.centerOn(gemserkLogoSprite, width * 0.5f, height * 0.5f);
 		
-		time = 2000;
+		timer = new CountDownTimer(2000, true);
 	}
 	
 	@Override
@@ -61,12 +62,11 @@ public class SplashGameState extends GameStateImpl {
 
 	@Override
 	public void update(int delta) {
-		time -= delta;
-		if (time <= 0) 
+		timer.update(delta);
+		if (!timer.isRunning())
 			game.transition(game.menuScreen, true);
-		
 		if (Gdx.input.justTouched())
-			time = 0;
+			timer.update(10000);
 	}
 
 	@Override
