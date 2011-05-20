@@ -36,7 +36,6 @@ import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
-import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.componentsengine.utils.Container;
@@ -101,37 +100,8 @@ public class TestGameState extends GameStateImpl {
 		gameData = new GameData();
 
 		resourceManager = new ResourceManagerImpl<String>();
-
-		new LibgdxResourceBuilder(resourceManager) {
-			{
-				setCacheWhenLoad(true);
-
-				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
-				texture("HappyFaceTexture", "data/face-happy-64x64.png");
-				texture("SadFaceTexture", "data/face-sad-64x64.png");
-				texture("HeartTexture", "data/heart-32x32.png");
-				texture("FaceSpriteSheet", "data/face-parts.png");
-				texture("OverlayTexture", "data/white-rectangle.png");
-
-				sprite("BackgroundSprite", "BackgroundTexture");
-				sprite("HappyFaceSprite", "HappyFaceTexture");
-				sprite("SadFaceSprite", "SadFaceTexture");
-				sprite("HeartSprite", "HeartTexture");
-				sprite("OverlaySprite", "OverlayTexture");
-
-				sprite("Part01", "FaceSpriteSheet", 64 * 0, 64 * 0, 64, 64);
-				sprite("Part02", "FaceSpriteSheet", 64 * 1, 64 * 0, 64, 64);
-				sprite("Part03", "FaceSpriteSheet", 64 * 2, 64 * 0, 64, 64);
-				sprite("Part04", "FaceSpriteSheet", 64 * 3, 64 * 0, 64, 64);
-				sprite("Part05", "FaceSpriteSheet", 64 * 0, 64 * 1, 64, 64);
-
-				sound("CritterKilledSound", "data/sounds/bounce.wav");
-				sound("CritterSpawnedSound", "data/sounds/critter-spawned.wav");
-				sound("CritterBounceSound", "data/sounds/bounce.wav");
-
-				font("Font", "data/font.png", "data/font.fnt");
-			}
-		};
+		
+		new GameResourceBuilder(resourceManager);
 
 		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
 
