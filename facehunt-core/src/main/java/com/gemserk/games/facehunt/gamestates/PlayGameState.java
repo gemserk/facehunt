@@ -64,7 +64,7 @@ import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
 public class PlayGameState extends GameStateImpl {
-	
+
 	static class Wave {
 
 		public String[] texts;
@@ -72,7 +72,7 @@ public class PlayGameState extends GameStateImpl {
 		EnemySpawnInfo[] types;
 
 	}
-	
+
 	enum InternalGameState {
 		INTRO, PLAYING, PREPARE_INTRO
 	}
@@ -92,8 +92,6 @@ public class PlayGameState extends GameStateImpl {
 	private WorldWrapper worldWrapper;
 
 	private World world;
-
-	public boolean gameOver = true;
 
 	private com.badlogic.gdx.physics.box2d.World physicsWorld;
 
@@ -122,7 +120,7 @@ public class PlayGameState extends GameStateImpl {
 	private String currentText;
 
 	InternalGameState internalGameState;
-	
+
 	private Templates templates;
 
 	private Entity player;
@@ -131,11 +129,12 @@ public class PlayGameState extends GameStateImpl {
 
 	public PlayGameState(FaceHuntGame game) {
 		this.game = game;
+		this.gameData = new GameData();
 	}
 
 	public void restartGame() {
 
-		gameOver = false;
+		gameData.gameOver = false;
 
 		int viewportWidth = Gdx.graphics.getWidth();
 		int viewportHeight = Gdx.graphics.getHeight();
@@ -143,7 +142,6 @@ public class PlayGameState extends GameStateImpl {
 		worldCamera.center(0f, 0f);
 
 		cameraData = new CameraImpl(0f, 0f, 64f, 0f);
-		gameData = new GameData();
 
 		gameData.points = 0;
 
@@ -422,7 +420,7 @@ public class PlayGameState extends GameStateImpl {
 			Container health = healthComponent.getHealth();
 
 			if (health.isEmpty()) {
-				gameOver = true;
+				gameData.gameOver = true;
 				game.scoreGameState.setGameData(gameData);
 				game.transition(game.scoreScreen, true);
 			}
@@ -475,14 +473,16 @@ public class PlayGameState extends GameStateImpl {
 
 		}
 
-		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
+		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
+			game.scoreGameState.setGameData(gameData);
 			game.transition(game.scoreScreen);
+		}
 
 	}
 
 	@Override
 	public void init() {
-		if (gameOver)
+		if (gameData.gameOver)
 			restartGame();
 	}
 
@@ -502,7 +502,7 @@ public class PlayGameState extends GameStateImpl {
 		spriteBatch.dispose();
 		spriteBatch = null;
 		physicsWorld.dispose();
-		gameOver = true;
+		gameData.gameOver = true;
 	}
 
 }

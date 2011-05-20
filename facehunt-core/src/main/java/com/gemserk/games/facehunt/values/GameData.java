@@ -4,4 +4,6 @@ public class GameData {
 	
 	public int points = 0;
 	
+	public boolean gameOver = true;
+	
 }

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
+import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
@@ -42,7 +43,15 @@ public class ScoreGameState extends GameStateImpl {
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
 
 	private Sound pressedSound;
-	
+
+	private Screen previousScreen;
+
+	private Screen menuScreen;
+
+	public void setGameData(GameData gameData) {
+		this.gameData = gameData;
+	}
+
 	public ScoreGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -59,8 +68,11 @@ public class ScoreGameState extends GameStateImpl {
 				texture("BackgroundTexture", "data/images/background01-1024x512.jpg", false);
 				sprite("BackgroundSprite", "BackgroundTexture");
 				font("Font", "data/fonts/font.png", "data/fonts/font.fnt");
-				
+
 				sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
+
+				texture("OverlayTexture", "data/images/white-rectangle.png");
+				sprite("OverlaySprite", "OverlayTexture");
 			}
 		};
 
@@ -71,52 +83,62 @@ public class ScoreGameState extends GameStateImpl {
 
 		String buttonText = "Try again";
 
-		if (!game.playGameState.gameOver)
+		if (!gameData.gameOver)
 			buttonText = "Resume";
 
 		tryAgainButton = new TextButton(font, buttonText, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
 		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.3f);
-		
+
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
-		
+
 		tryAgainButton.setNotOverColor(notOverColor);
 		tryAgainButton.setOverColor(overColor);
 		tryAgainButton.setColor(notOverColor);
-		
+
 		mainMenuButton.setNotOverColor(notOverColor);
 		mainMenuButton.setOverColor(overColor);
 		mainMenuButton.setColor(notOverColor);
-		
+
 		Gdx.input.setCatchBackKey(true);
-		
+
 		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
-		
-		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {{
-			if (Gdx.app.getType() == ApplicationType.Android)
-				monitorKey("back", Keys.BACK);
-			else 
-				monitorKey("back", Keys.ESCAPE);
-		}};
-		
+
+		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {
+			{
+				if (Gdx.app.getType() == ApplicationType.Android)
+					monitorKey("back", Keys.BACK);
+				else
+					monitorKey("back", Keys.ESCAPE);
+			}
+		};
+
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
+
+		previousScreen = game.tutorialScreen;
+		menuScreen = game.menuScreen;
 	}
-	
+
+	@Override
+	public void resume() {
+		Gdx.input.setCatchBackKey(true);
+	}
+
 	@Override
 	public void pause() {
-		Gdx.input.setCatchBackKey(false);		
+		Gdx.input.setCatchBackKey(false);
 	}
 
 	@Override
 	public void render(int delta) {
 		if (spriteBatch == null)
 			return;
-		
+
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
 		backgroundSprite.draw(spriteBatch);
 
-		if (game.playGameState.gameOver && gameData != null) {
+		if (gameData != null && gameData.gameOver) {
 			font.setColor(Color.RED);
 			SpriteBatchUtils.drawCentered(spriteBatch, font, "Game Over", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.7f);
 			SpriteBatchUtils.drawCentered(spriteBatch, font, "Score: " + gameData.points, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
@@ -130,7 +152,7 @@ public class ScoreGameState extends GameStateImpl {
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize(delta);
-		
+
 		inputDevicesMonitor.update();
 
 		tryAgainButton.update();
@@ -138,13 +160,13 @@ public class ScoreGameState extends GameStateImpl {
 
 		if (tryAgainButton.isReleased()) {
 			pressedSound.play();
-			game.transition(game.tutorialScreen, true);
+			game.transition(previousScreen, true);
 		}
 
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
 			pressedSound.play();
-			game.transition(game.menuScreen, true);
-			game.tutorialScreen.dispose();
+			game.transition(menuScreen, true);
+			previousScreen.dispose();
 			setGameData(null);
 		}
 	}
@@ -154,10 +176,6 @@ public class ScoreGameState extends GameStateImpl {
 		resourceManager.unloadAll();
 		spriteBatch.dispose();
 		spriteBatch = null;
-	}
-
-	public void setGameData(GameData gameData) {
-		this.gameData = gameData;
 	}
 
 }
