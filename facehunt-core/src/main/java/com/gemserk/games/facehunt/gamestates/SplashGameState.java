@@ -2,9 +2,12 @@ package com.gemserk.games.facehunt.gamestates;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.gemserk.animation4j.transitions.Transitions;
+import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteUtils;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
@@ -29,6 +32,10 @@ public class SplashGameState extends GameStateImpl {
 
 	private Sprite libgdxLogo;
 
+	private Sprite gemserkLogoBlur;
+	
+	private Color blurColor = new Color();
+
 	public SplashGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -47,26 +54,33 @@ public class SplashGameState extends GameStateImpl {
 		new LibgdxResourceBuilder(resourceManager) {
 			{
 				setCacheWhenLoad(true);
-				texture("GemserkLogoTexture", "data/images/logo-gemserk-512x128-white.png");
+				texture("GemserkLogoTexture", "data/images/logo-gemserk-512x128.png");
+				texture("GemserkLogoTextureBlur", "data/images/logo-gemserk-512x128-blur.png");
 				texture("LwjglLogoTexture", "data/images/logo-lwjgl-512x256-inverted.png");
 				texture("LibgdxLogoTexture", "data/images/logo-libgdx-clockwork-512x256.png");
 				sprite("GemserkLogo", "GemserkLogoTexture");
+				sprite("GemserkLogoBlur", "GemserkLogoTextureBlur");
 				sprite("LwjglLogo", "LwjglLogoTexture", 0, 0, 512, 185);
 				sprite("LibgdxLogo", "LibgdxLogoTexture", 0, 25, 512, 256 - 50);
 			}
 		};
 
 		gemserkLogo = resourceManager.getResourceValue("GemserkLogo");
+		gemserkLogoBlur = resourceManager.getResourceValue("GemserkLogoBlur");
 		lwjglLogo = resourceManager.getResourceValue("LwjglLogo");
 		libgdxLogo = resourceManager.getResourceValue("LibgdxLogo");
 
 		SpriteUtils.resize(gemserkLogo, width * 0.8f);
+		SpriteUtils.resize(gemserkLogoBlur, width * 0.8f);
 		SpriteUtils.resize(lwjglLogo, width * 0.2f);
 		SpriteUtils.resize(libgdxLogo, width * 0.2f);
 
 		SpriteUtils.centerOn(gemserkLogo, centerX, centerY);
+		SpriteUtils.centerOn(gemserkLogoBlur, centerX, centerY);
 		SpriteUtils.centerOn(lwjglLogo, width * 0.85f, lwjglLogo.getHeight() * 0.5f);
 		SpriteUtils.centerOn(libgdxLogo, width * 0.15f, libgdxLogo.getHeight() * 0.5f);
+		
+		Synchronizers.transition(blurColor, Transitions.transitionBuilder(new Color(1f, 0f, 0f, 0f)).end(new Color(1f, 0f, 0f, 1f)).time(1000));
 
 		timer = new CountDownTimer(2000, true);
 	}
@@ -75,6 +89,10 @@ public class SplashGameState extends GameStateImpl {
 	public void render(int delta) {
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
+		
+		gemserkLogoBlur.setColor(blurColor);
+		gemserkLogoBlur.draw(spriteBatch);
+		
 		gemserkLogo.draw(spriteBatch);
 		if (Gdx.app.getType() != ApplicationType.Android)
 			lwjglLogo.draw(spriteBatch);
@@ -84,6 +102,7 @@ public class SplashGameState extends GameStateImpl {
 
 	@Override
 	public void update(int delta) {
+		Synchronizers.synchronize(delta);
 		timer.update(delta);
 		if (!timer.isRunning())
 			game.transition(game.menuScreen, true);
