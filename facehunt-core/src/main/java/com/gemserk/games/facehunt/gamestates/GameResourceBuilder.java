@@ -10,11 +10,11 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 	public GameResourceBuilder(ResourceManager<String> resourceManager) {
 		super(resourceManager);
 
-		texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
-		texture("HappyFaceTexture", "data/face-happy-64x64.png");
-		texture("SadFaceTexture", "data/face-sad-64x64.png");
-		texture("FaceSpriteSheet", "data/face-parts.png");
-		texture("OverlayTexture", "data/white-rectangle.png");
+		texture("BackgroundTexture", "data/images/background01-1024x512.jpg", false);
+		texture("HappyFaceTexture", "data/images/face-happy-64x64.png");
+		texture("SadFaceTexture", "data/images/face-sad-64x64.png");
+		texture("FaceSpriteSheet", "data/images/face-parts.png");
+		texture("OverlayTexture", "data/images/white-rectangle.png");
 
 		sprite("BackgroundSprite", "BackgroundTexture");
 		sprite("HappyFaceSprite", "HappyFaceTexture");
@@ -31,6 +31,6 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		sound("CritterSpawnedSound", "data/sounds/critter_spawned.ogg");
 		sound("CritterBounceSound", "data/sounds/bounce.wav");
 
-		font("Font", "data/font.png", "data/font.fnt");
+		font("Font", "data/fonts/font.png", "data/fonts/font.fnt");
 	}
 }

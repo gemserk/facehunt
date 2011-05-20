@@ -38,7 +38,7 @@ public class SplashGameState extends GameStateImpl {
 		new LibgdxResourceBuilder(resourceManager) {
 			{
 				setCacheWhenLoad(true);
-				texture("GemserkLogoTexture", "data/logo-gemserk-512x128-white.png");
+				texture("GemserkLogoTexture", "data/images/logo-gemserk-512x128-white.png");
 				sprite("GemserkLogoSprite", "GemserkLogoTexture");
 			}
 		};

@@ -66,12 +66,12 @@ public class MenuGameState extends GameStateImpl {
 		new LibgdxResourceBuilder(resourceManager) {
 			{
 				// setCacheWhenLoad(true);
-				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
+				texture("BackgroundTexture", "data/images/background01-1024x512.jpg", false);
 				sprite("BackgroundSprite", "BackgroundTexture");
-				font("Font", "data/titlefont.png", "data/titlefont.fnt", true);
-				font("TitleFont", "data/titlefont.png", "data/titlefont.fnt", true);
+				font("Font", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
+				font("TitleFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
 
-				texture("HappyFaceTexture", "data/face-happy-64x64.png");
+				texture("HappyFaceTexture", "data/images/face-happy-64x64.png");
 				sprite("HappyFaceSprite", "HappyFaceTexture");
 
 				sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");

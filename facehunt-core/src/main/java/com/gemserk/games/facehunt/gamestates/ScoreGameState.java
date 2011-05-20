@@ -56,9 +56,9 @@ public class ScoreGameState extends GameStateImpl {
 		new LibgdxResourceBuilder(resourceManager) {
 			{
 				setCacheWhenLoad(true);
-				texture("BackgroundTexture", "data/background01-1024x512.jpg", false);
+				texture("BackgroundTexture", "data/images/background01-1024x512.jpg", false);
 				sprite("BackgroundSprite", "BackgroundTexture");
-				font("Font", "data/font.png", "data/font.fnt");
+				font("Font", "data/fonts/font.png", "data/fonts/font.fnt");
 				
 				sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
 			}
