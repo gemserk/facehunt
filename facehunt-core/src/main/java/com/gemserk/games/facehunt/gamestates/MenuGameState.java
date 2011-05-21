@@ -17,7 +17,6 @@ import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
-import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -36,7 +35,7 @@ public class MenuGameState extends GameStateImpl {
 
 	private TextButton exitButton;
 
-	private BitmapFont font;
+//	private BitmapFont font;
 
 	private BitmapFont titleFont;
 
@@ -64,21 +63,8 @@ public class MenuGameState extends GameStateImpl {
 
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
-
-		new LibgdxResourceBuilder(resourceManager) {
-			{
-				// setCacheWhenLoad(true);
-				texture("BackgroundTexture", "data/images/background01-1024x512.jpg", false);
-				sprite("BackgroundSprite", "BackgroundTexture");
-				font("Font", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
-				font("TitleFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
-
-				texture("HappyFaceTexture", "data/images/face-happy-64x64.png");
-				sprite("HappyFaceSprite", "HappyFaceTexture");
-
-				sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
-			}
-		};
+		
+		new GameResourceBuilder(resourceManager);
 
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
@@ -99,12 +85,9 @@ public class MenuGameState extends GameStateImpl {
 		titleFont.setColor(1f, 1f, 0f, 1f);
 		titleFont.setScale(1f * viewportWidth / 800f);
 
-		font = resourceManager.getResourceValue("Font");
-		font.setScale(1f * viewportWidth / 800f);
-
-		playButton = new TextButton(font, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.6f);
-		survivalModeButton = new TextButton(font, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.4f);
-		exitButton = new TextButton(font, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.2f);
+		playButton = new TextButton(titleFont, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.6f);
+		survivalModeButton = new TextButton(titleFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.4f);
+		exitButton = new TextButton(titleFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.2f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
@@ -137,6 +120,7 @@ public class MenuGameState extends GameStateImpl {
 		survivalModeButton.draw(spriteBatch);
 		exitButton.draw(spriteBatch);
 
+		titleFont.setColor(1f, 1f, 0f, 1f);
 		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
 
 		particleEmitter1.draw(spriteBatch, ((float) delta) * 0.001f);
