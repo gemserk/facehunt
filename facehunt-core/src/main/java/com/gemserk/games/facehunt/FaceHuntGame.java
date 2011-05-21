@@ -6,7 +6,7 @@ import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.ScreenImpl;
-import com.gemserk.games.facehunt.gamestates.MenuGameState;
+import com.gemserk.games.facehunt.gamestates.MainMenuGameState;
 import com.gemserk.games.facehunt.gamestates.TutorialModeGameState;
 import com.gemserk.games.facehunt.gamestates.PauseGameState;
 import com.gemserk.games.facehunt.gamestates.SplashGameState;
@@ -42,7 +42,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		tutorialModeGameState = new TutorialModeGameState(this);
 		pauseGameState = new PauseGameState(this);
 
-		menuScreen = new ScreenImpl(new MenuGameState(this));
+		menuScreen = new ScreenImpl(new MainMenuGameState(this));
 		tutorialScreen = new ScreenImpl(tutorialModeGameState);
 		gameScreen = new ScreenImpl(new SurvivalModeGameState(this));
 		scoreScreen = new ScreenImpl(pauseGameState);
