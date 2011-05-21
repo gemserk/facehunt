@@ -11,6 +11,16 @@ import com.gemserk.resources.ResourceManager;
 public class GameResourceBuilder extends LibgdxResourceBuilder {
 	public GameResourceBuilder(ResourceManager<String> resourceManager) {
 		super(resourceManager);
+		
+		texture("GemserkLogoTexture", "data/images/logo-gemserk-512x128.png");
+		texture("GemserkLogoTextureBlur", "data/images/logo-gemserk-512x128-blur.png");
+		texture("LwjglLogoTexture", "data/images/logo-lwjgl-512x256-inverted.png");
+		texture("LibgdxLogoTexture", "data/images/logo-libgdx-clockwork-512x256.png");
+		
+		sprite("GemserkLogo", "GemserkLogoTexture");
+		sprite("GemserkLogoBlur", "GemserkLogoTextureBlur");
+		sprite("LwjglLogo", "LwjglLogoTexture", 0, 0, 512, 185);
+		sprite("LibgdxLogo", "LibgdxLogoTexture", 0, 25, 512, 256 - 50);
 
 		texture("BackgroundTexture", "data/images/background01-1024x512.jpg", false);
 		texture("HappyFaceTexture", "data/images/face-happy-64x64.png");

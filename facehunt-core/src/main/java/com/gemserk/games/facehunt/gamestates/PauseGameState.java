@@ -99,7 +99,7 @@ public class PauseGameState extends GameStateImpl {
 
 		overlaySprite = resourceManager.getResourceValue("OverlaySprite");
 
-		overlaySprite.setColor(0.6f, 0.6f, 0.6f, 0.5f);
+		overlaySprite.setColor(0.5f, 0.5f, 0.5f, 0.7f);
 		overlaySprite.setPosition(0, 0);
 		overlaySprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
