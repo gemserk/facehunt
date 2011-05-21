@@ -85,8 +85,6 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	private World world;
 
-	public boolean gameOver = true;
-
 	private com.badlogic.gdx.physics.box2d.World physicsWorld;
 
 	private BodyBuilder bodyBuilder;
@@ -98,8 +96,6 @@ public class SurvivalModeGameState extends GameStateImpl {
 	private GameData gameData;
 
 	private BitmapFont font;
-
-	private Color waveIntroductionColor = new Color();
 
 	private Wave[] waves;
 
@@ -117,11 +113,10 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	public SurvivalModeGameState(FaceHuntGame game) {
 		this.game = game;
+		this.gameData = new GameData();
 	}
 
 	public void restartGame() {
-
-		gameOver = false;
 
 		int viewportWidth = Gdx.graphics.getWidth();
 		int viewportHeight = Gdx.graphics.getHeight();
@@ -129,8 +124,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 		worldCamera.center(0f, 0f);
 
 		cameraData = new CameraImpl(0f, 0f, 64f, 0f);
-		gameData = new GameData();
-
+		
+		gameData.gameOver = false;
 		gameData.points = 0;
 
 		resourceManager = new ResourceManagerImpl<String>();
@@ -372,19 +367,23 @@ public class SurvivalModeGameState extends GameStateImpl {
 		Container health = healthComponent.getHealth();
 
 		if (health.isEmpty()) {
-			gameOver = true;
+			gameData.gameOver = true;
 			game.pauseGameState.setGameData(gameData);
-			game.transition(game.scoreScreen, true);
+			game.pauseGameState.setPreviousScreen(game.gameScreen);
+			game.transition(game.scoreScreen);
 		}
 
-		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
+		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
+			game.pauseGameState.setGameData(gameData);
+			game.pauseGameState.setPreviousScreen(game.gameScreen);
 			game.transition(game.scoreScreen);
+		}
 
 	}
 
 	@Override
 	public void init() {
-		if (gameOver)
+		if (gameData.gameOver)
 			restartGame();
 	}
 
@@ -404,7 +403,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 		spriteBatch.dispose();
 		spriteBatch = null;
 		physicsWorld.dispose();
-		gameOver = true;
+		gameData.gameOver = true;
 	}
 
 }

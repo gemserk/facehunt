@@ -422,7 +422,8 @@ public class TutorialModeGameState extends GameStateImpl {
 			if (health.isEmpty()) {
 				gameData.gameOver = true;
 				game.pauseGameState.setGameData(gameData);
-				game.transition(game.scoreScreen, true);
+				game.pauseGameState.setPreviousScreen(game.tutorialScreen);
+				game.transition(game.scoreScreen);
 			}
 
 		}
@@ -475,6 +476,7 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
 			game.pauseGameState.setGameData(gameData);
+			game.pauseGameState.setPreviousScreen(game.tutorialScreen);
 			game.transition(game.scoreScreen);
 		}
 

@@ -85,6 +85,10 @@ public class PauseGameState extends GameStateImpl {
 	public void setGameData(GameData gameData) {
 		this.gameData = gameData;
 	}
+	
+	public void setPreviousScreen(Screen previousScreen) {
+		this.previousScreen = previousScreen;
+	}
 
 	public PauseGameState(FaceHuntGame game) {
 		this.game = game;
@@ -146,7 +150,7 @@ public class PauseGameState extends GameStateImpl {
 
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 
-		previousScreen = game.tutorialScreen;
+//		previousScreen = game.tutorialScreen;
 		menuScreen = game.menuScreen;
 	}
 
