@@ -12,6 +12,7 @@ import com.gemserk.animation4j.interpolator.function.InterpolationFunctions;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.components.HitComponent;
+import com.gemserk.commons.artemis.components.LinearVelocityLimitComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
@@ -144,6 +145,7 @@ public class Templates {
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		e.addComponent(new PhysicsComponent(body));
+		e.addComponent(new LinearVelocityLimitComponent(13f));
 		e.addComponent(new BounceSmallVelocityFixComponent());
 		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
 		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), color));

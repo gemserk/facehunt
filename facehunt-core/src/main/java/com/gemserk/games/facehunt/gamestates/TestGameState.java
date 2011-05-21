@@ -137,6 +137,9 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper = new WorldWrapper(world);
 		worldWrapper.addRenderSystem(new SpriteUpdateSystem());
 		worldWrapper.addRenderSystem(new SpriteRendererSystem(renderLayers));
+		
+		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
+		
 		worldWrapper.addUpdateSystem(new PhysicsSystem(physicsWorld));
 		worldWrapper.addUpdateSystem(new BounceSmallVelocityFixSystem());
 		worldWrapper.addUpdateSystem(new HitDetectionSystem());
@@ -144,7 +147,7 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new MovementSystem());
 		worldWrapper.addUpdateSystem(new IntermittentInvulnerabilitySystem());
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
-		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
+		
 		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
 		worldWrapper.init();
 
