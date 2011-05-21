@@ -13,7 +13,6 @@ import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
-import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
@@ -93,26 +92,13 @@ public class PauseGameState extends GameStateImpl {
 
 	@Override
 	public void init() {
-
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
 
-		new LibgdxResourceBuilder(resourceManager) {
-			{
-				setCacheWhenLoad(true);
-				texture("BackgroundTexture", "data/images/background01-1024x512.jpg", false);
-				sprite("BackgroundSprite", "BackgroundTexture");
-				font("Font", "data/fonts/font.png", "data/fonts/font.fnt");
+		new GameResourceBuilder(resourceManager);
 
-				sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
-
-				texture("OverlayTexture", "data/images/white-rectangle.png");
-				sprite("OverlaySprite", "OverlayTexture");
-			}
-		};
-		
 		overlaySprite = resourceManager.getResourceValue("OverlaySprite");
-		
+
 		overlaySprite.setColor(0.6f, 0.6f, 0.6f, 0.5f);
 		overlaySprite.setPosition(0, 0);
 		overlaySprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

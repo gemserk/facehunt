@@ -32,6 +32,7 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		sound("CritterKilledSound", "data/sounds/critter_killed.ogg");
 		sound("CritterSpawnedSound", "data/sounds/critter_spawned.ogg");
 		sound("CritterBounceSound", "data/sounds/bounce.wav");
+		sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
 
 		font("Font", "data/fonts/font.png", "data/fonts/font.fnt");
 	}
