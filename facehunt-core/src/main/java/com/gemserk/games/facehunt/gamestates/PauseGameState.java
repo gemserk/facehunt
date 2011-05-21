@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -82,6 +81,8 @@ public class PauseGameState extends GameStateImpl {
 
 	private Text gameOverText;
 
+	private Sprite overlaySprite;
+
 	public void setGameData(GameData gameData) {
 		this.gameData = gameData;
 	}
@@ -109,6 +110,12 @@ public class PauseGameState extends GameStateImpl {
 				sprite("OverlaySprite", "OverlayTexture");
 			}
 		};
+		
+		overlaySprite = resourceManager.getResourceValue("OverlaySprite");
+		
+		overlaySprite.setColor(0.6f, 0.6f, 0.6f, 0.5f);
+		overlaySprite.setPosition(0, 0);
+		overlaySprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
@@ -122,7 +129,7 @@ public class PauseGameState extends GameStateImpl {
 
 		if (!gameData.gameOver) {
 			buttonText = "Resume";
-		} 
+		}
 
 		tryAgainButton = new TextButton(font, buttonText, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
 		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
@@ -158,6 +165,16 @@ public class PauseGameState extends GameStateImpl {
 	}
 
 	@Override
+	public void show() {
+		previousScreen.show();
+	}
+
+	@Override
+	public void hide() {
+		previousScreen.hide();
+	}
+
+	@Override
 	public void resume() {
 		Gdx.input.setCatchBackKey(true);
 	}
@@ -172,9 +189,12 @@ public class PauseGameState extends GameStateImpl {
 		if (spriteBatch == null)
 			return;
 
-		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
+		previousScreen.render(delta);
+
+		// Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
-		backgroundSprite.draw(spriteBatch);
+		// backgroundSprite.draw(spriteBatch);
+		overlaySprite.draw(spriteBatch);
 
 		font.setColor(Color.RED);
 		gameOverText.draw(spriteBatch, font);

@@ -3,6 +3,8 @@ package com.gemserk.games.facehunt.gamestates;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.resources.ResourceManager;
 
+// TODO: use the same unique game resources declaration for all game states
+
 /**
  * Declares all resources needed for the game.
  */
