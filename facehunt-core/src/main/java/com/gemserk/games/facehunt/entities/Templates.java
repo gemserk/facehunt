@@ -104,9 +104,9 @@ public class Templates {
 		Body body = bodyBuilder //
 				.type(BodyType.StaticBody) //
 				.boxShape(w * 0.5f, h * 0.5f) //
-				.restitution(0.5f) //
+				.restitution(1f) //
 				.mass(1f)//
-				.friction(0.5f) //
+				.friction(0f) //
 				.userData(entity) //
 				.position(x, y) //
 				.categoryBits(Collisions.Border) //
@@ -133,7 +133,7 @@ public class Templates {
 				.circleShape(spatial.getWidth() * 0.5f) //
 				.mass(1f)//
 				.friction(0.5f)//
-				.restitution(0.5f)//
+				.restitution(1f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
 				.categoryBits(Collisions.Face) //
@@ -210,7 +210,7 @@ public class Templates {
 
 		e.addComponent(new PhysicsComponent(body));
 		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial.getWidth() * 0.6f, spatial.getHeight() * 0.6f)));
-		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
+		e.addComponent(new SpriteComponent(sprite, 0, new Vector2(0.5f, 0.5f), faceColor));
 		e.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
