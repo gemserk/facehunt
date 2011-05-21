@@ -82,7 +82,7 @@ public class Templates {
 	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
 		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond);
 	}
-	
+
 	public void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		Entity entity = world.createEntity();
 		staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
@@ -93,7 +93,7 @@ public class Templates {
 		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
 		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
 	}
-	
+
 	public void createBorder(float x, float y, float w, float h) {
 		Entity entity = world.createEntity();
 		staticBoxTemplate(entity, x, y, w, h);
@@ -109,6 +109,8 @@ public class Templates {
 				.friction(0.5f) //
 				.userData(entity) //
 				.position(x, y) //
+				.categoryBits(Collisions.Border) //
+				.maskBits(Collisions.All) //
 				.build();
 		entity.addComponent(new PhysicsComponent(body));
 	}
@@ -134,6 +136,8 @@ public class Templates {
 				.restitution(0.5f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
+				.categoryBits(Collisions.Face) //
+				.maskBits(Collisions.All) //
 				.build();
 
 		body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
@@ -193,6 +197,8 @@ public class Templates {
 				.restitution(0f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
+				.categoryBits(Collisions.FacePart) //
+				.maskBits((short) (Collisions.All & ~Collisions.Face & ~Collisions.FacePart)) //
 				.build();
 
 		Vector2 impulse = new Vector2(1f, 0f);
