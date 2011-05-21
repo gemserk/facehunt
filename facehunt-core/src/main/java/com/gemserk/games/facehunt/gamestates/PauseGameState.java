@@ -24,6 +24,38 @@ import com.gemserk.resources.ResourceManagerImpl;
 
 public class PauseGameState extends GameStateImpl {
 
+	static class Text {
+
+		private final String text;
+
+		private final float x;
+
+		private final float y;
+
+		private boolean visible;
+
+		public void setVisible(boolean visible) {
+			this.visible = visible;
+		}
+
+		public boolean isVisible() {
+			return visible;
+		}
+
+		public Text(String text, float x, float y) {
+			this.text = text;
+			this.x = x;
+			this.y = y;
+		}
+
+		public void draw(SpriteBatch spriteBatch, BitmapFont font) {
+			if (!isVisible())
+				return;
+			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, text, x, y);
+		}
+
+	}
+
 	private final FaceHuntGame game;
 
 	private SpriteBatch spriteBatch;
@@ -47,6 +79,8 @@ public class PauseGameState extends GameStateImpl {
 	private Screen previousScreen;
 
 	private Screen menuScreen;
+
+	private Text gameOverText;
 
 	public void setGameData(GameData gameData) {
 		this.gameData = gameData;
@@ -83,11 +117,15 @@ public class PauseGameState extends GameStateImpl {
 
 		String buttonText = "Try again";
 
-		if (!gameData.gameOver)
-			buttonText = "Resume";
+		gameOverText = new Text("Game Over\n" + "Score: " + gameData.points, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
+		gameOverText.setVisible(gameData.gameOver);
 
-		tryAgainButton = new TextButton(font, buttonText, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
-		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.3f);
+		if (!gameData.gameOver) {
+			buttonText = "Resume";
+		} 
+
+		tryAgainButton = new TextButton(font, buttonText, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+		mainMenuButton = new TextButton(font, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.4f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
@@ -138,11 +176,8 @@ public class PauseGameState extends GameStateImpl {
 		spriteBatch.begin();
 		backgroundSprite.draw(spriteBatch);
 
-		if (gameData != null && gameData.gameOver) {
-			font.setColor(Color.RED);
-			SpriteBatchUtils.drawCentered(spriteBatch, font, "Game Over", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.7f);
-			SpriteBatchUtils.drawCentered(spriteBatch, font, "Score: " + gameData.points, Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.6f);
-		}
+		font.setColor(Color.RED);
+		gameOverText.draw(spriteBatch, font);
 
 		tryAgainButton.draw(spriteBatch);
 		mainMenuButton.draw(spriteBatch);
@@ -166,8 +201,7 @@ public class PauseGameState extends GameStateImpl {
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
 			pressedSound.play();
 			game.transition(menuScreen, true);
-			previousScreen.dispose();
-			setGameData(null);
+			gameData.gameOver = true;
 		}
 	}
 
@@ -176,6 +210,8 @@ public class PauseGameState extends GameStateImpl {
 		resourceManager.unloadAll();
 		spriteBatch.dispose();
 		spriteBatch = null;
+		if (gameData.gameOver)
+			previousScreen.dispose();
 	}
 
 }
