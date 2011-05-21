@@ -205,7 +205,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		waves = new Wave[] { new Wave() {
 			{
-				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10000, 0.4f), new EnemySpawnInfo(1, 10000, 0.3f), new EnemySpawnInfo(2, 10000, 0.3f), };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10000, 0.5f), new EnemySpawnInfo(1, 10000, 0.2f), new EnemySpawnInfo(2, 10000, 0.3f), };
 			}
 		}, };
 
