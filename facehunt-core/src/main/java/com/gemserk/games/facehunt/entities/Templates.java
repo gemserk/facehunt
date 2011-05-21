@@ -51,7 +51,7 @@ public class Templates {
 		final Color faceColor = new Color(color);
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 6f, 15f);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 		entity.refresh();
@@ -64,24 +64,24 @@ public class Templates {
 		final Color faceColor = new Color(color);
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 3f, 7f);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
-		entity.addComponent(new RandomMovementBehaviorComponent(500));
+		entity.addComponent(new RandomMovementBehaviorComponent(500, 10f));
 		entity.refresh();
 	}
 
 	public void createFaceInvulnerableType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f, 13f);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 		invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
 		entity.refresh();
 	}
 
-	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
-		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond);
+	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond, float maxSpeedLimit) {
+		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond, maxSpeedLimit);
 	}
 
 	public void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
@@ -126,7 +126,7 @@ public class Templates {
 	}
 
 	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Container health, //
-			float resistance, Color color, float damagePerSecond) {
+			float resistance, Color color, float damagePerSecond, float maxSpeedLimit) {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
@@ -145,7 +145,7 @@ public class Templates {
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		e.addComponent(new PhysicsComponent(body));
-		e.addComponent(new LinearVelocityLimitComponent(13f));
+		e.addComponent(new LinearVelocityLimitComponent(maxSpeedLimit));
 		e.addComponent(new BounceSmallVelocityFixComponent());
 		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
 		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), color));
