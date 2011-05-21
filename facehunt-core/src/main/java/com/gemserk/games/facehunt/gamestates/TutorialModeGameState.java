@@ -198,7 +198,7 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		player = world.createEntity();
 		player.setTag("Player");
-		player.addComponent(new HealthComponent(new Container(100f, 100f), 0f));
+		player.addComponent(new HealthComponent(new Container(100f, 100f), 0.5f));
 		player.refresh();
 
 		world.loopStart();
@@ -211,23 +211,24 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		waves = new Wave[] { new Wave() {
 			{
-				texts = new String[] { "Don't let the faces escape,\ntouch over them to kill'em.", "Let's practice, kill 15 faces..." };
+				texts = new String[] { "Welcome to Face Hunt.\nHunt as many faces as you can\n by touching over them.", //
+						"Kill them before they kill you\n while they laugh.", "Let's begin practice, kill 15 yellow faces..." };
 				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 15, 1f) };
 			}
 		}, new Wave() {
 			{
-				texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "Some of them are too fast..." };
+				texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "Some of them are just too fast...\nKill 10 green faces." };
 				types = new EnemySpawnInfo[] { new EnemySpawnInfo(1, 10, 1f), };
 			}
 		}, new Wave() {
 			{
-				texts = new String[] { "And some of them just don't want to die." };
+				texts = new String[] { "Some of them just don't want to die...", "Kill 10 red faces, wait for them to be yellow\n when they are vulnerable" };
 				types = new EnemySpawnInfo[] { new EnemySpawnInfo(2, 10, 1f), };
 			}
 		}, new Wave() {
 			{
-				texts = new String[] { "Well well, it seems like someone\n is improving their skills.", "But, this war is just starting..." };
-				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 1000, 0.4f), new EnemySpawnInfo(1, 1000, 0.3f), new EnemySpawnInfo(2, 1000, 0.3f), };
+				texts = new String[] { "It seems like someone\n has improved their skills.", "Well done, now you will have\n to face a real challenge..." };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 0, 1f) };
 			}
 		}, };
 
@@ -375,10 +376,10 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 		Container health = healthComponent.getHealth();
-		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.3f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
+		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.2f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
 
-		font.setColor(Color.RED);
-		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
+		// font.setColor(Color.RED);
+		// font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
 
 		if (currentWave != null) {
 			font.setColor(waveIntroductionColor);
@@ -402,24 +403,30 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		if (internalGameState == InternalGameState.PLAYING) {
 			worldWrapper.update(delta);
-			
+
 			HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 			Container health = healthComponent.getHealth();
-			
+
 			if (health.isEmpty()) {
 				gameData.gameOver = true;
 				game.pauseGameState.setGameData(gameData);
 				game.pauseGameState.setPreviousScreen(game.tutorialScreen);
 				game.transition(game.scoreScreen);
 			}
-			
+
 			ImmutableBag<Entity> faces = world.getGroupManager().getEntities(Groups.FaceGroup);
 
 			// for now, allow N to process next state...
 			if (spawner.isEmpty() && faces.isEmpty()) {
 				// if last wave, then game is over...
-				internalGameState = InternalGameState.PREPARE_INTRO;
-				currentWaveIndex++;
+
+				if (currentWaveIndex == waves.length - 1) {
+					gameData.gameOver = true;
+					game.transition(game.gameScreen, true);
+				} else {
+					internalGameState = InternalGameState.PREPARE_INTRO;
+					currentWaveIndex++;
+				}
 			}
 
 			if (Gdx.input.isKeyPressed(Keys.N)) {

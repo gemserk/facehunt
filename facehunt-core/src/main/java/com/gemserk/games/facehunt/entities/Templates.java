@@ -66,8 +66,8 @@ public class Templates {
 		Entity entity = world.createEntity();
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 3f, 7f);
 		collidableTemplate(entity, hitTrigger);
-		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
-		entity.addComponent(new RandomMovementBehaviorComponent(500, 10f));
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.3f, touchTrigger);
+		entity.addComponent(new RandomMovementBehaviorComponent(750, 10f));
 		entity.refresh();
 	}
 
