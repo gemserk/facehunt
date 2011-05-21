@@ -217,12 +217,12 @@ public class TutorialModeGameState extends GameStateImpl {
 		}, new Wave() {
 			{
 				texts = new String[] { "Nicely done but don't celebrate yet,\nmore faces are coming!", "Some of them are too fast..." };
-				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.5f), new EnemySpawnInfo(1, 5, 0.5f), };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(1, 10, 1f), };
 			}
 		}, new Wave() {
 			{
 				texts = new String[] { "And some of them just don't want to die." };
-				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10, 0.4f), new EnemySpawnInfo(2, 5, 0.6f), };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(2, 10, 1f), };
 			}
 		}, new Wave() {
 			{
@@ -402,11 +402,22 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		if (internalGameState == InternalGameState.PLAYING) {
 			worldWrapper.update(delta);
-
+			
+			HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+			Container health = healthComponent.getHealth();
+			
+			if (health.isEmpty()) {
+				gameData.gameOver = true;
+				game.pauseGameState.setGameData(gameData);
+				game.pauseGameState.setPreviousScreen(game.tutorialScreen);
+				game.transition(game.scoreScreen);
+			}
+			
 			ImmutableBag<Entity> faces = world.getGroupManager().getEntities(Groups.FaceGroup);
 
 			// for now, allow N to process next state...
 			if (spawner.isEmpty() && faces.isEmpty()) {
+				// if last wave, then game is over...
 				internalGameState = InternalGameState.PREPARE_INTRO;
 				currentWaveIndex++;
 			}
@@ -414,16 +425,6 @@ public class TutorialModeGameState extends GameStateImpl {
 			if (Gdx.input.isKeyPressed(Keys.N)) {
 				internalGameState = InternalGameState.PREPARE_INTRO;
 				currentWaveIndex++;
-			}
-
-			HealthComponent healthComponent = player.getComponent(HealthComponent.class);
-			Container health = healthComponent.getHealth();
-
-			if (health.isEmpty()) {
-				gameData.gameOver = true;
-				game.pauseGameState.setGameData(gameData);
-				game.pauseGameState.setPreviousScreen(game.tutorialScreen);
-				game.transition(game.scoreScreen);
 			}
 
 		}

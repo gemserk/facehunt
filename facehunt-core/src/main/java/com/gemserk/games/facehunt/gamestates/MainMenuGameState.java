@@ -20,6 +20,8 @@ import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
+import com.gemserk.resources.dataloaders.DataLoader;
+import com.gemserk.resources.resourceloaders.ResourceLoaderImpl;
 
 public class MainMenuGameState extends GameStateImpl {
 
@@ -61,8 +63,28 @@ public class MainMenuGameState extends GameStateImpl {
 
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
-		
-		new GameResourceBuilder(resourceManager);
+
+		new GameResourceBuilder(resourceManager) {
+			{
+				particleEmitter("FaceEmitter", "HappyFaceSprite", "data/emitters/FaceEmitter");
+			}
+			private void particleEmitter(String id, final String spriteId, final String file) {
+				resourceManager.add(id, new ResourceLoaderImpl<ParticleEmitter>(new DataLoader<ParticleEmitter>() {
+					@Override
+					public ParticleEmitter load() {
+						try {
+							ParticleEmitter particleEmitter = new ParticleEmitter(new BufferedReader(new InputStreamReader(Gdx.files.internal(file).read())));
+							Sprite sprite = resourceManager.getResourceValue(spriteId);
+							particleEmitter.setSprite(sprite);
+							return particleEmitter;
+						} catch (IOException e) {
+							throw new RuntimeException("Failed to load face particle emitter from file " + file, e);
+						}
+					}
+				}));
+			}
+
+		};
 
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
@@ -70,14 +92,8 @@ public class MainMenuGameState extends GameStateImpl {
 
 		happyFaceSprite = resourceManager.getResourceValue("HappyFaceSprite");
 
-		try {
-			particleEmitter1 = new ParticleEmitter(new BufferedReader(new InputStreamReader(Gdx.files.internal("data/emitters/FaceEmitter").read())));
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to load face particle emitter", e);
-		}
-
-		particleEmitter1.setSprite(new Sprite(happyFaceSprite));
-		particleEmitter2 = new ParticleEmitter(particleEmitter1);
+		particleEmitter1 = resourceManager.getResourceValue("FaceEmitter");
+		particleEmitter2 = resourceManager.getResourceValue("FaceEmitter");
 
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
@@ -93,7 +109,7 @@ public class MainMenuGameState extends GameStateImpl {
 		playButton.setNotOverColor(notOverColor);
 		playButton.setOverColor(overColor);
 		playButton.setColor(notOverColor);
-		
+
 		survivalModeButton.setNotOverColor(notOverColor);
 		survivalModeButton.setOverColor(overColor);
 		survivalModeButton.setColor(notOverColor);
@@ -101,7 +117,7 @@ public class MainMenuGameState extends GameStateImpl {
 		exitButton.setNotOverColor(notOverColor);
 		exitButton.setOverColor(overColor);
 		exitButton.setColor(notOverColor);
-		
+
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 
 		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f);
@@ -136,7 +152,7 @@ public class MainMenuGameState extends GameStateImpl {
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize();
-		
+
 		playButton.update();
 		survivalModeButton.update();
 		exitButton.update();
@@ -145,7 +161,7 @@ public class MainMenuGameState extends GameStateImpl {
 			game.transition(game.tutorialScreen, true);
 			pressedSound.play();
 		}
-		
+
 		if (survivalModeButton.isReleased()) {
 			game.transition(game.gameScreen, true);
 			pressedSound.play();
