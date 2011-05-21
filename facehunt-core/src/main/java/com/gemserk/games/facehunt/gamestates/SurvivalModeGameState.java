@@ -69,6 +69,12 @@ public class SurvivalModeGameState extends GameStateImpl {
 		INTRO, PLAYING, PREPARE_INTRO
 	}
 
+	public static interface Function {
+
+		float f(float x);
+
+	}
+
 	private final FaceHuntGame game;
 
 	private ResourceManager<String> resourceManager;
@@ -111,6 +117,16 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	private Sprite whiteRectangle;
 
+	private Function velocityIncrementFunction = new Function() {
+		public float f(float x) {
+			if (x > 4f * 60f)
+				return 16f;
+			float nx = x / 60f;
+			float fx = (float) Math.pow(2, nx);
+			return fx;
+		}
+	};
+
 	public SurvivalModeGameState(FaceHuntGame game) {
 		this.game = game;
 		this.gameData = new GameData();
@@ -124,9 +140,10 @@ public class SurvivalModeGameState extends GameStateImpl {
 		worldCamera.center(0f, 0f);
 
 		cameraData = new CameraImpl(0f, 0f, 64f, 0f);
-		
+
 		gameData.gameOver = false;
 		gameData.points = 0;
+		gameData.gameTime = 0;
 
 		resourceManager = new ResourceManagerImpl<String>();
 
@@ -185,15 +202,15 @@ public class SurvivalModeGameState extends GameStateImpl {
 		player.refresh();
 
 		world.loopStart();
-		
+
 		waves = new Wave[] { new Wave() {
 			{
-				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10000, 0.4f), new EnemySpawnInfo(1, 10000, 0.3f), new EnemySpawnInfo(2, 10000, 0.3f), };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10000, 0.5f), new EnemySpawnInfo(1, 10000, 0.2f), new EnemySpawnInfo(2, 10000, 0.3f), };
 			}
 		}, };
 
 		currentWaveIndex = 0;
-		
+
 		currentWave = waves[currentWaveIndex];
 		spawner = new Spawner(currentWave.types);
 
@@ -231,8 +248,14 @@ public class SurvivalModeGameState extends GameStateImpl {
 				if (MathUtils.randomBoolean())
 					angularVelocity = -angularVelocity;
 
+				float increment = velocityIncrementFunction.f(gameData.gameTime * 0.001f);
+
 				Vector2 linearVelocity = new Vector2(0f, 0f);
-				linearVelocity.x = MathUtils.random(1f, 4f);
+				linearVelocity.x = MathUtils.random(1f, 3f);
+				linearVelocity.mul(increment);
+
+				Gdx.app.log("FaceHunt", "spawn.vel: " + linearVelocity.len());
+
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
 
 				Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
@@ -356,6 +379,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 		controller.update(delta);
 
 		worldWrapper.update(delta);
+		gameData.gameTime += delta;
 
 		if (spawner.isEmpty()) {
 			currentWaveIndex++;

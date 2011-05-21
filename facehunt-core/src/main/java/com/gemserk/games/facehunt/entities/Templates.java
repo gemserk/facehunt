@@ -12,6 +12,7 @@ import com.gemserk.animation4j.interpolator.function.InterpolationFunctions;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.components.HitComponent;
+import com.gemserk.commons.artemis.components.LinearVelocityLimitComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.Spatial;
 import com.gemserk.commons.artemis.components.SpatialComponent;
@@ -50,7 +51,7 @@ public class Templates {
 		final Color faceColor = new Color(color);
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 6f, 15f, 100);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 		entity.refresh();
@@ -63,26 +64,26 @@ public class Templates {
 		final Color faceColor = new Color(color);
 		Synchronizers.transition(faceColor, Transitions.transitionBuilder(hideColor).end(showColor).time(500));
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 5f);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 3f, 7f, 250);
 		collidableTemplate(entity, hitTrigger);
-		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
-		entity.addComponent(new RandomMovementBehaviorComponent(500));
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.3f, touchTrigger);
+		entity.addComponent(new RandomMovementBehaviorComponent(750, 10f));
 		entity.refresh();
 	}
 
 	public void createFaceInvulnerableType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f, 13f, 150);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
 		invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
 		entity.refresh();
 	}
 
-	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond) {
-		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond);
+	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond, float maxSpeedLimit, int points) {
+		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond, maxSpeedLimit, points);
 	}
-	
+
 	public void createStaticSprite(Sprite sprite, float x, float y, float width, float height, float angle, int layer, float centerx, float centery, Color color) {
 		Entity entity = world.createEntity();
 		staticSpriteTemplate(entity, sprite, x, y, width, height, angle, layer, centerx, centery, color);
@@ -93,7 +94,7 @@ public class Templates {
 		entity.addComponent(new SpatialComponent(new SpatialImpl(x, y, width, height, angle)));
 		entity.addComponent(new SpriteComponent(sprite, layer, new Vector2(centerx, centery), new Color(color)));
 	}
-	
+
 	public void createBorder(float x, float y, float w, float h) {
 		Entity entity = world.createEntity();
 		staticBoxTemplate(entity, x, y, w, h);
@@ -104,11 +105,13 @@ public class Templates {
 		Body body = bodyBuilder //
 				.type(BodyType.StaticBody) //
 				.boxShape(w * 0.5f, h * 0.5f) //
-				.restitution(0.5f) //
+				.restitution(1f) //
 				.mass(1f)//
-				.friction(0.5f) //
+				.friction(0f) //
 				.userData(entity) //
 				.position(x, y) //
+				.categoryBits(Collisions.Border) //
+				.maskBits(Collisions.All) //
 				.build();
 		entity.addComponent(new PhysicsComponent(body));
 	}
@@ -123,7 +126,7 @@ public class Templates {
 	}
 
 	public void faceTemplate(Entity e, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Container health, //
-			float resistance, Color color, float damagePerSecond) {
+			float resistance, Color color, float damagePerSecond, float maxSpeedLimit, int points) {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
@@ -131,19 +134,22 @@ public class Templates {
 				.circleShape(spatial.getWidth() * 0.5f) //
 				.mass(1f)//
 				.friction(0.5f)//
-				.restitution(0.5f)//
+				.restitution(1f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
+				.categoryBits(Collisions.Face) //
+				.maskBits(Collisions.All) //
 				.build();
 
 		body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
 		body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
 
 		e.addComponent(new PhysicsComponent(body));
+		e.addComponent(new LinearVelocityLimitComponent(maxSpeedLimit));
 		e.addComponent(new BounceSmallVelocityFixComponent());
 		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
 		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), color));
-		e.addComponent(new PointsComponent(100));
+		e.addComponent(new PointsComponent(points));
 		e.addComponent(new HealthComponent(health, resistance));
 		e.addComponent(new DamageComponent(damagePerSecond));
 	}
@@ -193,6 +199,8 @@ public class Templates {
 				.restitution(0f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
+				.categoryBits(Collisions.FacePart) //
+				.maskBits((short) (Collisions.All & ~Collisions.Face & ~Collisions.FacePart)) //
 				.build();
 
 		Vector2 impulse = new Vector2(1f, 0f);
@@ -204,7 +212,7 @@ public class Templates {
 
 		e.addComponent(new PhysicsComponent(body));
 		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial.getWidth() * 0.6f, spatial.getHeight() * 0.6f)));
-		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), faceColor));
+		e.addComponent(new SpriteComponent(sprite, 0, new Vector2(0.5f, 0.5f), faceColor));
 		e.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {

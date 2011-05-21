@@ -6,6 +6,8 @@ public class RandomMovementBehaviorComponent extends Component {
 	
 	private final int time;
 	
+	private final float impulse;
+
 	private int currentTime;
 	
 	public int getTime() {
@@ -20,9 +22,14 @@ public class RandomMovementBehaviorComponent extends Component {
 		this.currentTime = currentTime;
 	}
 	
-	public RandomMovementBehaviorComponent(int time) {
+	public float getImpulse() {
+		return impulse;
+	}
+	
+	public RandomMovementBehaviorComponent(int time, float impulse) {
 		this.time = time;
 		this.currentTime = time;
+		this.impulse = impulse;
 	}
 
 }

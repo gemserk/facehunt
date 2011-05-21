@@ -6,4 +6,6 @@ public class GameData {
 	
 	public boolean gameOver = true;
 	
+	public float gameTime = 0;
+	
 }
