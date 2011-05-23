@@ -10,6 +10,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -38,6 +39,7 @@ import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
+import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.EnemySpawnInfo;
@@ -134,8 +136,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	public void restartGame() {
 
-		int viewportWidth = Gdx.graphics.getWidth();
-		int viewportHeight = Gdx.graphics.getHeight();
+		viewportWidth = Gdx.graphics.getWidth();
+		viewportHeight = Gdx.graphics.getHeight();
 
 		worldCamera.center(0f, 0f);
 
@@ -333,6 +335,10 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
+	private int viewportWidth;
+
+	private int viewportHeight;
+
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
@@ -366,8 +372,15 @@ public class SurvivalModeGameState extends GameStateImpl {
 		Container health = healthComponent.getHealth();
 		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.3f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
 
+		String text = "Points: 99999";
+		
+		TextBounds bounds = font.getMultiLineBounds(text);
+		float scale = SpriteBatchUtils.calculateScaleForText(viewportWidth, bounds.width, 0.2f);
+		
+		font.setScale(scale);
 		font.setColor(Color.RED);
 		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
+		font.setScale(1f);
 
 		spriteBatch.end();
 	}

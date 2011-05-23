@@ -11,6 +11,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -136,8 +137,8 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		gameData.gameOver = false;
 
-		int viewportWidth = Gdx.graphics.getWidth();
-		int viewportHeight = Gdx.graphics.getHeight();
+		viewportWidth = Gdx.graphics.getWidth();
+		viewportHeight = Gdx.graphics.getHeight();
 
 		worldCamera.center(0f, 0f);
 
@@ -345,6 +346,10 @@ public class TutorialModeGameState extends GameStateImpl {
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
+	private int viewportWidth;
+
+	private int viewportHeight;
+
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
@@ -378,11 +383,14 @@ public class TutorialModeGameState extends GameStateImpl {
 		Container health = healthComponent.getHealth();
 		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.2f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
 
-		// font.setColor(Color.RED);
-		// font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
-
 		if (currentWave != null) {
+			
 			font.setColor(waveIntroductionColor);
+			
+			TextBounds bounds = font.getMultiLineBounds(currentText);
+			float scale = SpriteBatchUtils.calculateScaleForText(viewportWidth, bounds.width, 0.8f);
+			
+			font.setScale(scale);
 			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
 					currentText, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
 
@@ -394,6 +402,7 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		spriteBatch.end();
 	}
+	
 
 	@Override
 	public void update(int delta) {
