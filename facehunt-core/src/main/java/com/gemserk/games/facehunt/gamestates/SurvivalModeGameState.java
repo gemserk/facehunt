@@ -119,6 +119,10 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	private Sprite whiteRectangle;
 
+	private int viewportWidth;
+
+	private int viewportHeight;
+
 	private Function velocityIncrementFunction = new Function() {
 		public float f(float x) {
 			if (x > 4f * 60f)
@@ -332,12 +336,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 			}
 		};
 	}
-
+	
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
-
-	private int viewportWidth;
-
-	private int viewportHeight;
 
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);
@@ -373,10 +373,10 @@ public class SurvivalModeGameState extends GameStateImpl {
 		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.3f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
 
 		String text = "Points: 99999";
-		
+
 		TextBounds bounds = font.getMultiLineBounds(text);
 		float scale = SpriteBatchUtils.calculateScaleForText(viewportWidth, bounds.width, 0.2f);
-		
+
 		font.setScale(scale);
 		font.setColor(Color.RED);
 		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
