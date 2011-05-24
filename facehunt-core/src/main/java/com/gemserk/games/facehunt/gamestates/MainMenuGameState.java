@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Input.TextInputListener;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
@@ -13,6 +15,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
@@ -51,6 +54,20 @@ public class MainMenuGameState extends GameStateImpl {
 
 	private TextButton survivalModeButton;
 
+	private int viewportWidth;
+
+	private int viewportHeight;
+
+	private BitmapFont textFont;
+
+	private TextButton changeUsernameButton;
+
+	private String username;
+
+	private Preferences preferences;
+
+	private static final String KEY_USERNAME = "username";
+
 	public MainMenuGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -58,8 +75,17 @@ public class MainMenuGameState extends GameStateImpl {
 	@Override
 	public void init() {
 
-		int viewportWidth = Gdx.graphics.getWidth();
-		int viewportHeight = Gdx.graphics.getHeight();
+		preferences = Gdx.app.getPreferences("gemserk-facehunt");
+		username = preferences.getString(KEY_USERNAME);
+
+		if ("".equals(username)) {
+			username = "undefined-" + MathUtils.random(10000, 99999);
+			preferences.putString(KEY_USERNAME, username);
+			preferences.flush();
+		}
+
+		viewportWidth = Gdx.graphics.getWidth();
+		viewportHeight = Gdx.graphics.getHeight();
 
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
@@ -68,6 +94,7 @@ public class MainMenuGameState extends GameStateImpl {
 			{
 				particleEmitter("FaceEmitter", "HappyFaceSprite", "data/emitters/FaceEmitter");
 			}
+
 			private void particleEmitter(String id, final String spriteId, final String file) {
 				resourceManager.add(id, new ResourceLoaderImpl<ParticleEmitter>(new DataLoader<ParticleEmitter>() {
 					@Override
@@ -95,13 +122,18 @@ public class MainMenuGameState extends GameStateImpl {
 		particleEmitter1 = resourceManager.getResourceValue("FaceEmitter");
 		particleEmitter2 = resourceManager.getResourceValue("FaceEmitter");
 
+		textFont = resourceManager.getResourceValue("Font");
+		textFont.setColor(1f, 1f, 0f, 1f);
+		textFont.setScale(0.8f * viewportWidth / 800f);
+
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
 		titleFont.setScale(1f * viewportWidth / 800f);
 
-		playButton = new TextButton(titleFont, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.6f);
-		survivalModeButton = new TextButton(titleFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.4f);
-		exitButton = new TextButton(titleFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.2f);
+		playButton = new TextButton(titleFont, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.7f);
+		survivalModeButton = new TextButton(titleFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+		exitButton = new TextButton(titleFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
+		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.08f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
@@ -118,10 +150,14 @@ public class MainMenuGameState extends GameStateImpl {
 		exitButton.setOverColor(overColor);
 		exitButton.setColor(notOverColor);
 
+		changeUsernameButton.setColor(new Color(1f, 1f, 0f, 1f));
+		changeUsernameButton.setOverColor(new Color(1f, 0f, 0f, 1f));
+		changeUsernameButton.setNotOverColor(new Color(1f, 1f, 0f, 1f));
+
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 
-		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f);
-		particleEmitter2.setPosition(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f);
+		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.9f);
+		particleEmitter2.setPosition(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.9f);
 	}
 
 	@Override
@@ -133,16 +169,17 @@ public class MainMenuGameState extends GameStateImpl {
 		playButton.draw(spriteBatch);
 		survivalModeButton.draw(spriteBatch);
 		exitButton.draw(spriteBatch);
+		changeUsernameButton.draw(spriteBatch);
 
 		titleFont.setColor(1f, 1f, 0f, 1f);
-		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
+		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.9f);
 
 		particleEmitter1.draw(spriteBatch, ((float) delta) * 0.001f);
 		particleEmitter2.draw(spriteBatch, ((float) delta) * 0.001f);
 
 		happyFaceSprite.setColor(1f, 1f, 0f, 1f);
-		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.8f, happyFaceAngle);
-		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f, -happyFaceAngle);
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.9f, happyFaceAngle);
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.9f, -happyFaceAngle);
 
 		happyFaceAngle += 0.05f * delta;
 
@@ -156,6 +193,7 @@ public class MainMenuGameState extends GameStateImpl {
 		playButton.update();
 		survivalModeButton.update();
 		exitButton.update();
+		changeUsernameButton.update();
 
 		if (playButton.isReleased()) {
 			game.transition(game.tutorialScreen, true);
@@ -169,6 +207,31 @@ public class MainMenuGameState extends GameStateImpl {
 
 		if (exitButton.isReleased())
 			System.exit(0);
+
+		if (changeUsernameButton.isReleased()) {
+
+			game.getScreen().pause();
+
+			Gdx.input.getTextInput(new TextInputListener() {
+
+				@Override
+				public void input(String username) {
+					if (!"".equals(username)) {
+						preferences.putString(KEY_USERNAME, username);
+						preferences.flush();
+						changeUsernameButton.setText("Username: " + username + "\n(tap to change it)");
+					}
+					game.getScreen().resume();
+				}
+
+				@Override
+				public void cancled() {
+					game.getScreen().resume();
+				}
+
+			}, "Username", username);
+
+		}
 
 		if (Gdx.input.isKeyPressed(Keys.T))
 			game.transition(game.testScreen, true);

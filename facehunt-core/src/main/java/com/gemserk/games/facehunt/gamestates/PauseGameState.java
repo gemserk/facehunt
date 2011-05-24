@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
-import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
+import com.gemserk.commons.gdx.gui.Text;
 import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
@@ -21,38 +21,6 @@ import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
 public class PauseGameState extends GameStateImpl {
-
-	static class Text {
-
-		private final String text;
-
-		private final float x;
-
-		private final float y;
-
-		private boolean visible;
-
-		public void setVisible(boolean visible) {
-			this.visible = visible;
-		}
-
-		public boolean isVisible() {
-			return visible;
-		}
-
-		public Text(String text, float x, float y) {
-			this.text = text;
-			this.x = x;
-			this.y = y;
-		}
-
-		public void draw(SpriteBatch spriteBatch, BitmapFont font) {
-			if (!isVisible())
-				return;
-			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, text, x, y);
-		}
-
-	}
 
 	private final FaceHuntGame game;
 
