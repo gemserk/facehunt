@@ -11,14 +11,17 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
+import com.gemserk.commons.gdx.gui.Text;
 import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
+import com.gemserk.scores.Score;
+import com.gemserk.scores.Scores;
 
-public class PauseGameState extends GameStateImpl {
+public class GameOverGameState extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
@@ -28,7 +31,7 @@ public class PauseGameState extends GameStateImpl {
 
 	private Sprite backgroundSprite;
 
-	private TextButton resumeButton;
+	private TextButton tryAgainButton;
 
 	private TextButton mainMenuButton;
 
@@ -40,22 +43,32 @@ public class PauseGameState extends GameStateImpl {
 
 	private Screen menuScreen;
 
+	private Text gameOverText;
+
 	private Sprite overlaySprite;
 	
-	private boolean mainMenu;
+	private Scores scores;
 
-	public void setPreviousScreen(Screen previousScreen) {
-		this.previousScreen = previousScreen;
+	private Score score;
+
+	private BitmapFont buttonFont;
+	
+	public void setScores(Scores scores) {
+		this.scores = scores;
 	}
 
-	public PauseGameState(FaceHuntGame game) {
+	public void setScore(Score score) {
+		this.score = score;
+	}
+
+	public GameOverGameState(FaceHuntGame game) {
 		this.game = game;
 	}
 
 	@Override
 	public void init() {
 		int viewportWidth = Gdx.graphics.getWidth();
-
+		
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
 
@@ -65,23 +78,26 @@ public class PauseGameState extends GameStateImpl {
 
 		overlaySprite.setColor(0.5f, 0.5f, 0.5f, 0.7f);
 		overlaySprite.setPosition(0, 0);
-		overlaySprite.setSize(viewportWidth, Gdx.graphics.getHeight());
+		overlaySprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
 
-		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont");
+		buttonFont = resourceManager.getResourceValue("ButtonFont");
 		buttonFont.setScale(0.7f * viewportWidth / 800f);
 
-		resumeButton = new TextButton(buttonFont, "Resume", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.35f);
+		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.8f);
+		gameOverText.setColor(Color.RED);
+		
+		tryAgainButton = new TextButton(buttonFont, "Try again", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+		mainMenuButton = new TextButton(buttonFont, "Main Menu", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.35f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
 
-		resumeButton.setNotOverColor(notOverColor);
-		resumeButton.setOverColor(overColor);
-		resumeButton.setColor(notOverColor);
+		tryAgainButton.setNotOverColor(notOverColor);
+		tryAgainButton.setOverColor(overColor);
+		tryAgainButton.setColor(notOverColor);
 
 		mainMenuButton.setNotOverColor(notOverColor);
 		mainMenuButton.setOverColor(overColor);
@@ -102,8 +118,7 @@ public class PauseGameState extends GameStateImpl {
 
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 		menuScreen = game.menuScreen;
-		
-		mainMenu = false;
+		previousScreen = game.gameScreen;
 	}
 
 	@Override
@@ -135,7 +150,10 @@ public class PauseGameState extends GameStateImpl {
 
 		spriteBatch.begin();
 		overlaySprite.draw(spriteBatch);
-		resumeButton.draw(spriteBatch);
+
+		gameOverText.draw(spriteBatch, buttonFont);
+
+		tryAgainButton.draw(spriteBatch);
 		mainMenuButton.draw(spriteBatch);
 		spriteBatch.end();
 	}
@@ -146,10 +164,10 @@ public class PauseGameState extends GameStateImpl {
 
 		inputDevicesMonitor.update();
 
-		resumeButton.update();
+		tryAgainButton.update();
 		mainMenuButton.update();
 
-		if (resumeButton.isReleased()) {
+		if (tryAgainButton.isReleased()) {
 			pressedSound.play();
 			game.transition(previousScreen, true);
 		}
@@ -157,7 +175,6 @@ public class PauseGameState extends GameStateImpl {
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
 			pressedSound.play();
 			game.transition(menuScreen, true);
-			mainMenu = true;
 		}
 	}
 
@@ -166,8 +183,7 @@ public class PauseGameState extends GameStateImpl {
 		resourceManager.unloadAll();
 		spriteBatch.dispose();
 		spriteBatch = null;
-		if (mainMenu)
-			previousScreen.dispose();
+		previousScreen.dispose();
 	}
 
 }

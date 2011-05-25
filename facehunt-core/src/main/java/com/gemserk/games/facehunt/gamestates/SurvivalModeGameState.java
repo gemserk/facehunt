@@ -1,11 +1,14 @@
 package com.gemserk.games.facehunt.gamestates;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import com.artemis.Entity;
 import com.artemis.World;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
@@ -58,6 +61,7 @@ import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
+import com.gemserk.scores.Score;
 
 public class SurvivalModeGameState extends GameStateImpl {
 
@@ -122,6 +126,12 @@ public class SurvivalModeGameState extends GameStateImpl {
 	private int viewportWidth;
 
 	private int viewportHeight;
+
+	private Preferences preferences;
+
+	public void setPreferences(Preferences preferences) {
+		this.preferences = preferences;
+	}
 
 	private Function velocityIncrementFunction = new Function() {
 		public float f(float x) {
@@ -336,7 +346,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 			}
 		};
 	}
-	
+
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
 	private Sprite getRandomFacePart() {
@@ -405,13 +415,14 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		if (health.isEmpty()) {
 			gameData.gameOver = true;
-			game.pauseGameState.setGameData(gameData);
-			game.pauseGameState.setPreviousScreen(game.gameScreen);
-			game.transition(game.scoreScreen);
+
+			String username = preferences.getString("username");
+
+			game.gameOverGameState.setScore(new Score(username, gameData.points, new HashSet<String>(), new HashMap<String, Object>()));
+			game.transition(game.gameOverScreen);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
-			game.pauseGameState.setGameData(gameData);
 			game.pauseGameState.setPreviousScreen(game.gameScreen);
 			game.transition(game.scoreScreen);
 		}

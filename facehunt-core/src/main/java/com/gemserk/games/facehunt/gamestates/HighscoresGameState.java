@@ -97,10 +97,13 @@ public class HighscoresGameState extends GameStateImpl {
 	};
 
 	private FutureProcessor<Collection<Score>> scoresRefreshProcessor;
+	
+	public void setScores(Scores scores) {
+		this.scores = scores;
+	}
 
 	public HighscoresGameState(FaceHuntGame game) {
 		this.game = game;
-		this.scores = game.scores;
 	}
 
 	@Override

@@ -69,6 +69,10 @@ public class MainMenuGameState extends GameStateImpl {
 	private static final String KEY_USERNAME = "username";
 
 	private TextButton highscoresButton;
+	
+	public void setPreferences(Preferences preferences) {
+		this.preferences = preferences;
+	}
 
 	public MainMenuGameState(FaceHuntGame game) {
 		this.game = game;
@@ -77,7 +81,6 @@ public class MainMenuGameState extends GameStateImpl {
 	@Override
 	public void init() {
 
-		preferences = Gdx.app.getPreferences("gemserk-facehunt");
 		username = preferences.getString(KEY_USERNAME);
 
 		if ("".equals(username)) {
