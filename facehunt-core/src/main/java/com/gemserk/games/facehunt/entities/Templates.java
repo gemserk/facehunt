@@ -28,7 +28,6 @@ import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
 import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
-import com.gemserk.games.facehunt.components.IntermittentInvulnerabilityComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.components.TouchableComponent;
@@ -76,7 +75,7 @@ public class Templates {
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f, 13f, 150);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
-		invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 2000);
+		invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 1000, 3000);
 		entity.refresh();
 	}
 
@@ -158,26 +157,32 @@ public class Templates {
 		e.addComponent(new HitComponent(hitTrigger));
 	}
 
-	public void invulnerableFaceTemplate(Entity entity, final Color vulnerableColor, final Color invulnerableColor, int toggleTime) {
-		AbstractTrigger onEnabledTrigger = new AbstractTrigger() {
+	public void invulnerableFaceTemplate(Entity entity, final Color vulnerableColor, final Color invulnerableColor, final int minTime, final int maxTime) {
+		entity.addComponent(new TimerComponent(0, new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
+				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
+				timerComponent.setCurrentTime(MathUtils.random(minTime, maxTime));
+				
+				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
+				DamageComponent damageComponent = e.getComponent(DamageComponent.class);
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-				Color color = spriteComponent.getColor();
-				Synchronizers.transition(color, Transitions.transitionBuilder().end(invulnerableColor).time(250));
+				
+				if (healthComponent.getResistance() > 0f) {
+					healthComponent.setResistance(0f);
+					damageComponent.setDamagePerSecond(5f);
+					Color color = spriteComponent.getColor();
+					Synchronizers.transition(color, Transitions.transitionBuilder(color).end(vulnerableColor).time(250));
+				} else {
+					healthComponent.setResistance(1f);
+					damageComponent.setDamagePerSecond(0);
+					Color color = spriteComponent.getColor();
+					Synchronizers.transition(color, Transitions.transitionBuilder(color).end(invulnerableColor).time(250));
+				}
+
 				return false;
 			}
-		};
-		AbstractTrigger onDisabledTrigger = new AbstractTrigger() {
-			@Override
-			protected boolean handle(Entity e) {
-				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-				Color color = spriteComponent.getColor();
-				Synchronizers.transition(color, Transitions.transitionBuilder().end(vulnerableColor).time(250));
-				return false;
-			}
-		};
-		entity.addComponent(new IntermittentInvulnerabilityComponent(toggleTime, onEnabledTrigger, onDisabledTrigger));
+		}));
 	}
 
 	public void facePartTemplate(Entity e, Sprite sprite, Spatial spatial, int aliveTime, Color color, float angle) {

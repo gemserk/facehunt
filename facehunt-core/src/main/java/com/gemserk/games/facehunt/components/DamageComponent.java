@@ -4,10 +4,14 @@ import com.artemis.Component;
 
 public class DamageComponent extends Component {
 
-	private final float damagePerSecond;
+	private float damagePerSecond;
 
 	public float getDamagePerSecond() {
 		return damagePerSecond;
+	}
+	
+	public void setDamagePerSecond(float damagePerSecond) {
+		this.damagePerSecond = damagePerSecond;
 	}
 	
 	public DamageComponent(float damagePerSecond) {

@@ -56,7 +56,6 @@ import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
-import com.gemserk.games.facehunt.systems.IntermittentInvulnerabilitySystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
@@ -189,7 +188,6 @@ public class SurvivalModeGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new HitDetectionSystem());
 		worldWrapper.addUpdateSystem(new TimerSystem());
 		worldWrapper.addUpdateSystem(new MovementSystem());
-		worldWrapper.addUpdateSystem(new IntermittentInvulnerabilitySystem());
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
