@@ -135,9 +135,9 @@ public class MainMenuGameState extends GameStateImpl {
 		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont");
 		buttonFont.setScale(0.7f * viewportWidth / 800f);
 
-		playButton = new TextButton(buttonFont, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.6f);
-		survivalModeButton = new TextButton(buttonFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-		highscoresButton = new TextButton(buttonFont, "Highscores", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.4f);
+		playButton = new TextButton(buttonFont, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.66f);
+		survivalModeButton = new TextButton(buttonFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.54f);
+		highscoresButton = new TextButton(buttonFont, "Highscores", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.42f);
 		exitButton = new TextButton(buttonFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
 		
 		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.08f);
@@ -167,8 +167,8 @@ public class MainMenuGameState extends GameStateImpl {
 
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 
-		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.9f);
-		particleEmitter2.setPosition(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.9f);
+		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.85f);
+		particleEmitter2.setPosition(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.85f);
 	}
 
 	@Override
@@ -184,14 +184,14 @@ public class MainMenuGameState extends GameStateImpl {
 		changeUsernameButton.draw(spriteBatch);
 
 		titleFont.setColor(1f, 1f, 0f, 1f);
-		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.9f);
+		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.85f);
 
 		particleEmitter1.draw(spriteBatch, ((float) delta) * 0.001f);
 		particleEmitter2.draw(spriteBatch, ((float) delta) * 0.001f);
 
 		happyFaceSprite.setColor(1f, 1f, 0f, 1f);
-		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.9f, happyFaceAngle);
-		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.9f, -happyFaceAngle);
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.85f, happyFaceAngle);
+		SpriteBatchUtils.drawCentered(spriteBatch, happyFaceSprite, Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.85f, -happyFaceAngle);
 
 		happyFaceAngle += 0.05f * delta;
 

@@ -10,5 +10,6 @@ public class FaceHuntAndroidApplication extends AndroidApplication  {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		initialize(new FaceHuntGame(), false);
-	}	
+	}
+	
 }

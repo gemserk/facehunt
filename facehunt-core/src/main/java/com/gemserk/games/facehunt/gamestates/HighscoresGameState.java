@@ -12,12 +12,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.gui.Text;
 import com.gemserk.games.facehunt.FaceHuntGame;
@@ -53,8 +51,6 @@ public class HighscoresGameState extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
-	private String username;
-
 	private SpriteBatch spriteBatch;
 
 	private BitmapFont font;
@@ -75,12 +71,6 @@ public class HighscoresGameState extends GameStateImpl {
 
 	private ExecutorService executorService;
 
-	private Preferences preferences;
-
-	private final String gameKey = "db3bbc454ad707213fe02874e526e5f7";
-
-	private final String scoresApplicationUrl = "http://gemserkscores.appspot.com";
-
 	public HighscoresGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -90,10 +80,7 @@ public class HighscoresGameState extends GameStateImpl {
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
 
-		preferences = Gdx.app.getPreferences("gemserk-test01");
-		username = preferences.getString("username", "undefined-" + MathUtils.random(10000, 50000));
-
-		scores = new ScoresHttpImpl(gameKey, scoresApplicationUrl, new ScoreSerializerJSONImpl());
+		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
 
 		font = new BitmapFont();
 		spriteBatch = new SpriteBatch();
@@ -103,7 +90,7 @@ public class HighscoresGameState extends GameStateImpl {
 		if (score != null) {
 			texts.add(new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
 			submitScoreFuture = executorService.submit(new SubmitScoreCallable(score));
-		}else {
+		} else {
 			texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
 			refreshScoresFuture = executorService.submit(new RefreshScoresCallable());
 		}
@@ -124,7 +111,7 @@ public class HighscoresGameState extends GameStateImpl {
 	public void update(int delta) {
 		processRefreshScores();
 		processSubmitScore();
-		if (Gdx.input.justTouched()) 
+		if (Gdx.input.justTouched())
 			game.transition(game.menuScreen, true);
 	}
 
@@ -184,11 +171,13 @@ public class HighscoresGameState extends GameStateImpl {
 		} catch (InterruptedException e) {
 			texts.clear();
 			texts.add(new Text("Refresh scores failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			// e.printStackTrace();
+			Gdx.app.log("FaceHunt", e.getMessage());
+			e.printStackTrace();
 		} catch (ExecutionException e) {
 			texts.clear();
 			texts.add(new Text("Refresh scores failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			// e.printStackTrace();
+			Gdx.app.log("FaceHunt", e.getMessage());
+			e.printStackTrace();
 		}
 
 		refreshScoresFuture = null;
@@ -217,10 +206,12 @@ public class HighscoresGameState extends GameStateImpl {
 		} catch (InterruptedException e) {
 			texts.clear();
 			texts.add(new Text("Submit score failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+			Gdx.app.log("FaceHunt", e.getMessage());
 			// e.printStackTrace();
 		} catch (ExecutionException e) {
 			texts.clear();
 			texts.add(new Text("Submit score failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+			Gdx.app.log("FaceHunt", e.getMessage());
 			// e.printStackTrace();
 		}
 
