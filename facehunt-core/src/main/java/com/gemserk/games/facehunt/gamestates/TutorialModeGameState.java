@@ -226,6 +226,11 @@ public class TutorialModeGameState extends GameStateImpl {
 			}
 		}, new Wave() {
 			{
+				texts = new String[] { "There are also friendly whity faces\nwhich will recover your life.", "However, do not kill them,\n else they will take revenge." };
+				types = new EnemySpawnInfo[] { new EnemySpawnInfo(3, 4, 1f) };
+			}
+		}, new Wave() {
+			{
 				texts = new String[] { "It seems like someone\n has improved their skills.", "Well done, now you will have\n to face a real challenge..." };
 				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 0, 1f) };
 			}
@@ -279,6 +284,8 @@ public class TutorialModeGameState extends GameStateImpl {
 					templates.createFaceSecondType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
 				else if (type == 2)
 					templates.createFaceInvulnerableType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
+				else if (type == 3)
+					templates.createMedicFaceType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getMedicFaceTouchTrigger());
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -322,6 +329,32 @@ public class TutorialModeGameState extends GameStateImpl {
 				healthComponent = player.getComponent(HealthComponent.class);
 				health = healthComponent.getHealth();
 				health.add(5f);
+
+				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
+				sound.play();
+
+				return true;
+			}
+		};
+	}
+	
+	private Trigger getMedicFaceTouchTrigger() {
+		return new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
+				Spatial spatial = spatialComponent.getSpatial();
+
+				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+				Color currentColor = spriteComponent.getColor();
+
+				createDeadFace(spatial, 6, 1500, currentColor);
+
+				world.deleteEntity(e);
+
+				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+				Container health = healthComponent.getHealth();
+				health.remove(20f);
 
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				sound.play();
@@ -382,12 +415,12 @@ public class TutorialModeGameState extends GameStateImpl {
 		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.2f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
 
 		if (currentWave != null) {
-			
+
 			font.setColor(waveIntroductionColor);
-			
+
 			TextBounds bounds = font.getMultiLineBounds(currentText);
 			float scale = SpriteBatchUtils.calculateScaleForText(viewportWidth, bounds.width, 0.8f);
-			
+
 			font.setScale(scale);
 			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
 					currentText, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
@@ -400,7 +433,6 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		spriteBatch.end();
 	}
-	
 
 	@Override
 	public void update(int delta) {

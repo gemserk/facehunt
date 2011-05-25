@@ -219,7 +219,11 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		waves = new Wave[] { new Wave() {
 			{
-				types = new EnemySpawnInfo[] { new EnemySpawnInfo(0, 10000, 0.5f), new EnemySpawnInfo(1, 10000, 0.2f), new EnemySpawnInfo(2, 10000, 0.3f), };
+				types = new EnemySpawnInfo[] {  //
+						new EnemySpawnInfo(0, 10000, 0.5f), // 
+						new EnemySpawnInfo(1, 10000, 0.2f),  //
+						new EnemySpawnInfo(2, 10000, 0.25f), //
+						new EnemySpawnInfo(3, 10000, 0.05f)};
 			}
 		}, };
 
@@ -282,6 +286,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 					templates.createFaceSecondType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
 				else if (type == 2)
 					templates.createFaceInvulnerableType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
+				else if (type == 3)
+					templates.createMedicFaceType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getMedicFaceTouchTrigger());
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				sound.play();
@@ -333,6 +339,33 @@ public class SurvivalModeGameState extends GameStateImpl {
 			}
 		};
 	}
+	
+	private Trigger getMedicFaceTouchTrigger() {
+		return new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
+				Spatial spatial = spatialComponent.getSpatial();
+
+				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+				Color currentColor = spriteComponent.getColor();
+
+				createDeadFace(spatial, 6, 1500, currentColor);
+
+				world.deleteEntity(e);
+
+				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+				Container health = healthComponent.getHealth();
+				health.remove(20f);
+
+				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
+				sound.play();
+
+				return true;
+			}
+		};
+	}
+
 
 	private Trigger getFaceHitTrigger() {
 		return new AbstractTrigger() {
