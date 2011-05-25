@@ -117,6 +117,7 @@ public class TestGameState extends GameStateImpl {
 				monitorKey("insertFace1", Keys.NUM_1);
 				monitorKey("insertFace2", Keys.NUM_2);
 				monitorKey("insertFace3", Keys.NUM_3);
+				monitorKey("insertFace4", Keys.NUM_4);
 			}
 		};
 
@@ -217,6 +218,32 @@ public class TestGameState extends GameStateImpl {
 		};
 	}
 
+	private Trigger getMedicFaceTouchTrigger() {
+		return new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
+				Spatial spatial = spatialComponent.getSpatial();
+
+				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+				Color currentColor = spriteComponent.getColor();
+
+				createDeadFace(spatial, 6, 1500, currentColor);
+
+				world.deleteEntity(e);
+
+				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+				Container health = healthComponent.getHealth();
+				health.remove(20f);
+
+				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
+				sound.play();
+
+				return true;
+			}
+		};
+	}
+
 	private Trigger getFaceHitTrigger() {
 		return new AbstractTrigger() {
 			@Override
@@ -272,9 +299,10 @@ public class TestGameState extends GameStateImpl {
 		inputDevicesMonitor.update();
 		worldWrapper.update(delta);
 
+		mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+		worldCamera.unproject(mousePosition);
+
 		if (inputDevicesMonitor.getButton("insertFace1").isPressed()) {
-			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-			worldCamera.unproject(mousePosition);
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
@@ -285,8 +313,6 @@ public class TestGameState extends GameStateImpl {
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
-			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-			worldCamera.unproject(mousePosition);
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
@@ -297,8 +323,6 @@ public class TestGameState extends GameStateImpl {
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace3").isPressed()) {
-			mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-			worldCamera.unproject(mousePosition);
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
@@ -306,6 +330,16 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
 			templates.createFaceInvulnerableType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceTouchTrigger());
+		}
+
+		if (inputDevicesMonitor.getButton("insertFace4").isPressed()) {
+			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+
+			Vector2 linearImpulse = new Vector2(1f, 0f);
+			linearImpulse.rotate(MathUtils.random(360f));
+			linearImpulse.mul(MathUtils.random(1f, 5f));
+
+			templates.createMedicFaceType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getMedicFaceTouchTrigger());
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))

@@ -78,6 +78,32 @@ public class Templates {
 		invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 1000, 3000);
 		entity.refresh();
 	}
+	
+	public void createMedicFaceType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
+		Entity entity = world.createEntity();
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 1f, 1f, 1f), -2.5f, 13f, 0);
+		collidableTemplate(entity, hitTrigger);
+		touchableTemplate(entity, controller, spatial.getWidth() * 0f, touchTrigger);
+		
+		int aliveTime = 4000;
+		
+		SpriteComponent spriteComponent = entity.getComponent(SpriteComponent.class);
+		Color color = spriteComponent.getColor();
+		color.a = 1f;
+		Color vulnerableColor = new Color(color.r, color.g, color.b, 0f);
+		Synchronizers.transition(color, Transitions.transitionBuilder(color).end(vulnerableColor).time(4000) //
+				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
+		
+		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
+			@Override
+			protected boolean handle(Entity e) {
+				world.deleteEntity(e);
+				return true;
+			}
+		}));
+		
+		entity.refresh();
+	}
 
 	void simpleFaceTemplate(Entity entity, Spatial spatial, Sprite sprite, Vector2 linearImpulse, float angularVelocity, Color color, float damagePerSecond, float maxSpeedLimit, int points) {
 		faceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Container(0.1f, 0.1f), 0f, color, damagePerSecond, maxSpeedLimit, points);
