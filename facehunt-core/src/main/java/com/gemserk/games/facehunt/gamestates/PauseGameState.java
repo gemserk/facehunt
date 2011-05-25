@@ -26,8 +26,6 @@ public class PauseGameState extends GameStateImpl {
 
 	private ResourceManager<String> resourceManager;
 
-	private Sprite backgroundSprite;
-
 	private TextButton resumeButton;
 
 	private TextButton mainMenuButton;
@@ -66,9 +64,6 @@ public class PauseGameState extends GameStateImpl {
 		overlaySprite.setColor(0.5f, 0.5f, 0.5f, 0.7f);
 		overlaySprite.setPosition(0, 0);
 		overlaySprite.setSize(viewportWidth, Gdx.graphics.getHeight());
-
-		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
-		backgroundSprite.setPosition(0, 0);
 
 		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont");
 		buttonFont.setScale(0.7f * viewportWidth / 800f);

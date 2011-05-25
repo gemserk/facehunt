@@ -46,13 +46,11 @@ public class GameOverGameState extends GameStateImpl {
 	class ScoreSubmitHanlderImpl implements FutureHandler<String> {
 
 		public void done(String scoreId) {
-			scoreSubmitText.setText("Score submitted!");
-			scoreSubmitText.setColor(Color.GREEN);
+			scoreSubmitText.setText("Score submitted!").setColor(Color.GREEN);
 		}
 
 		public void failed(Exception e) {
-			scoreSubmitText.setText("Submit score failed :(");
-			scoreSubmitText.setColor(Color.RED);
+			scoreSubmitText.setText("Submit score failed :(").setColor(Color.RED);
 			if (e != null)
 				Gdx.app.log("FaceHunt", e.getMessage());
 		}
@@ -64,8 +62,6 @@ public class GameOverGameState extends GameStateImpl {
 	private SpriteBatch spriteBatch;
 
 	private ResourceManager<String> resourceManager;
-
-	private Sprite backgroundSprite;
 
 	private TextButton tryAgainButton;
 
@@ -127,14 +123,10 @@ public class GameOverGameState extends GameStateImpl {
 		overlaySprite.setPosition(0, 0);
 		overlaySprite.setSize(viewportWidth, viewportHeight);
 
-		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
-		backgroundSprite.setPosition(0, 0);
-
 		buttonFont = resourceManager.getResourceValue("ButtonFont");
 		buttonFont.setScale(0.7f * viewportWidth / 800f);
 
-		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), viewportWidth * 0.5f, viewportHeight * 0.8f);
-		gameOverText.setColor(Color.RED);
+		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), viewportWidth * 0.5f, viewportHeight * 0.8f).setColor(Color.RED);
 
 		tryAgainButton = new TextButton(buttonFont, "Try again", viewportWidth * 0.5f, viewportHeight * 0.4f);
 		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, viewportHeight * 0.25f);
@@ -167,8 +159,7 @@ public class GameOverGameState extends GameStateImpl {
 		menuScreen = game.menuScreen;
 		previousScreen = game.gameScreen;
 
-		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.55f);
-		scoreSubmitText.setColor(new Color(1f, 1f, 0f, 1f));
+		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.55f).setColor(new Color(1f, 1f, 0f, 1f));
 
 		submitScoreProcessor = new FutureProcessor<String>(new ScoreSubmitHanlderImpl());
 		submitScoreProcessor.setFuture(executorService.submit(new SubmitScoreCallable(score)));
