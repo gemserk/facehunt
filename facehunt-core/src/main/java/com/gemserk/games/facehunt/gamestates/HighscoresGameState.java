@@ -8,7 +8,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -16,6 +18,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.gui.Text;
+import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
+import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -74,7 +78,9 @@ public class HighscoresGameState extends GameStateImpl {
 	private float newHeight;
 
 	private static final Color yellowColor = new Color(1f, 1f, 0f, 1f);
-	
+
+	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
+
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
 	}
@@ -91,10 +97,10 @@ public class HighscoresGameState extends GameStateImpl {
 	public void init() {
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
-		
+
 		resourceManager = new ResourceManagerImpl<String>();
 		new GameResourceBuilder(resourceManager);
-		
+
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
 		backgroundSprite.setSize(viewportWidth, viewportHeight);
@@ -103,7 +109,7 @@ public class HighscoresGameState extends GameStateImpl {
 		font.setScale(1f);
 		newHeight = (viewportHeight * 0.9f / 12f) / font.getLineHeight();
 		font.setScale(newHeight);
-		
+
 		spriteBatch = new SpriteBatch();
 		texts = new ArrayList<Text>();
 		scoresRefreshProcessor = new FutureProcessor<Collection<Score>>(scoresRefreshHandler);
@@ -111,6 +117,27 @@ public class HighscoresGameState extends GameStateImpl {
 		texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
 		Future<Collection<Score>> future = executorService.submit(new RefreshScoresCallable());
 		scoresRefreshProcessor.setFuture(future);
+		
+		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
+
+		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {
+			{
+				if (Gdx.app.getType() == ApplicationType.Android)
+					monitorKey("back", Keys.BACK);
+				else
+					monitorKey("back", Keys.ESCAPE);
+			}
+		};
+	}
+
+	@Override
+	public void resume() {
+		Gdx.input.setCatchBackKey(true);
+	}
+
+	@Override
+	public void pause() {
+		Gdx.input.setCatchBackKey(false);
 	}
 
 	@Override
@@ -127,8 +154,11 @@ public class HighscoresGameState extends GameStateImpl {
 
 	@Override
 	public void update(int delta) {
+		inputDevicesMonitor.update();
 		scoresRefreshProcessor.update();
 		if (Gdx.input.justTouched())
+			game.transition(game.menuScreen, true);
+		if (inputDevicesMonitor.getButton("back").isReleased()) 
 			game.transition(game.menuScreen, true);
 	}
 
