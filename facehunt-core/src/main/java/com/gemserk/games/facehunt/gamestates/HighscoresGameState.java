@@ -6,9 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL10;
@@ -24,39 +22,6 @@ import com.gemserk.util.concurrent.FutureProcessor;
 
 public class HighscoresGameState extends GameStateImpl {
 
-	class SubmitScoreCallable implements Callable<String> {
-
-		private final Score score;
-
-		private SubmitScoreCallable(Score score) {
-			this.score = score;
-		}
-
-		@Override
-		public String call() throws Exception {
-			return scores.submit(score);
-		}
-
-	}
-
-	class ScoreSubmitHanlderImpl implements FutureHandler<String> {
-
-		public void done(String scoreId) {
-			texts.clear();
-			texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			Future<Collection<Score>> future = executorService.submit(new RefreshScoresCallable());
-			scoresRefreshProcessor.setFuture(future);
-		}
-
-		public void failed(Exception e) {
-			texts.clear();
-			texts.add(new Text("Submit score failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			if (e != null)
-				Gdx.app.log("FaceHunt", e.getMessage());
-		}
-
-	}
-	
 	private class RefreshScoresCallable implements Callable<Collection<Score>> {
 		@Override
 		public Collection<Score> call() throws Exception {
@@ -98,6 +63,10 @@ public class HighscoresGameState extends GameStateImpl {
 
 	private FutureProcessor<Collection<Score>> scoresRefreshProcessor;
 	
+	public void setExecutorService(ExecutorService executorService) {
+		this.executorService = executorService;
+	}
+
 	public void setScores(Scores scores) {
 		this.scores = scores;
 	}
@@ -115,12 +84,10 @@ public class HighscoresGameState extends GameStateImpl {
 		spriteBatch = new SpriteBatch();
 		texts = new ArrayList<Text>();
 		scoresRefreshProcessor = new FutureProcessor<Collection<Score>>(scoresRefreshHandler);
-		executorService = Executors.newCachedThreadPool();
 
-			texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			Future<Collection<Score>> future = executorService.submit(new RefreshScoresCallable());
-			scoresRefreshProcessor.setFuture(future);
-
+		texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+		Future<Collection<Score>> future = executorService.submit(new RefreshScoresCallable());
+		scoresRefreshProcessor.setFuture(future);
 	}
 
 	@Override
@@ -177,11 +144,5 @@ public class HighscoresGameState extends GameStateImpl {
 	public void dispose() {
 		spriteBatch.dispose();
 		font.dispose();
-		try {
-			executorService.shutdown();
-			executorService.awaitTermination(1000l, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 }

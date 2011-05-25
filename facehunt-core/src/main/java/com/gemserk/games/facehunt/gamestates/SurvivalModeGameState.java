@@ -270,7 +270,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 				linearVelocity.x = MathUtils.random(1f, 3f);
 				linearVelocity.mul(increment);
 
-				Gdx.app.log("FaceHunt", "spawn.vel: " + linearVelocity.len());
+//				Gdx.app.log("FaceHunt", "spawn.vel: " + linearVelocity.len());
 
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
 

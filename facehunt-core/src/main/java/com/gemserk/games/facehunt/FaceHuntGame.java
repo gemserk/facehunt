@@ -1,5 +1,9 @@
 package com.gemserk.games.facehunt;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
@@ -51,11 +55,14 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	public Preferences preferences;
 
+	private ExecutorService executorService;
+
 	@Override
 	public void create() {
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
 		
+		executorService = Executors.newCachedThreadPool();
 		preferences = Gdx.app.getPreferences("gemserk-facehunt");
 		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
 
@@ -64,12 +71,14 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		
 		gameOverGameState = new GameOverGameState(this);
 		gameOverGameState.setScores(scores);
+		gameOverGameState.setExecutorService(executorService);
 
 		MainMenuGameState mainMenuGameState = new MainMenuGameState(this);
 		mainMenuGameState.setPreferences(preferences);
 
 		HighscoresGameState highscoresGameState = new HighscoresGameState(this);
 		highscoresGameState.setScores(scores);
+		highscoresGameState.setExecutorService(executorService);
 		
 		SurvivalModeGameState survivalModeGameState = new SurvivalModeGameState(this);
 		survivalModeGameState.setPreferences(preferences);
@@ -109,6 +118,17 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		fadeTransitionScreen.resume();
 		fadeTransitionScreen.show();
 		setScreen(fadeTransitionScreen);
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		try {
+			executorService.shutdown();
+			executorService.awaitTermination(1000l, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
