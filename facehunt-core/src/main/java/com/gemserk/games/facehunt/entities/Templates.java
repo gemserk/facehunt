@@ -81,7 +81,7 @@ public class Templates {
 	
 	public void createMedicFaceType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
 		Entity entity = world.createEntity();
-		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 1f, 1f, 1f), -2.5f, 13f, 0);
+		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 1f, 1f, 1f), -6f, 13f, 0);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0f, touchTrigger);
 		
