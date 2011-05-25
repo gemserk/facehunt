@@ -14,6 +14,9 @@ import com.gemserk.games.facehunt.gamestates.SurvivalModeGameState;
 import com.gemserk.games.facehunt.gamestates.TestGameState;
 import com.gemserk.games.facehunt.gamestates.TutorialModeGameState;
 import com.gemserk.games.facehunt.screens.FadeTransitionScreen;
+import com.gemserk.scores.ScoreSerializerJSONImpl;
+import com.gemserk.scores.Scores;
+import com.gemserk.scores.ScoresHttpImpl;
 
 public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
@@ -22,7 +25,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public Screen splashScreen;
 
 	public Screen tutorialScreen;
-	
+
 	public Screen gameScreen;
 
 	public Screen menuScreen;
@@ -30,17 +33,21 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public Screen scoreScreen;
 
 	public Screen testScreen;
-	
+
 	public Screen highscoresScreen;
 
 	public PauseGameState pauseGameState;
 
 	public TutorialModeGameState tutorialModeGameState;
 
+	public Scores scores;
+
 	@Override
 	public void create() {
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
+
+		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
 
 		tutorialModeGameState = new TutorialModeGameState(this);
 		pauseGameState = new PauseGameState(this);

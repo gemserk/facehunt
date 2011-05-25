@@ -20,9 +20,7 @@ import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.gui.Text;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.scores.Score;
-import com.gemserk.scores.ScoreSerializerJSONImpl;
 import com.gemserk.scores.Scores;
-import com.gemserk.scores.ScoresHttpImpl;
 
 public class HighscoresGameState extends GameStateImpl {
 
@@ -49,6 +47,106 @@ public class HighscoresGameState extends GameStateImpl {
 		}
 	}
 
+	interface FutureHandler<T> {
+
+		void done(T t);
+
+		void failed(Exception e);
+
+	}
+
+	interface ScoreSubmitHandler extends FutureHandler<String> {
+
+		void done(String scoreId);
+
+		void failed(Exception e);
+
+	}
+
+	class ScoreSubmitHanlderImpl implements ScoreSubmitHandler {
+
+		public void done(String scoreId) {
+			score.setId(scoreId);
+			texts.clear();
+			texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+			refreshScoresFuture = executorService.submit(new RefreshScoresCallable());
+			futureProcessor.setFuture(refreshScoresFuture);
+		}
+
+		public void failed(Exception e) {
+			texts.clear();
+			texts.add(new Text("Submit score failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+			if (e != null)
+				Gdx.app.log("FaceHunt", e.getMessage());
+		}
+
+	}
+
+	interface ScoresRefreshHandler extends FutureHandler<Collection<Score>> {
+
+		void done(Collection<Score> scores);
+
+		void failed(Exception e);
+
+	}
+
+	class ScoresRefreshHandlerImpl implements ScoresRefreshHandler {
+
+		@Override
+		public void done(Collection<Score> scores) {
+			refreshScores(scores);
+		}
+
+		@Override
+		public void failed(Exception e) {
+			texts.clear();
+			texts.add(new Text("Refresh scores failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+			if (e != null)
+				Gdx.app.log("FaceHunt", e.getMessage());
+		}
+
+	}
+
+	static class FutureProcessor<T> {
+
+		private final FutureHandler<T> futureHandler;
+
+		private Future<T> future;
+
+		public void setFuture(Future<T> future) {
+			this.future = future;
+		}
+
+		public FutureProcessor(FutureHandler<T> scoresRefreshHandler) {
+			this.futureHandler = scoresRefreshHandler;
+		}
+
+		public void update() {
+			if (future == null)
+				return;
+
+			if (!future.isDone())
+				return;
+
+			try {
+
+				if (future.isCancelled()) {
+					futureHandler.failed(null);
+				} else {
+					futureHandler.done(future.get());
+				}
+
+			} catch (InterruptedException e) {
+				futureHandler.failed(e);
+			} catch (ExecutionException e) {
+				futureHandler.failed(e);
+			}
+
+			future = null;
+		}
+
+	}
+
 	private final FaceHuntGame game;
 
 	private SpriteBatch spriteBatch;
@@ -71,16 +169,21 @@ public class HighscoresGameState extends GameStateImpl {
 
 	private ExecutorService executorService;
 
+	private ScoreSubmitHandler scoreSubmitHanlderImpl = new ScoreSubmitHanlderImpl();
+
+	private ScoresRefreshHandler scoresRefreshHandler = new ScoresRefreshHandlerImpl();
+
+	private FutureProcessor futureProcessor;
+
 	public HighscoresGameState(FaceHuntGame game) {
 		this.game = game;
+		this.scores = game.scores;
 	}
 
 	@Override
 	public void init() {
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
-
-		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
 
 		font = new BitmapFont();
 		spriteBatch = new SpriteBatch();
@@ -94,6 +197,10 @@ public class HighscoresGameState extends GameStateImpl {
 			texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
 			refreshScoresFuture = executorService.submit(new RefreshScoresCallable());
 		}
+
+		futureProcessor = new FutureProcessor(scoresRefreshHandler);
+		futureProcessor.setFuture(refreshScoresFuture);
+
 	}
 
 	@Override
@@ -109,7 +216,8 @@ public class HighscoresGameState extends GameStateImpl {
 
 	@Override
 	public void update(int delta) {
-		processRefreshScores();
+		futureProcessor.update();
+		// processRefreshScores();
 		processSubmitScore();
 		if (Gdx.input.justTouched())
 			game.transition(game.menuScreen, true);
@@ -152,37 +260,6 @@ public class HighscoresGameState extends GameStateImpl {
 		}
 	}
 
-	private void processRefreshScores() {
-		if (refreshScoresFuture == null)
-			return;
-
-		if (!refreshScoresFuture.isDone())
-			return;
-
-		try {
-
-			if (refreshScoresFuture.isCancelled()) {
-				texts.clear();
-				texts.add(new Text("Refresh scores failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			} else {
-				refreshScores(refreshScoresFuture.get());
-			}
-
-		} catch (InterruptedException e) {
-			texts.clear();
-			texts.add(new Text("Refresh scores failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			Gdx.app.log("FaceHunt", e.getMessage());
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			texts.clear();
-			texts.add(new Text("Refresh scores failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			Gdx.app.log("FaceHunt", e.getMessage());
-			e.printStackTrace();
-		}
-
-		refreshScoresFuture = null;
-	}
-
 	private void processSubmitScore() {
 		if (submitScoreFuture == null)
 			return;
@@ -193,26 +270,16 @@ public class HighscoresGameState extends GameStateImpl {
 		try {
 
 			if (submitScoreFuture.isCancelled()) {
-				texts.clear();
-				texts.add(new Text("Submit score failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+				scoreSubmitHanlderImpl.failed(null);
 			} else {
 				String scoreId = submitScoreFuture.get();
-				this.score.setId(scoreId);
-				texts.clear();
-				texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-				refreshScoresFuture = executorService.submit(new RefreshScoresCallable());
+				scoreSubmitHanlderImpl.done(scoreId);
 			}
 
 		} catch (InterruptedException e) {
-			texts.clear();
-			texts.add(new Text("Submit score failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			Gdx.app.log("FaceHunt", e.getMessage());
-			// e.printStackTrace();
+			scoreSubmitHanlderImpl.failed(e);
 		} catch (ExecutionException e) {
-			texts.clear();
-			texts.add(new Text("Submit score failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-			Gdx.app.log("FaceHunt", e.getMessage());
-			// e.printStackTrace();
+			scoreSubmitHanlderImpl.failed(e);
 		}
 
 		submitScoreFuture = null;
