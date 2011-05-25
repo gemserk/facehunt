@@ -64,6 +64,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.gemserk.datastore</groupId>
+			<artifactId>datastore-core</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.gemserk.resources</groupId>
 			<artifactId>resourcesmanager-core</artifactId>
 			<version>${resourcesmanager.version}</version>
@@ -71,6 +77,10 @@
 				<exclusion>
 					<artifactId>logback-classic</artifactId>
 					<groupId>ch.qos.logback</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>

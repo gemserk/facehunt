@@ -45,6 +45,7 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		sound("ButtonPressedSound", "data/sounds/button_pressed.ogg");
 
 		font("Font", "data/fonts/font.png", "data/fonts/font.fnt", true);
+		font("ButtonFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
 		font("TitleFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
 	}
 }

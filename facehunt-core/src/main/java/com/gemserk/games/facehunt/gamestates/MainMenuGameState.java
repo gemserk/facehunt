@@ -68,6 +68,8 @@ public class MainMenuGameState extends GameStateImpl {
 
 	private static final String KEY_USERNAME = "username";
 
+	private TextButton highscoresButton;
+
 	public MainMenuGameState(FaceHuntGame game) {
 		this.game = game;
 	}
@@ -129,10 +131,15 @@ public class MainMenuGameState extends GameStateImpl {
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
 		titleFont.setScale(1f * viewportWidth / 800f);
+		
+		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont");
+		buttonFont.setScale(0.7f * viewportWidth / 800f);
 
-		playButton = new TextButton(titleFont, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.7f);
-		survivalModeButton = new TextButton(titleFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-		exitButton = new TextButton(titleFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
+		playButton = new TextButton(buttonFont, "Tutorial", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.6f);
+		survivalModeButton = new TextButton(buttonFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
+		highscoresButton = new TextButton(buttonFont, "Highscores", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.4f);
+		exitButton = new TextButton(buttonFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
+		
 		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.08f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
@@ -145,6 +152,10 @@ public class MainMenuGameState extends GameStateImpl {
 		survivalModeButton.setNotOverColor(notOverColor);
 		survivalModeButton.setOverColor(overColor);
 		survivalModeButton.setColor(notOverColor);
+		
+		highscoresButton.setNotOverColor(notOverColor);
+		highscoresButton.setOverColor(overColor);
+		highscoresButton.setColor(notOverColor);
 
 		exitButton.setNotOverColor(notOverColor);
 		exitButton.setOverColor(overColor);
@@ -169,6 +180,7 @@ public class MainMenuGameState extends GameStateImpl {
 		playButton.draw(spriteBatch);
 		survivalModeButton.draw(spriteBatch);
 		exitButton.draw(spriteBatch);
+		highscoresButton.draw(spriteBatch);
 		changeUsernameButton.draw(spriteBatch);
 
 		titleFont.setColor(1f, 1f, 0f, 1f);
@@ -193,6 +205,7 @@ public class MainMenuGameState extends GameStateImpl {
 		playButton.update();
 		survivalModeButton.update();
 		exitButton.update();
+		highscoresButton.update();
 		changeUsernameButton.update();
 
 		if (playButton.isReleased()) {
@@ -202,6 +215,11 @@ public class MainMenuGameState extends GameStateImpl {
 
 		if (survivalModeButton.isReleased()) {
 			game.transition(game.gameScreen, true);
+			pressedSound.play();
+		}
+		
+		if (highscoresButton.isReleased()) { 
+			game.transition(game.highscoresScreen, true);
 			pressedSound.play();
 		}
 

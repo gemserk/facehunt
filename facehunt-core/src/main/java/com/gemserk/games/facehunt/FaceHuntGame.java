@@ -6,12 +6,13 @@ import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.ScreenImpl;
+import com.gemserk.games.facehunt.gamestates.HighscoresGameState;
 import com.gemserk.games.facehunt.gamestates.MainMenuGameState;
-import com.gemserk.games.facehunt.gamestates.TutorialModeGameState;
 import com.gemserk.games.facehunt.gamestates.PauseGameState;
 import com.gemserk.games.facehunt.gamestates.SplashGameState;
 import com.gemserk.games.facehunt.gamestates.SurvivalModeGameState;
 import com.gemserk.games.facehunt.gamestates.TestGameState;
+import com.gemserk.games.facehunt.gamestates.TutorialModeGameState;
 import com.gemserk.games.facehunt.screens.FadeTransitionScreen;
 
 public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
@@ -29,6 +30,8 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public Screen scoreScreen;
 
 	public Screen testScreen;
+	
+	public Screen highscoresScreen;
 
 	public PauseGameState pauseGameState;
 
@@ -48,6 +51,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		scoreScreen = new ScreenImpl(pauseGameState);
 		splashScreen = new ScreenImpl(new SplashGameState(this));
 		testScreen = new ScreenImpl(new TestGameState(this));
+		highscoresScreen = new ScreenImpl(new HighscoresGameState(this));
 
 		fadeTransitionScreen = new FadeTransitionScreen(this);
 
