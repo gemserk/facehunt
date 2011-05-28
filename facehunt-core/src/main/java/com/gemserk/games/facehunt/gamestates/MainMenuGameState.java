@@ -84,7 +84,7 @@ public class MainMenuGameState extends GameStateImpl {
 		username = preferences.getString(KEY_USERNAME);
 
 		if ("".equals(username)) {
-			username = "undefined-" + MathUtils.random(10000, 99999);
+			username = "guest-" + MathUtils.random(10000, 99999);
 			preferences.putString(KEY_USERNAME, username);
 			preferences.flush();
 		}
