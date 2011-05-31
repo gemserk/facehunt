@@ -47,5 +47,8 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		font("Font", "data/fonts/font.png", "data/fonts/font.fnt", true);
 		font("ButtonFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
 		font("TitleFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
+		
+		font("ScoresFont", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
+		font("TutorialFont", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", true);
 	}
 }

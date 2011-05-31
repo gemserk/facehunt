@@ -105,10 +105,14 @@ public class HighscoresGameState extends GameStateImpl {
 		backgroundSprite.setPosition(0, 0);
 		backgroundSprite.setSize(viewportWidth, viewportHeight);
 
-		font = resourceManager.getResourceValue("ButtonFont");
-		font.setScale(1f);
-		newHeight = (viewportHeight * 0.9f / 12f) / font.getLineHeight();
-		font.setScale(newHeight);
+//		font = resourceManager.getResourceValue("ButtonFont");
+		font = resourceManager.getResourceValue("ScoresFont");
+
+		font.setScale(1f * viewportWidth / 800f);
+		
+//		font.setScale(1f);
+//		newHeight = (viewportHeight * 0.9f / 12f) / font.getLineHeight();
+//		font.setScale(newHeight);
 
 		spriteBatch = new SpriteBatch();
 		texts = new ArrayList<Text>();
@@ -166,7 +170,7 @@ public class HighscoresGameState extends GameStateImpl {
 		texts.clear();
 
 		float x = viewportWidth * 0.5f;
-		float y = viewportHeight * 0.95f;
+		float y = viewportHeight * 0.98f;
 
 		texts.add(new Text("HIGHSCORES", x, y, 0.5f, 0.5f).setColor(Color.GREEN));
 

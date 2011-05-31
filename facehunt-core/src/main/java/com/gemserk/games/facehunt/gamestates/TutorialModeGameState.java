@@ -152,6 +152,8 @@ public class TutorialModeGameState extends GameStateImpl {
 		spriteBatch = new SpriteBatch();
 
 		font = resourceManager.getResourceValue("Font");
+		tutorialFont = resourceManager.getResourceValue("TutorialFont");		
+		tutorialFont.setScale(1f * viewportWidth / 800f);
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
 		renderLayers.add(new RenderLayer(-1000, -100, backgroundLayerCamera));
@@ -381,6 +383,8 @@ public class TutorialModeGameState extends GameStateImpl {
 
 	private int viewportHeight;
 
+	private BitmapFont tutorialFont;
+
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
@@ -415,20 +419,17 @@ public class TutorialModeGameState extends GameStateImpl {
 		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.2f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
 
 		if (currentWave != null) {
+			tutorialFont.setColor(waveIntroductionColor);
 
-			font.setColor(waveIntroductionColor);
-
-			TextBounds bounds = font.getMultiLineBounds(currentText);
+			TextBounds bounds = tutorialFont.getMultiLineBounds(currentText);
 			float scale = SpriteBatchUtils.calculateScaleForText(viewportWidth, bounds.width, 0.8f);
 
-			font.setScale(scale);
-			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
+			tutorialFont.setScale(scale);
+			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, tutorialFont, //
 					currentText, (Gdx.graphics.getWidth() * 0.5f), (Gdx.graphics.getHeight() * 0.5f));
-
-			font.setScale(0.7f);
-			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, //
+			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, tutorialFont, //
 					"tap to continue", (Gdx.graphics.getWidth() * 0.8f), (Gdx.graphics.getHeight() * 0.1f));
-			font.setScale(1f);
+			tutorialFont.setScale(1f);
 		}
 
 		spriteBatch.end();
