@@ -45,6 +45,8 @@ import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.componentsengine.utils.Container;
+import com.gemserk.datastore.profiles.Profile;
+import com.gemserk.datastore.profiles.ProfileJsonSerializer;
 import com.gemserk.games.facehunt.EnemySpawnInfo;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Spawner;
@@ -219,11 +221,11 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		waves = new Wave[] { new Wave() {
 			{
-				types = new EnemySpawnInfo[] {  //
-						new EnemySpawnInfo(0, 10000, 0.5f), // 
-						new EnemySpawnInfo(1, 10000, 0.2f),  //
+				types = new EnemySpawnInfo[] { //
+				new EnemySpawnInfo(0, 10000, 0.5f), //
+						new EnemySpawnInfo(1, 10000, 0.2f), //
 						new EnemySpawnInfo(2, 10000, 0.25f), //
-						new EnemySpawnInfo(3, 10000, 0.05f)};
+						new EnemySpawnInfo(3, 10000, 0.05f) };
 			}
 		}, };
 
@@ -272,7 +274,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 				linearVelocity.x = MathUtils.random(1f, 3f);
 				linearVelocity.mul(increment);
 
-//				Gdx.app.log("FaceHunt", "spawn.vel: " + linearVelocity.len());
+				// Gdx.app.log("FaceHunt", "spawn.vel: " + linearVelocity.len());
 
 				linearVelocity.rotate(MathUtils.random(0f, 360f));
 
@@ -339,7 +341,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 			}
 		};
 	}
-	
+
 	private Trigger getMedicFaceTouchTrigger() {
 		return new AbstractTrigger() {
 			@Override
@@ -366,7 +368,6 @@ public class SurvivalModeGameState extends GameStateImpl {
 		};
 	}
 
-
 	private Trigger getFaceHitTrigger() {
 		return new AbstractTrigger() {
 			@Override
@@ -379,6 +380,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 	}
 
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
+
+	private final ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
 
 	private Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);
@@ -447,9 +450,13 @@ public class SurvivalModeGameState extends GameStateImpl {
 		if (health.isEmpty()) {
 			gameData.gameOver = true;
 
-			String username = preferences.getString("username");
+			String profileJson = preferences.getString("profile");
+			Profile profile = profileJsonSerializer.parse(profileJson);
 
-			game.gameOverGameState.setScore(new Score(username, gameData.points, new HashSet<String>(), new HashMap<String, Object>()));
+			// String username = preferences.getString("username");
+			// String username = profile.getName();
+
+			game.gameOverGameState.setScore(new Score(profile.getPublicKey(), profile.getName(), gameData.points, new HashSet<String>(), new HashMap<String, Object>()));
 			game.transition(game.gameOverScreen);
 		}
 

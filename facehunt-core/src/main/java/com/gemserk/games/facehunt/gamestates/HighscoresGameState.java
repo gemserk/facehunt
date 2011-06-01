@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -20,6 +21,8 @@ import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.gui.Text;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
+import com.gemserk.datastore.profiles.Profile;
+import com.gemserk.datastore.profiles.ProfileJsonSerializer;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -80,6 +83,14 @@ public class HighscoresGameState extends GameStateImpl {
 	private static final Color yellowColor = new Color(1f, 1f, 0f, 1f);
 
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
+	
+	private Preferences preferences;
+
+	private Profile profile;
+	
+	public void setPreferences(Preferences preferences) {
+		this.preferences = preferences;
+	}
 
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
@@ -95,6 +106,10 @@ public class HighscoresGameState extends GameStateImpl {
 
 	@Override
 	public void init() {
+		
+		String profileJson = preferences.getString("profile");
+		profile = new ProfileJsonSerializer().parse(profileJson);
+		
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
 
@@ -184,10 +199,15 @@ public class HighscoresGameState extends GameStateImpl {
 		int index = 1;
 
 		for (Score score : scoreList) {
+			
+			Color scoreColor = yellowColor;
+			
+			if (profile.getPublicKey() != null && profile.getPublicKey().equals(score.getProfilePublicKey()))
+				scoreColor = Color.RED;
 
-			Text numberText = new Text("" + index + ". ", viewportWidth * 0.3f, y, 1f, 0.5f).setColor(yellowColor);
-			Text nameText = new Text(score.getName(), viewportWidth * 0.3f, y, 0f, 0.5f).setColor(yellowColor);
-			Text pointsText = new Text(Long.toString(score.getPoints()), viewportWidth * 0.7f, y, 1f, 0.5f).setColor(yellowColor);
+			Text numberText = new Text("" + index + ". ", viewportWidth * 0.3f, y, 1f, 0.5f).setColor(scoreColor);
+			Text nameText = new Text(score.getName(), viewportWidth * 0.3f, y, 0f, 0.5f).setColor(scoreColor);
+			Text pointsText = new Text(Long.toString(score.getPoints()), viewportWidth * 0.7f, y, 1f, 0.5f).setColor(scoreColor);
 
 			texts.add(numberText);
 			texts.add(nameText);

@@ -66,7 +66,7 @@
 		<dependency>
 			<groupId>com.gemserk.datastore</groupId>
 			<artifactId>datastore-core</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.3-addprofile-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

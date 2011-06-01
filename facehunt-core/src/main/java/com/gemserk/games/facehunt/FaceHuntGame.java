@@ -12,6 +12,8 @@ import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.ScreenImpl;
+import com.gemserk.datastore.profiles.Profiles;
+import com.gemserk.datastore.profiles.ProfilesHttpImpl;
 import com.gemserk.games.facehunt.gamestates.GameOverGameState;
 import com.gemserk.games.facehunt.gamestates.HighscoresGameState;
 import com.gemserk.games.facehunt.gamestates.MainMenuGameState;
@@ -52,6 +54,8 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public GameOverGameState gameOverGameState;
 
 	public Scores scores;
+	
+	public Profiles profiles;
 
 	public Preferences preferences;
 
@@ -64,7 +68,10 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		
 		executorService = Executors.newCachedThreadPool();
 		preferences = Gdx.app.getPreferences("gemserk-facehunt");
-		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
+		// http://localhost:8080/
+//		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
+		scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
+		profiles = new ProfilesHttpImpl("http://localhost:8080/");
 
 		tutorialModeGameState = new TutorialModeGameState(this);
 		pauseGameState = new PauseGameState(this);
@@ -72,13 +79,17 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		gameOverGameState = new GameOverGameState(this);
 		gameOverGameState.setScores(scores);
 		gameOverGameState.setExecutorService(executorService);
+		gameOverGameState.setProfiles(profiles);
+		gameOverGameState.setPreferences(preferences);
 
 		MainMenuGameState mainMenuGameState = new MainMenuGameState(this);
 		mainMenuGameState.setPreferences(preferences);
+		mainMenuGameState.setProfiles(profiles);
 
 		HighscoresGameState highscoresGameState = new HighscoresGameState(this);
 		highscoresGameState.setScores(scores);
 		highscoresGameState.setExecutorService(executorService);
+		highscoresGameState.setPreferences(preferences);
 		
 		SurvivalModeGameState survivalModeGameState = new SurvivalModeGameState(this);
 		survivalModeGameState.setPreferences(preferences);

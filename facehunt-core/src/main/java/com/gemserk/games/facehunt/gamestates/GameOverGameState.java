@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -18,6 +19,9 @@ import com.gemserk.commons.gdx.gui.Text;
 import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
+import com.gemserk.datastore.profiles.Profile;
+import com.gemserk.datastore.profiles.ProfileJsonSerializer;
+import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -31,19 +35,24 @@ public class GameOverGameState extends GameStateImpl {
 	class SubmitScoreCallable implements Callable<String> {
 
 		private final Score score;
+		
+		private final Profile profile;
 
-		private SubmitScoreCallable(Score score) {
+		private SubmitScoreCallable(Score score, Profile profile) {
 			this.score = score;
+			this.profile = profile;
 		}
 
 		@Override
 		public String call() throws Exception {
+			score.setProfilePublicKey(profile.getPublicKey());
+			score.setName(profile.getName());
 			return scores.submit(score);
 		}
 
 	}
 
-	class ScoreSubmitHanlderImpl implements FutureHandler<String> {
+	class SubmitScoreHandler implements FutureHandler<String> {
 
 		public void done(String scoreId) {
 			scoreSubmitText.setText("Score submitted!").setColor(Color.GREEN);
@@ -80,6 +89,10 @@ public class GameOverGameState extends GameStateImpl {
 	private Sprite overlaySprite;
 
 	private Scores scores;
+	
+	private Profiles profiles;
+	
+	private Preferences preferences;
 
 	private Score score;
 
@@ -91,12 +104,26 @@ public class GameOverGameState extends GameStateImpl {
 
 	private FutureProcessor<String> submitScoreProcessor;
 
+	private final ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
+
+	private Profile profile;
+
+	private FutureProcessor<Profile> registerProfileProcessor;
+
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
 	}
 
 	public void setScores(Scores scores) {
 		this.scores = scores;
+	}
+	
+	public void setProfiles(Profiles profiles) {
+		this.profiles = profiles;
+	}
+	
+	public void setPreferences(Preferences preferences) {
+		this.preferences = preferences;
 	}
 
 	public void setScore(Score score) {
@@ -160,9 +187,36 @@ public class GameOverGameState extends GameStateImpl {
 		previousScreen = game.gameScreen;
 
 		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.55f).setColor(new Color(1f, 1f, 0f, 1f));
+		
+		String profileJson = preferences.getString("profile");
+		profile = profileJsonSerializer.parse(profileJson);
 
-		submitScoreProcessor = new FutureProcessor<String>(new ScoreSubmitHanlderImpl());
-		submitScoreProcessor.setFuture(executorService.submit(new SubmitScoreCallable(score)));
+		submitScoreProcessor = new FutureProcessor<String>(new SubmitScoreHandler());
+		registerProfileProcessor = new FutureProcessor<Profile>(new FutureHandler<Profile>() {
+
+			@Override
+			public void done(Profile profile) {
+				preferences.putString("profile", profileJsonSerializer.serialize(profile));
+				preferences.flush();
+				submitScoreProcessor.setFuture(executorService.submit(new SubmitScoreCallable(score, profile)));
+			}
+
+			@Override
+			public void failed(Exception e) {
+				scoreSubmitText.setText("Submit score failed :(").setColor(Color.RED);
+				if (e != null)
+					Gdx.app.log("FaceHunt", e.getMessage());
+			}
+			
+		});
+		registerProfileProcessor.setFuture(executorService.submit(new Callable<Profile>() {
+			@Override
+			public Profile call() throws Exception {
+				if (profile.getPublicKey() != null)
+					return profile;
+				return profiles.register(profile.getName(), profile.isGuest());
+			}
+		}));
 	}
 
 	@Override
@@ -208,6 +262,7 @@ public class GameOverGameState extends GameStateImpl {
 		Synchronizers.synchronize(delta);
 
 		inputDevicesMonitor.update();
+		registerProfileProcessor.update();
 		submitScoreProcessor.update();
 
 		tryAgainButton.update();

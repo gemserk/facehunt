@@ -20,6 +20,9 @@ import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
+import com.gemserk.datastore.profiles.Profile;
+import com.gemserk.datastore.profiles.ProfileJsonSerializer;
+import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -66,10 +69,20 @@ public class MainMenuGameState extends GameStateImpl {
 
 	private Preferences preferences;
 
-	private static final String KEY_USERNAME = "username";
+	// private static final String KEY_USERNAME = "username";
 
 	private TextButton highscoresButton;
-	
+
+	private ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
+
+	private Profile profile;
+
+	private Profiles profiles;
+
+	public void setProfiles(Profiles profiles) {
+		this.profiles = profiles;
+	}
+
 	public void setPreferences(Preferences preferences) {
 		this.preferences = preferences;
 	}
@@ -81,13 +94,27 @@ public class MainMenuGameState extends GameStateImpl {
 	@Override
 	public void init() {
 
-		username = preferences.getString(KEY_USERNAME);
+		String profileJson = preferences.getString("profile", "");
 
-		if ("".equals(username)) {
-			username = "guest-" + MathUtils.random(10000, 99999);
-			preferences.putString(KEY_USERNAME, username);
+		profile = new Profile("guest-" + MathUtils.random(10000, 99999), true);
+
+		if (profileJson != null && !"".equals(profileJson)) {
+			// try catch, because data could be corrupted in some way
+			profile = profileJsonSerializer.parse(profileJson);
+		} else {
+			preferences.putString("profile", profileJsonSerializer.serialize(profile));
 			preferences.flush();
 		}
+
+		username = profile.getName();
+
+		// username = preferences.getString(KEY_USERNAME);
+
+		// if ("".equals(username)) {
+		// username = "guest-" + MathUtils.random(10000, 99999);
+		// preferences.putString(KEY_USERNAME, username);
+		// preferences.flush();
+		// }
 
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
@@ -134,7 +161,7 @@ public class MainMenuGameState extends GameStateImpl {
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
 		titleFont.setScale(1f * viewportWidth / 800f);
-		
+
 		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont");
 		buttonFont.setScale(0.7f * viewportWidth / 800f);
 
@@ -142,7 +169,7 @@ public class MainMenuGameState extends GameStateImpl {
 		survivalModeButton = new TextButton(buttonFont, "Play", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.54f);
 		highscoresButton = new TextButton(buttonFont, "Highscores", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.42f);
 		exitButton = new TextButton(buttonFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
-		
+
 		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.08f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
@@ -155,7 +182,7 @@ public class MainMenuGameState extends GameStateImpl {
 		survivalModeButton.setNotOverColor(notOverColor);
 		survivalModeButton.setOverColor(overColor);
 		survivalModeButton.setColor(notOverColor);
-		
+
 		highscoresButton.setNotOverColor(notOverColor);
 		highscoresButton.setOverColor(overColor);
 		highscoresButton.setColor(notOverColor);
@@ -220,8 +247,8 @@ public class MainMenuGameState extends GameStateImpl {
 			game.transition(game.gameScreen, true);
 			pressedSound.play();
 		}
-		
-		if (highscoresButton.isReleased()) { 
+
+		if (highscoresButton.isReleased()) {
 			game.transition(game.highscoresScreen, true);
 			pressedSound.play();
 		}
@@ -238,8 +265,26 @@ public class MainMenuGameState extends GameStateImpl {
 				@Override
 				public void input(String username) {
 					if (!"".equals(username)) {
-						preferences.putString(KEY_USERNAME, username);
+						// if (profile.isGuest()) {
+						// // TODO: should use futures and stuff, also, could fail if no connection, etc
+						// String name = profile.getName();
+						// profile = profiles.register(name, false);
+						// }
+
+						/*
+						 * if current profile guest and already registered => update the server profile with new name
+						 * 
+						 * if current profile guest but not registered, then do nothing
+						 */
+
+						MainMenuGameState.this.username = username;
+
+						// search for local profiles with that name and use them, else create a new one.
+						profile = new Profile(username, false);
+
+						preferences.putString("profile", profileJsonSerializer.serialize(profile));
 						preferences.flush();
+
 						changeUsernameButton.setText("Username: " + username + "\n(tap to change it)");
 					}
 					game.getScreen().resume();
