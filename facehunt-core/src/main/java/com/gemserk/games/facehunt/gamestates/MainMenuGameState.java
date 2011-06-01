@@ -271,16 +271,27 @@ public class MainMenuGameState extends GameStateImpl {
 						// profile = profiles.register(name, false);
 						// }
 
-						/*
-						 * if current profile guest and already registered => update the server profile with new name
-						 * 
-						 * if current profile guest but not registered, then do nothing
-						 */
+						// TODO: use futures or at least try/catch
+
+						if (profile.isGuest() && profile.getPublicKey() != null) {
+							profile.setName(username);
+
+							try {
+								profiles.update(profile);
+							} catch (Exception e) {
+								// profile couldn't be updated... :(
+								Gdx.app.log("FaceHunt", e.getMessage(), e);
+								game.getScreen().resume();
+								return;
+							}
+
+						} else {
+							profile = new Profile(username, false);
+						}
 
 						MainMenuGameState.this.username = username;
 
 						// search for local profiles with that name and use them, else create a new one.
-						profile = new Profile(username, false);
 
 						preferences.putString("profile", profileJsonSerializer.serialize(profile));
 						preferences.flush();

@@ -72,6 +72,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 //		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
 		scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
 		profiles = new ProfilesHttpImpl("http://localhost:8080/");
+//		profiles = new ProfilesHttpImpl("http://gemserkscores.appspot.com");
 
 		tutorialModeGameState = new TutorialModeGameState(this);
 		pauseGameState = new PauseGameState(this);

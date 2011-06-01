@@ -61,7 +61,7 @@ public class GameOverGameState extends GameStateImpl {
 		public void failed(Exception e) {
 			scoreSubmitText.setText("Submit score failed :(").setColor(Color.RED);
 			if (e != null)
-				Gdx.app.log("FaceHunt", e.getMessage());
+				Gdx.app.log("FaceHunt", e.getMessage(), e);
 		}
 
 	}
@@ -205,7 +205,7 @@ public class GameOverGameState extends GameStateImpl {
 			public void failed(Exception e) {
 				scoreSubmitText.setText("Submit score failed :(").setColor(Color.RED);
 				if (e != null)
-					Gdx.app.log("FaceHunt", e.getMessage());
+					Gdx.app.log("FaceHunt", e.getMessage(), e);
 			}
 			
 		});

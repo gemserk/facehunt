@@ -68,7 +68,7 @@ public class HighscoresGameState extends GameStateImpl {
 			texts.clear();
 			texts.add(new Text("Refresh scores failed...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f).setColor(Color.RED));
 			if (e != null)
-				Gdx.app.log("FaceHunt", e.getMessage());
+				Gdx.app.log("FaceHunt", e.getMessage(), e);
 		}
 	};
 
