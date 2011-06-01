@@ -54,7 +54,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public GameOverGameState gameOverGameState;
 
 	public Scores scores;
-	
+
 	public Profiles profiles;
 
 	public Preferences preferences;
@@ -65,18 +65,17 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public void create() {
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
-		
+
 		executorService = Executors.newCachedThreadPool();
 		preferences = Gdx.app.getPreferences("gemserk-facehunt");
-		// http://localhost:8080/
-//		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
-		scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
-		profiles = new ProfilesHttpImpl("http://localhost:8080/");
-//		profiles = new ProfilesHttpImpl("http://gemserkscores.appspot.com");
+		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
+		profiles = new ProfilesHttpImpl("http://gemserkscores.appspot.com");
+		// scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
+		// profiles = new ProfilesHttpImpl("http://localhost:8080/");
 
 		tutorialModeGameState = new TutorialModeGameState(this);
 		pauseGameState = new PauseGameState(this);
-		
+
 		gameOverGameState = new GameOverGameState(this);
 		gameOverGameState.setScores(scores);
 		gameOverGameState.setExecutorService(executorService);
@@ -91,10 +90,10 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		highscoresGameState.setScores(scores);
 		highscoresGameState.setExecutorService(executorService);
 		highscoresGameState.setPreferences(preferences);
-		
+
 		SurvivalModeGameState survivalModeGameState = new SurvivalModeGameState(this);
 		survivalModeGameState.setPreferences(preferences);
-		
+
 		menuScreen = new ScreenImpl(mainMenuGameState);
 		tutorialScreen = new ScreenImpl(tutorialModeGameState);
 		gameScreen = new ScreenImpl(survivalModeGameState);
@@ -105,7 +104,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		highscoresScreen = new ScreenImpl(highscoresGameState);
 
 		fadeTransitionScreen = new FadeTransitionScreen(this);
-		
+
 		transition(null, splashScreen);
 	}
 
@@ -131,7 +130,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		fadeTransitionScreen.show();
 		setScreen(fadeTransitionScreen);
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();

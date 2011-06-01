@@ -277,7 +277,7 @@ public class MainMenuGameState extends GameStateImpl {
 							profile.setName(username);
 
 							try {
-								profiles.update(profile);
+								profile = profiles.update(profile);
 							} catch (Exception e) {
 								// profile couldn't be updated... :(
 								Gdx.app.log("FaceHunt", e.getMessage(), e);
