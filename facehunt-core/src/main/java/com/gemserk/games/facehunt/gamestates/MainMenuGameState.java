@@ -12,6 +12,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -145,7 +146,8 @@ public class MainMenuGameState extends GameStateImpl {
 		highscoresButton = new TextButton(buttonFont, "Highscores", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.42f);
 		exitButton = new TextButton(buttonFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
 
-		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.125f);
+		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.125f) //
+			.setAlignment(HAlignment.CENTER);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
