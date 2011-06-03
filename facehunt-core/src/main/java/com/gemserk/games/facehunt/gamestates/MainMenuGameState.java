@@ -3,6 +3,7 @@ package com.gemserk.games.facehunt.gamestates;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Set;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -265,19 +266,33 @@ public class MainMenuGameState extends GameStateImpl {
 				@Override
 				public void input(String username) {
 					if (!"".equals(username)) {
-						// if (profile.isGuest()) {
-						// // TODO: should use futures and stuff, also, could fail if no connection, etc
-						// String name = profile.getName();
-						// profile = profiles.register(name, false);
-						// }
 
 						// TODO: use futures or at least try/catch
+						
+						String profilesListJson = preferences.getString("profiles", "[]");
+						Set<Profile> profileList = profileJsonSerializer.parseList(profilesListJson);
+						
+						boolean savedProfileFound = false;
+						
+						for (Profile savedProfile : profileList) {
+							if (savedProfile.getName().equals(username)) {
+								//use this profile as selected
+								profile = savedProfile;
+								savedProfileFound =true;
+								break;
+							}
+						}
 
 						if (profile.isGuest() && profile.getPublicKey() != null) {
 							profile.setName(username);
 
 							try {
+								profileList.remove(profile);
 								profile = profiles.update(profile);
+								profileList.add(profile);
+								preferences.putString("profiles", profileJsonSerializer.serialize(profileList));
+								preferences.flush();
+								
 							} catch (Exception e) {
 								// profile couldn't be updated... :(
 								Gdx.app.log("FaceHunt", e.getMessage(), e);
@@ -285,7 +300,7 @@ public class MainMenuGameState extends GameStateImpl {
 								return;
 							}
 
-						} else {
+						} else if (!savedProfileFound) {
 							profile = new Profile(username, false);
 						}
 

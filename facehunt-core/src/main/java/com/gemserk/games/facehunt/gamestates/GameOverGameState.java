@@ -1,5 +1,6 @@
 package com.gemserk.games.facehunt.gamestates;
 
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -196,8 +197,15 @@ public class GameOverGameState extends GameStateImpl {
 
 			@Override
 			public void done(Profile profile) {
+				String profilesListJson = preferences.getString("profiles", "[]");
+				Set<Profile> profileList = profileJsonSerializer.parseList(profilesListJson);
+				
+				profileList.add(profile);
+				
+				preferences.putString("profiles", profileJsonSerializer.serialize(profileList));
 				preferences.putString("profile", profileJsonSerializer.serialize(profile));
 				preferences.flush();
+				
 				submitScoreProcessor.setFuture(executorService.submit(new SubmitScoreCallable(score, profile)));
 			}
 
