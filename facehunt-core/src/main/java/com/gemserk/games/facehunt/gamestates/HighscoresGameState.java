@@ -15,10 +15,16 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.gemserk.commons.gdx.GameStateImpl;
+import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.Text;
+import com.gemserk.commons.gdx.gui.TextButton;
+import com.gemserk.commons.gdx.input.LibgdxPointer;
+import com.gemserk.commons.gdx.math.MathUtils2;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.datastore.profiles.Profile;
@@ -34,11 +40,112 @@ import com.gemserk.util.concurrent.FutureProcessor;
 
 public class HighscoresGameState extends GameStateImpl {
 
+	static class ToggleableTextButton {
+
+		private float x, y;
+
+		private BitmapFont font;
+
+		private String text;
+
+		private final Rectangle bounds = new Rectangle();
+
+		private boolean pressed;
+
+		private boolean released;
+
+		private LibgdxPointer libgdxPointer = new LibgdxPointer(0);
+
+		private Color color = new Color(1f, 1f, 1f, 1f);
+
+		private Color selectedColor = new Color(1f, 1f, 1f, 1f);
+
+		private boolean selected = false;
+
+		public ToggleableTextButton setColor(Color color) {
+			this.color.set(color);
+			return this;
+		}
+
+		public ToggleableTextButton setSelectedColor(Color selectedColor) {
+			this.selectedColor.set(selectedColor);
+			return this;
+		}
+
+		public ToggleableTextButton setText(String text) {
+			this.text = text;
+			calculateBounds(font, text, x, y);
+			return this;
+		}
+
+		public ToggleableTextButton setSelected(boolean selected) {
+			this.selected = selected;
+			return this;
+		}
+
+		public ToggleableTextButton(BitmapFont font, String text, float x, float y) {
+			this.font = font;
+			this.text = text;
+			this.x = x;
+			this.y = y;
+			calculateBounds(font, text, x, y);
+		}
+
+		private void calculateBounds(BitmapFont font, String text, float x, float y) {
+			TextBounds bounds = font.getMultiLineBounds(text);
+			float w = bounds.width;
+			float h = bounds.height;
+			this.bounds.set(x - w * 0.5f, y - h * 0.5f, w, h);
+		}
+
+		public void draw(SpriteBatch spriteBatch) {
+			if (selected)
+				font.setColor(selectedColor);
+			else
+				font.setColor(color);
+			SpriteBatchUtils.drawMultilineTextCentered(spriteBatch, font, text, x, y);
+			// ImmediateModeRendererUtils.drawRectangle(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, Color.GREEN);
+		}
+
+		public boolean isPressed() {
+			return pressed;
+		}
+
+		public boolean isReleased() {
+			return released;
+		}
+
+		public void update() {
+
+			libgdxPointer.update();
+
+			pressed = false;
+			released = false;
+
+			if (libgdxPointer.wasPressed)
+				pressed = MathUtils2.inside(bounds, libgdxPointer.getPressedPosition());
+
+			if (libgdxPointer.wasReleased)
+				released = MathUtils2.inside(bounds, libgdxPointer.getReleasedPosition());
+
+			// NOTE: for now the button could be released while it was never pressed before
+
+		}
+
+	}
+
 	private class RefreshScoresCallable implements Callable<Collection<Score>> {
+
+		private Range range;
+
+		public RefreshScoresCallable(Range range) {
+			this.range = range;
+		}
+
 		@Override
 		public Collection<Score> call() throws Exception {
 			Set<String> tags = new HashSet<String>();
-			return scores.getOrderedByPoints(tags, 10, false, Range.All);
+			return scores.getOrderedByPoints(tags, 10, false, range);
 		}
 	}
 
@@ -84,11 +191,23 @@ public class HighscoresGameState extends GameStateImpl {
 	private static final Color yellowColor = new Color(1f, 1f, 0f, 1f);
 
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
-	
+
 	private Preferences preferences;
 
 	private Profile profile;
-	
+
+	private ToggleableTextButton allButton;
+
+	private ToggleableTextButton monthlyButton;
+
+	private ToggleableTextButton weeklyButton;
+
+	private ToggleableTextButton dailyButton;
+
+	// private Text tapScreenText;
+
+	private TextButton tapScreenButton;
+
 	public void setPreferences(Preferences preferences) {
 		this.preferences = preferences;
 	}
@@ -107,10 +226,10 @@ public class HighscoresGameState extends GameStateImpl {
 
 	@Override
 	public void init() {
-		
+
 		String profileJson = preferences.getString("profile");
 		profile = new ProfileJsonSerializer().parse(profileJson);
-		
+
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
 
@@ -121,23 +240,25 @@ public class HighscoresGameState extends GameStateImpl {
 		backgroundSprite.setPosition(0, 0);
 		backgroundSprite.setSize(viewportWidth, viewportHeight);
 
-//		font = resourceManager.getResourceValue("ButtonFont");
+		// font = resourceManager.getResourceValue("ButtonFont");
 		font = resourceManager.getResourceValue("ScoresFont");
 
 		font.setScale(1f * viewportWidth / 800f);
-		
-//		font.setScale(1f);
-//		newHeight = (viewportHeight * 0.9f / 12f) / font.getLineHeight();
-//		font.setScale(newHeight);
+
+		// font.setScale(1f);
+		// newHeight = (viewportHeight * 0.9f / 12f) / font.getLineHeight();
+		// font.setScale(newHeight);
 
 		spriteBatch = new SpriteBatch();
 		texts = new ArrayList<Text>();
 		scoresRefreshProcessor = new FutureProcessor<Collection<Score>>(scoresRefreshHandler);
 
-		texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
-		Future<Collection<Score>> future = executorService.submit(new RefreshScoresCallable());
-		scoresRefreshProcessor.setFuture(future);
-		
+		reloadScores(Range.Day);
+
+		// texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+		// Future<Collection<Score>> future = executorService.submit(new RefreshScoresCallable(Range.Day));
+		// scoresRefreshProcessor.setFuture(future);
+
 		inputDevicesMonitor = new InputDevicesMonitorImpl<String>();
 
 		new LibgdxInputMappingBuilder<String>(inputDevicesMonitor, Gdx.input) {
@@ -148,6 +269,23 @@ public class HighscoresGameState extends GameStateImpl {
 					monitorKey("back", Keys.ESCAPE);
 			}
 		};
+
+		allButton = new ToggleableTextButton(font, "All", viewportWidth * 0.9f, viewportHeight * 0.9f) //
+				.setColor(yellowColor).setSelectedColor(Color.BLUE);
+		monthlyButton = new ToggleableTextButton(font, "Monthly", viewportWidth * 0.9f, viewportHeight * 0.75f) //
+				.setColor(yellowColor).setSelectedColor(Color.BLUE);
+		weeklyButton = new ToggleableTextButton(font, "Weekly", viewportWidth * 0.9f, viewportHeight * 0.60f) //
+				.setColor(yellowColor).setSelectedColor(Color.BLUE);
+		dailyButton = new ToggleableTextButton(font, "Daily", viewportWidth * 0.9f, viewportHeight * 0.45f) //
+				.setColor(yellowColor).setSelectedColor(Color.BLUE).setSelected(true);
+		
+		tapScreenButton = new TextButton(font, "Tap here to return", viewportWidth * 0.5f, viewportHeight * 0.1f);
+		tapScreenButton.setColor(yellowColor);
+		tapScreenButton.setOverColor(yellowColor);
+		tapScreenButton.setNotOverColor(yellowColor);
+
+		//tapScreenText = new Text("Tap the screen to return", viewportWidth * 0.5f, viewportHeight * 0.1f).setColor(yellowColor);
+
 	}
 
 	@Override
@@ -169,6 +307,15 @@ public class HighscoresGameState extends GameStateImpl {
 			Text text = texts.get(i);
 			text.draw(spriteBatch, font);
 		}
+		
+		tapScreenButton.draw(spriteBatch);
+		// tapScreenText.draw(spriteBatch, font);
+		
+		allButton.draw(spriteBatch);
+		monthlyButton.draw(spriteBatch);
+		weeklyButton.draw(spriteBatch);
+		dailyButton.draw(spriteBatch);
+		
 		spriteBatch.end();
 	}
 
@@ -176,10 +323,70 @@ public class HighscoresGameState extends GameStateImpl {
 	public void update(int delta) {
 		inputDevicesMonitor.update();
 		scoresRefreshProcessor.update();
-		if (Gdx.input.justTouched())
+
+		allButton.update();
+		monthlyButton.update();
+		weeklyButton.update();
+		dailyButton.update();
+		
+		tapScreenButton.update();
+
+		if (allButton.isPressed()) {
+			reloadScores(Range.All);
+
+			allButton.setSelected(true);
+			monthlyButton.setSelected(false);
+			weeklyButton.setSelected(false);
+			dailyButton.setSelected(false);
+
+			return;
+		}
+
+		if (monthlyButton.isPressed()) {
+			reloadScores(Range.Month);
+
+			allButton.setSelected(false);
+			monthlyButton.setSelected(true);
+			weeklyButton.setSelected(false);
+			dailyButton.setSelected(false);
+
+			return;
+		}
+		
+		if (weeklyButton.isPressed()) {
+			reloadScores(Range.Week);
+
+			allButton.setSelected(false);
+			monthlyButton.setSelected(false);
+			weeklyButton.setSelected(true);
+			dailyButton.setSelected(false);
+
+			return;
+		}
+		
+		if (dailyButton.isPressed()) {
+			reloadScores(Range.Day);
+
+			allButton.setSelected(false);
+			monthlyButton.setSelected(false);
+			weeklyButton.setSelected(false);
+			dailyButton.setSelected(true);
+
+			return;
+		}
+
+		if (tapScreenButton.isPressed())
 			game.transition(game.menuScreen, true);
-		if (inputDevicesMonitor.getButton("back").isReleased()) 
+		
+		if (inputDevicesMonitor.getButton("back").isReleased())
 			game.transition(game.menuScreen, true);
+	}
+
+	private void reloadScores(Range range) {
+		texts.clear();
+		texts.add(new Text("Refreshing scores...", viewportWidth * 0.5f, viewportHeight * 0.5f, 0.5f, 0.5f));
+		Future<Collection<Score>> future = executorService.submit(new RefreshScoresCallable(range));
+		scoresRefreshProcessor.setFuture(future);
 	}
 
 	private void refreshScores(Collection<Score> scoreList) {
@@ -200,9 +407,9 @@ public class HighscoresGameState extends GameStateImpl {
 		int index = 1;
 
 		for (Score score : scoreList) {
-			
+
 			Color scoreColor = yellowColor;
-			
+
 			if (profile.getPublicKey() != null && profile.getPublicKey().equals(score.getProfilePublicKey()))
 				scoreColor = Color.RED;
 
