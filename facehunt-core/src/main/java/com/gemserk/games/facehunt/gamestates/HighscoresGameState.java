@@ -270,13 +270,13 @@ public class HighscoresGameState extends GameStateImpl {
 			}
 		};
 
-		allButton = new ToggleableTextButton(font, "All", viewportWidth * 0.9f, viewportHeight * 0.9f) //
+		allButton = new ToggleableTextButton(font, "All", viewportWidth * 0.9f, viewportHeight * 0.85f) //
 				.setColor(yellowColor).setSelectedColor(Color.BLUE);
-		monthlyButton = new ToggleableTextButton(font, "Monthly", viewportWidth * 0.9f, viewportHeight * 0.75f) //
+		monthlyButton = new ToggleableTextButton(font, "Monthly", viewportWidth * 0.9f, viewportHeight * 0.65f) //
 				.setColor(yellowColor).setSelectedColor(Color.BLUE);
-		weeklyButton = new ToggleableTextButton(font, "Weekly", viewportWidth * 0.9f, viewportHeight * 0.60f) //
+		weeklyButton = new ToggleableTextButton(font, "Weekly", viewportWidth * 0.9f, viewportHeight * 0.45f) //
 				.setColor(yellowColor).setSelectedColor(Color.BLUE);
-		dailyButton = new ToggleableTextButton(font, "Daily", viewportWidth * 0.9f, viewportHeight * 0.45f) //
+		dailyButton = new ToggleableTextButton(font, "Daily", viewportWidth * 0.9f, viewportHeight * 0.25f) //
 				.setColor(yellowColor).setSelectedColor(Color.BLUE).setSelected(true);
 		
 		tapScreenButton = new TextButton(font, "Tap here to return", viewportWidth * 0.5f, viewportHeight * 0.1f);
