@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import com.artemis.Entity;
 import com.artemis.World;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Preferences;
@@ -456,7 +457,14 @@ public class SurvivalModeGameState extends GameStateImpl {
 			// String username = preferences.getString("username");
 			// String username = profile.getName();
 
-			game.gameOverGameState.setScore(new Score(profile.getName(), gameData.points, new HashSet<String>(), new HashMap<String, Object>()));
+			HashSet<String> tags = new HashSet<String>();
+			
+			if (Gdx.app.getType() ==ApplicationType.Android )
+				tags.add("android");
+			else
+				tags.add("pc");
+			
+			game.gameOverGameState.setScore(new Score(profile.getName(), gameData.points, tags, new HashMap<String, Object>()));
 			game.transition(game.gameOverScreen);
 		}
 
