@@ -1,13 +1,11 @@
 package com.gemserk.games.facehunt.gamestates;
 
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -93,7 +91,7 @@ public class GameOverGameState extends GameStateImpl {
 
 	private Profiles profiles;
 
-	private Preferences preferences;
+	// private Preferences preferences;
 
 	private Score score;
 
@@ -111,6 +109,8 @@ public class GameOverGameState extends GameStateImpl {
 
 	private FutureProcessor<Profile> registerProfileProcessor;
 
+	private GameProfiles gameProfiles;
+
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
 	}
@@ -123,12 +123,16 @@ public class GameOverGameState extends GameStateImpl {
 		this.profiles = profiles;
 	}
 
-	public void setPreferences(Preferences preferences) {
-		this.preferences = preferences;
-	}
+	// public void setPreferences(Preferences preferences) {
+	// this.preferences = preferences;
+	// }
 
 	public void setScore(Score score) {
 		this.score = score;
+	}
+
+	public void setGameProfiles(GameProfiles gameProfiles) {
+		this.gameProfiles = gameProfiles;
 	}
 
 	public GameOverGameState(FaceHuntGame game) {
@@ -189,23 +193,18 @@ public class GameOverGameState extends GameStateImpl {
 
 		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.55f).setColor(new Color(1f, 1f, 0f, 1f));
 
-		String profileJson = preferences.getString("profile");
-		profile = profileJsonSerializer.parse(profileJson);
+		profile = gameProfiles.getCurrentProfile();
+
+		// String profileJson = preferences.getString("profile");
+		// profile = profileJsonSerializer.parse(profileJson);
 
 		submitScoreProcessor = new FutureProcessor<String>(new SubmitScoreHandler());
 		registerProfileProcessor = new FutureProcessor<Profile>(new FutureHandler<Profile>() {
 
 			@Override
 			public void done(Profile profile) {
-				String profilesListJson = preferences.getString("profiles", "[]");
-				Set<Profile> profileList = profileJsonSerializer.parseList(profilesListJson);
-				
-				profileList.add(profile);
-				
-				preferences.putString("profiles", profileJsonSerializer.serialize(profileList));
-				preferences.putString("profile", profileJsonSerializer.serialize(profile));
-				preferences.flush();
-				
+				gameProfiles.updateProfiles(profile);
+
 				submitScoreProcessor.setFuture(executorService.submit(new SubmitScoreCallable(score, profile)));
 			}
 

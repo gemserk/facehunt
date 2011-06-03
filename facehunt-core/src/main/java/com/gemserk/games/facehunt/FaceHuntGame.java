@@ -15,6 +15,7 @@ import com.gemserk.commons.gdx.ScreenImpl;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.datastore.profiles.ProfilesHttpImpl;
 import com.gemserk.games.facehunt.gamestates.GameOverGameState;
+import com.gemserk.games.facehunt.gamestates.GameProfiles;
 import com.gemserk.games.facehunt.gamestates.HighscoresGameState;
 import com.gemserk.games.facehunt.gamestates.MainMenuGameState;
 import com.gemserk.games.facehunt.gamestates.PauseGameState;
@@ -72,6 +73,8 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		profiles = new ProfilesHttpImpl("http://gemserkscores.appspot.com");
 //		 scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
 //		 profiles = new ProfilesHttpImpl("http://localhost:8080/");
+		
+		GameProfiles gameProfiles = new GameProfiles(preferences);
 
 		tutorialModeGameState = new TutorialModeGameState(this);
 		pauseGameState = new PauseGameState(this);
@@ -80,11 +83,11 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		gameOverGameState.setScores(scores);
 		gameOverGameState.setExecutorService(executorService);
 		gameOverGameState.setProfiles(profiles);
-		gameOverGameState.setPreferences(preferences);
+		gameOverGameState.setGameProfiles(gameProfiles);
 
 		MainMenuGameState mainMenuGameState = new MainMenuGameState(this);
-		mainMenuGameState.setPreferences(preferences);
 		mainMenuGameState.setProfiles(profiles);
+		mainMenuGameState.setGameProfiles(gameProfiles);
 
 		HighscoresGameState highscoresGameState = new HighscoresGameState(this);
 		highscoresGameState.setScores(scores);
@@ -92,7 +95,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		highscoresGameState.setPreferences(preferences);
 
 		SurvivalModeGameState survivalModeGameState = new SurvivalModeGameState(this);
-		survivalModeGameState.setPreferences(preferences);
+		survivalModeGameState.setGameProfiles(gameProfiles);
 
 		menuScreen = new ScreenImpl(mainMenuGameState);
 		tutorialScreen = new ScreenImpl(tutorialModeGameState);

@@ -8,7 +8,6 @@ import java.util.Set;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Input.TextInputListener;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
@@ -16,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
@@ -68,10 +66,6 @@ public class MainMenuGameState extends GameStateImpl {
 
 	private String username;
 
-	private Preferences preferences;
-
-	// private static final String KEY_USERNAME = "username";
-
 	private TextButton highscoresButton;
 
 	private ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
@@ -80,12 +74,14 @@ public class MainMenuGameState extends GameStateImpl {
 
 	private Profiles profiles;
 
-	public void setProfiles(Profiles profiles) {
-		this.profiles = profiles;
+	private GameProfiles gameProfiles;
+
+	public void setGameProfiles(GameProfiles gameProfiles) {
+		this.gameProfiles = gameProfiles;
 	}
 
-	public void setPreferences(Preferences preferences) {
-		this.preferences = preferences;
+	public void setProfiles(Profiles profiles) {
+		this.profiles = profiles;
 	}
 
 	public MainMenuGameState(FaceHuntGame game) {
@@ -95,17 +91,19 @@ public class MainMenuGameState extends GameStateImpl {
 	@Override
 	public void init() {
 
-		String profileJson = preferences.getString("profile", "");
+		profile = gameProfiles.getCurrentProfile();
 
-		profile = new Profile("guest-" + MathUtils.random(10000, 99999), true);
-
-		if (profileJson != null && !"".equals(profileJson)) {
-			// try catch, because data could be corrupted in some way
-			profile = profileJsonSerializer.parse(profileJson);
-		} else {
-			preferences.putString("profile", profileJsonSerializer.serialize(profile));
-			preferences.flush();
-		}
+		// String profileJson = preferences.getString("profile", "");
+		//
+		// profile = new Profile("guest-" + MathUtils.random(10000, 99999), true);
+		//
+		// if (profileJson != null && !"".equals(profileJson)) {
+		// // try catch, because data could be corrupted in some way
+		// profile = profileJsonSerializer.parse(profileJson);
+		// } else {
+		// preferences.putString("profile", profileJsonSerializer.serialize(profile));
+		// preferences.flush();
+		// }
 
 		username = profile.getName();
 
@@ -268,17 +266,19 @@ public class MainMenuGameState extends GameStateImpl {
 					if (!"".equals(username)) {
 
 						// TODO: use futures or at least try/catch
-						
-						String profilesListJson = preferences.getString("profiles", "[]");
-						Set<Profile> profileList = profileJsonSerializer.parseList(profilesListJson);
-						
+
+						// String profilesListJson = preferences.getString("profiles", "[]");
+						// Set<Profile> profileList = profileJsonSerializer.parseList(profilesListJson);
+
+						Set<Profile> profileList = gameProfiles.getSavedProfiles();
+
 						boolean savedProfileFound = false;
-						
+
 						for (Profile savedProfile : profileList) {
 							if (savedProfile.getName().equals(username)) {
-								//use this profile as selected
+								// use this profile as selected
 								profile = savedProfile;
-								savedProfileFound =true;
+								savedProfileFound = true;
 								break;
 							}
 						}
@@ -287,12 +287,14 @@ public class MainMenuGameState extends GameStateImpl {
 							profile.setName(username);
 
 							try {
-								profileList.remove(profile);
 								profile = profiles.update(profile);
-								profileList.add(profile);
-								preferences.putString("profiles", profileJsonSerializer.serialize(profileList));
-								preferences.flush();
-								
+								gameProfiles.updateProfiles(profile);
+
+								// profileList.remove(profile);
+								// profileList.add(profile);
+								// preferences.putString("profiles", profileJsonSerializer.serialize(profileList));
+								// preferences.flush();
+
 							} catch (Exception e) {
 								// profile couldn't be updated... :(
 								Gdx.app.log("FaceHunt", e.getMessage(), e);
@@ -308,8 +310,8 @@ public class MainMenuGameState extends GameStateImpl {
 
 						// search for local profiles with that name and use them, else create a new one.
 
-						preferences.putString("profile", profileJsonSerializer.serialize(profile));
-						preferences.flush();
+						// preferences.putString("profile", profileJsonSerializer.serialize(profile));
+						// preferences.flush();
 
 						changeUsernameButton.setText("Username: " + username + "\n(tap to change it)");
 					}

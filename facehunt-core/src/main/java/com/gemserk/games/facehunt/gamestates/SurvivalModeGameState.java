@@ -9,7 +9,6 @@ import com.artemis.World;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
@@ -128,11 +127,11 @@ public class SurvivalModeGameState extends GameStateImpl {
 	private int viewportWidth;
 
 	private int viewportHeight;
+	
+	private GameProfiles gameProfiles;
 
-	private Preferences preferences;
-
-	public void setPreferences(Preferences preferences) {
-		this.preferences = preferences;
+	public void setGameProfiles(GameProfiles gameProfiles) {
+		this.gameProfiles = gameProfiles;
 	}
 
 	private Function velocityIncrementFunction = new Function() {
@@ -451,11 +450,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 		if (health.isEmpty()) {
 			gameData.gameOver = true;
 
-			String profileJson = preferences.getString("profile");
-			Profile profile = profileJsonSerializer.parse(profileJson);
-
-			// String username = preferences.getString("username");
-			// String username = profile.getName();
+			Profile profile = gameProfiles.getCurrentProfile();
 
 			HashSet<String> tags = new HashSet<String>();
 			
