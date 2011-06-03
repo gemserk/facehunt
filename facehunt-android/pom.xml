@@ -220,7 +220,7 @@
 		<dependency>
 			<groupId>com.gemserk.datastore</groupId>
 			<artifactId>datastore-android</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>${datastore.version}</version>
 		</dependency>
 
 	</dependencies>

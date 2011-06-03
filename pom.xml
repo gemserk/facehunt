@@ -52,6 +52,7 @@
 	<properties>
 		<compiler.version>1.6</compiler.version>
 		<libgdxversion>0.91-SNAPSHOT</libgdxversion>
+		<datastore.version>0.0.4-SNAPSHOT</datastore.version>
 	</properties>
 
 	<build>
