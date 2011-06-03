@@ -20,7 +20,6 @@ import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.datastore.profiles.Profile;
-import com.gemserk.datastore.profiles.ProfileJsonSerializer;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
@@ -68,8 +67,6 @@ public class MainMenuGameState extends GameStateImpl {
 
 	private TextButton highscoresButton;
 
-	private ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
-
 	private Profile profile;
 
 	private Profiles profiles;
@@ -90,30 +87,9 @@ public class MainMenuGameState extends GameStateImpl {
 
 	@Override
 	public void init() {
-
 		profile = gameProfiles.getCurrentProfile();
 
-		// String profileJson = preferences.getString("profile", "");
-		//
-		// profile = new Profile("guest-" + MathUtils.random(10000, 99999), true);
-		//
-		// if (profileJson != null && !"".equals(profileJson)) {
-		// // try catch, because data could be corrupted in some way
-		// profile = profileJsonSerializer.parse(profileJson);
-		// } else {
-		// preferences.putString("profile", profileJsonSerializer.serialize(profile));
-		// preferences.flush();
-		// }
-
 		username = profile.getName();
-
-		// username = preferences.getString(KEY_USERNAME);
-
-		// if ("".equals(username)) {
-		// username = "guest-" + MathUtils.random(10000, 99999);
-		// preferences.putString(KEY_USERNAME, username);
-		// preferences.flush();
-		// }
 
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
@@ -153,9 +129,9 @@ public class MainMenuGameState extends GameStateImpl {
 		particleEmitter1 = resourceManager.getResourceValue("FaceEmitter");
 		particleEmitter2 = resourceManager.getResourceValue("FaceEmitter");
 
-		textFont = resourceManager.getResourceValue("Font");
+		textFont = resourceManager.getResourceValue("TextFont");
 		textFont.setColor(1f, 1f, 0f, 1f);
-		textFont.setScale(0.8f * viewportWidth / 800f);
+		textFont.setScale(1f * viewportWidth / 800f);
 
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
@@ -169,7 +145,7 @@ public class MainMenuGameState extends GameStateImpl {
 		highscoresButton = new TextButton(buttonFont, "Highscores", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.42f);
 		exitButton = new TextButton(buttonFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
 
-		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.08f);
+		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.125f);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
@@ -267,9 +243,6 @@ public class MainMenuGameState extends GameStateImpl {
 
 						// TODO: use futures or at least try/catch
 
-						// String profilesListJson = preferences.getString("profiles", "[]");
-						// Set<Profile> profileList = profileJsonSerializer.parseList(profilesListJson);
-
 						Set<Profile> profileList = gameProfiles.getSavedProfiles();
 
 						boolean savedProfileFound = false;
@@ -290,11 +263,6 @@ public class MainMenuGameState extends GameStateImpl {
 								profile = profiles.update(profile);
 								gameProfiles.updateProfiles(profile);
 
-								// profileList.remove(profile);
-								// profileList.add(profile);
-								// preferences.putString("profiles", profileJsonSerializer.serialize(profileList));
-								// preferences.flush();
-
 							} catch (Exception e) {
 								// profile couldn't be updated... :(
 								Gdx.app.log("FaceHunt", e.getMessage(), e);
@@ -304,14 +272,10 @@ public class MainMenuGameState extends GameStateImpl {
 
 						} else if (!savedProfileFound) {
 							profile = new Profile(username, false);
+							gameProfiles.updateProfiles(profile);
 						}
 
 						MainMenuGameState.this.username = username;
-
-						// search for local profiles with that name and use them, else create a new one.
-
-						// preferences.putString("profile", profileJsonSerializer.serialize(profile));
-						// preferences.flush();
 
 						changeUsernameButton.setText("Username: " + username + "\n(tap to change it)");
 					}
