@@ -28,6 +28,7 @@ import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 import com.gemserk.scores.Score;
 import com.gemserk.scores.Scores;
+import com.gemserk.scores.Scores.Range;
 import com.gemserk.util.concurrent.FutureHandler;
 import com.gemserk.util.concurrent.FutureProcessor;
 
@@ -37,7 +38,7 @@ public class HighscoresGameState extends GameStateImpl {
 		@Override
 		public Collection<Score> call() throws Exception {
 			Set<String> tags = new HashSet<String>();
-			return scores.getOrderedByPoints(tags, 10, false);
+			return scores.getOrderedByPoints(tags, 10, false, Range.All);
 		}
 	}
 

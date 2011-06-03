@@ -35,7 +35,7 @@ public class GameOverGameState extends GameStateImpl {
 	class SubmitScoreCallable implements Callable<String> {
 
 		private final Score score;
-		
+
 		private final Profile profile;
 
 		private SubmitScoreCallable(Score score, Profile profile) {
@@ -45,9 +45,9 @@ public class GameOverGameState extends GameStateImpl {
 
 		@Override
 		public String call() throws Exception {
-			score.setProfilePublicKey(profile.getPublicKey());
-			score.setName(profile.getName());
-			return scores.submit(score);
+			// score.setProfilePublicKey(profile.getPublicKey());
+			// score.setName(profile.getName());
+			return scores.submit(profile.getPrivateKey(), score);
 		}
 
 	}
@@ -89,9 +89,9 @@ public class GameOverGameState extends GameStateImpl {
 	private Sprite overlaySprite;
 
 	private Scores scores;
-	
+
 	private Profiles profiles;
-	
+
 	private Preferences preferences;
 
 	private Score score;
@@ -117,11 +117,11 @@ public class GameOverGameState extends GameStateImpl {
 	public void setScores(Scores scores) {
 		this.scores = scores;
 	}
-	
+
 	public void setProfiles(Profiles profiles) {
 		this.profiles = profiles;
 	}
-	
+
 	public void setPreferences(Preferences preferences) {
 		this.preferences = preferences;
 	}
@@ -187,7 +187,7 @@ public class GameOverGameState extends GameStateImpl {
 		previousScreen = game.gameScreen;
 
 		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.55f).setColor(new Color(1f, 1f, 0f, 1f));
-		
+
 		String profileJson = preferences.getString("profile");
 		profile = profileJsonSerializer.parse(profileJson);
 
@@ -207,7 +207,7 @@ public class GameOverGameState extends GameStateImpl {
 				if (e != null)
 					Gdx.app.log("FaceHunt", e.getMessage(), e);
 			}
-			
+
 		});
 		registerProfileProcessor.setFuture(executorService.submit(new Callable<Profile>() {
 			@Override

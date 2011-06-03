@@ -456,7 +456,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 			// String username = preferences.getString("username");
 			// String username = profile.getName();
 
-			game.gameOverGameState.setScore(new Score(profile.getPublicKey(), profile.getName(), gameData.points, new HashSet<String>(), new HashMap<String, Object>()));
+			game.gameOverGameState.setScore(new Score(profile.getName(), gameData.points, new HashSet<String>(), new HashMap<String, Object>()));
 			game.transition(game.gameOverScreen);
 		}
 
