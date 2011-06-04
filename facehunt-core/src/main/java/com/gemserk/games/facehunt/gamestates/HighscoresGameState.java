@@ -15,7 +15,6 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -48,7 +47,7 @@ public class HighscoresGameState extends GameStateImpl {
 
 		private String text;
 
-		private final Rectangle bounds = new Rectangle();
+		private Rectangle bounds = new Rectangle();
 
 		private boolean pressed;
 
@@ -67,6 +66,14 @@ public class HighscoresGameState extends GameStateImpl {
 			return this;
 		}
 
+		/**
+		 * Increment size of the bounds by the specified w,h
+		 */
+		public ToggleableTextButton setBoundsOffset(float w, float h) {
+			this.bounds = SpriteBatchUtils.getBounds(font, text, x, y, w, h);
+			return this;
+		}
+
 		public ToggleableTextButton setSelectedColor(Color selectedColor) {
 			this.selectedColor.set(selectedColor);
 			return this;
@@ -74,7 +81,7 @@ public class HighscoresGameState extends GameStateImpl {
 
 		public ToggleableTextButton setText(String text) {
 			this.text = text;
-			calculateBounds(font, text, x, y);
+			this.bounds = SpriteBatchUtils.getBounds(font, text, x, y, 0f, 0f);
 			return this;
 		}
 
@@ -88,14 +95,7 @@ public class HighscoresGameState extends GameStateImpl {
 			this.text = text;
 			this.x = x;
 			this.y = y;
-			calculateBounds(font, text, x, y);
-		}
-
-		private void calculateBounds(BitmapFont font, String text, float x, float y) {
-			TextBounds bounds = font.getMultiLineBounds(text);
-			float w = bounds.width;
-			float h = bounds.height;
-			this.bounds.set(x - w * 0.5f, y - h * 0.5f, w, h);
+			this.bounds = SpriteBatchUtils.getBounds(font, text, x, y, 0f, 0f);
 		}
 
 		public void draw(SpriteBatch spriteBatch) {
@@ -271,20 +271,20 @@ public class HighscoresGameState extends GameStateImpl {
 		};
 
 		allButton = new ToggleableTextButton(font, "All", viewportWidth * 0.9f, viewportHeight * 0.85f) //
-				.setColor(yellowColor).setSelectedColor(Color.BLUE);
+				.setColor(yellowColor).setSelectedColor(Color.BLUE).setBoundsOffset(40f, 20f);
 		monthlyButton = new ToggleableTextButton(font, "Monthly", viewportWidth * 0.9f, viewportHeight * 0.65f) //
-				.setColor(yellowColor).setSelectedColor(Color.BLUE);
+				.setColor(yellowColor).setSelectedColor(Color.BLUE).setBoundsOffset(40f, 20f);
 		weeklyButton = new ToggleableTextButton(font, "Weekly", viewportWidth * 0.9f, viewportHeight * 0.45f) //
-				.setColor(yellowColor).setSelectedColor(Color.BLUE);
+				.setColor(yellowColor).setSelectedColor(Color.BLUE).setBoundsOffset(40f, 20f);
 		dailyButton = new ToggleableTextButton(font, "Daily", viewportWidth * 0.9f, viewportHeight * 0.25f) //
-				.setColor(yellowColor).setSelectedColor(Color.BLUE).setSelected(true);
-		
-		tapScreenButton = new TextButton(font, "Tap here to return", viewportWidth * 0.5f, viewportHeight * 0.1f);
+				.setColor(yellowColor).setSelectedColor(Color.BLUE).setSelected(true).setBoundsOffset(40f, 20f);
+
+		tapScreenButton = new TextButton(font, "Tap here to return", viewportWidth * 0.5f, viewportHeight * 0.1f).setBoundsOffset(0f, 20f);
 		tapScreenButton.setColor(yellowColor);
 		tapScreenButton.setOverColor(yellowColor);
 		tapScreenButton.setNotOverColor(yellowColor);
 
-		//tapScreenText = new Text("Tap the screen to return", viewportWidth * 0.5f, viewportHeight * 0.1f).setColor(yellowColor);
+		// tapScreenText = new Text("Tap the screen to return", viewportWidth * 0.5f, viewportHeight * 0.1f).setColor(yellowColor);
 
 	}
 
@@ -307,15 +307,15 @@ public class HighscoresGameState extends GameStateImpl {
 			Text text = texts.get(i);
 			text.draw(spriteBatch, font);
 		}
-		
+
 		tapScreenButton.draw(spriteBatch);
 		// tapScreenText.draw(spriteBatch, font);
-		
+
 		allButton.draw(spriteBatch);
 		monthlyButton.draw(spriteBatch);
 		weeklyButton.draw(spriteBatch);
 		dailyButton.draw(spriteBatch);
-		
+
 		spriteBatch.end();
 	}
 
@@ -328,7 +328,7 @@ public class HighscoresGameState extends GameStateImpl {
 		monthlyButton.update();
 		weeklyButton.update();
 		dailyButton.update();
-		
+
 		tapScreenButton.update();
 
 		if (allButton.isPressed()) {
@@ -352,7 +352,7 @@ public class HighscoresGameState extends GameStateImpl {
 
 			return;
 		}
-		
+
 		if (weeklyButton.isPressed()) {
 			reloadScores(Range.Week);
 
@@ -363,7 +363,7 @@ public class HighscoresGameState extends GameStateImpl {
 
 			return;
 		}
-		
+
 		if (dailyButton.isPressed()) {
 			reloadScores(Range.Day);
 
@@ -377,7 +377,7 @@ public class HighscoresGameState extends GameStateImpl {
 
 		if (tapScreenButton.isPressed())
 			game.transition(game.menuScreen, true);
-		
+
 		if (inputDevicesMonitor.getButton("back").isReleased())
 			game.transition(game.menuScreen, true);
 	}
