@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -38,9 +39,9 @@ public class PauseGameState extends GameStateImpl {
 
 	private Screen menuScreen;
 
-	private Sprite overlaySprite;
-	
 	private boolean mainMenu;
+
+	private Sprite backgroundSprite;
 
 	public void setPreviousScreen(Screen previousScreen) {
 		this.previousScreen = previousScreen;
@@ -53,25 +54,24 @@ public class PauseGameState extends GameStateImpl {
 	@Override
 	public void init() {
 		int viewportWidth = Gdx.graphics.getWidth();
+		int viewportHeight = Gdx.graphics.getHeight();
 
 		spriteBatch = new SpriteBatch();
 		resourceManager = new ResourceManagerImpl<String>();
 
 		new GameResourceBuilder(resourceManager);
 
-		overlaySprite = resourceManager.getResourceValue("OverlaySprite");
+		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
+		backgroundSprite.setPosition(0, 0);
+		backgroundSprite.setSize(viewportWidth, viewportHeight);
 
-		overlaySprite.setColor(0.5f, 0.5f, 0.5f, 0.7f);
-		overlaySprite.setPosition(0, 0);
-		overlaySprite.setSize(viewportWidth, Gdx.graphics.getHeight());
+		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont2");
+		buttonFont.setScale(1f * viewportWidth / 800f);
 
-		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont");
-		buttonFont.setScale(0.7f * viewportWidth / 800f);
+		resumeButton = new TextButton(buttonFont, "Resume", viewportWidth * 0.5f, viewportHeight * 0.65f);
+		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, viewportHeight * 0.35f);
 
-		resumeButton = new TextButton(buttonFont, "Resume", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.5f);
-		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.35f);
-
-		Color notOverColor = new Color(1f, 1f, 1f, 1f);
+		Color notOverColor = new Color(1f, 1f, 0f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
 
 		resumeButton.setNotOverColor(notOverColor);
@@ -97,18 +97,8 @@ public class PauseGameState extends GameStateImpl {
 
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");
 		menuScreen = game.menuScreen;
-		
+
 		mainMenu = false;
-	}
-
-	@Override
-	public void show() {
-		previousScreen.show();
-	}
-
-	@Override
-	public void hide() {
-		previousScreen.hide();
 	}
 
 	@Override
@@ -123,13 +113,9 @@ public class PauseGameState extends GameStateImpl {
 
 	@Override
 	public void render(int delta) {
-		if (spriteBatch == null)
-			return;
-
-		previousScreen.render(delta);
-
+		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
-		overlaySprite.draw(spriteBatch);
+		backgroundSprite.draw(spriteBatch);
 		resumeButton.draw(spriteBatch);
 		mainMenuButton.draw(spriteBatch);
 		spriteBatch.end();
