@@ -19,7 +19,6 @@ import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.datastore.profiles.Profile;
-import com.gemserk.datastore.profiles.ProfileJsonSerializer;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.resources.ResourceManager;
@@ -44,8 +43,6 @@ public class GameOverGameState extends GameStateImpl {
 
 		@Override
 		public String call() throws Exception {
-			// score.setProfilePublicKey(profile.getPublicKey());
-			// score.setName(profile.getName());
 			return scores.submit(profile.getPrivateKey(), score);
 		}
 
@@ -85,13 +82,9 @@ public class GameOverGameState extends GameStateImpl {
 
 	private Text gameOverText;
 
-	private Sprite overlaySprite;
-
 	private Scores scores;
 
 	private Profiles profiles;
-
-	// private Preferences preferences;
 
 	private Score score;
 
@@ -103,13 +96,13 @@ public class GameOverGameState extends GameStateImpl {
 
 	private FutureProcessor<String> submitScoreProcessor;
 
-	private final ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
-
 	private Profile profile;
 
 	private FutureProcessor<Profile> registerProfileProcessor;
 
 	private GameProfiles gameProfiles;
+
+	private Sprite backgroundSprite;
 
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
@@ -122,10 +115,6 @@ public class GameOverGameState extends GameStateImpl {
 	public void setProfiles(Profiles profiles) {
 		this.profiles = profiles;
 	}
-
-	// public void setPreferences(Preferences preferences) {
-	// this.preferences = preferences;
-	// }
 
 	public void setScore(Score score) {
 		this.score = score;
@@ -149,14 +138,12 @@ public class GameOverGameState extends GameStateImpl {
 
 		new GameResourceBuilder(resourceManager);
 
-		overlaySprite = resourceManager.getResourceValue("OverlaySprite");
-
-		overlaySprite.setColor(0.5f, 0.5f, 0.5f, 0.7f);
-		overlaySprite.setPosition(0, 0);
-		overlaySprite.setSize(viewportWidth, viewportHeight);
-
-		buttonFont = resourceManager.getResourceValue("ButtonFont");
-		buttonFont.setScale(0.7f * viewportWidth / 800f);
+		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
+		backgroundSprite.setPosition(0, 0);
+		backgroundSprite.setSize(viewportWidth, viewportHeight);
+		
+		buttonFont = resourceManager.getResourceValue("ButtonFont2");
+		buttonFont.setScale(1f * viewportWidth / 800f);
 
 		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), viewportWidth * 0.5f, viewportHeight * 0.8f).setColor(Color.RED);
 
@@ -195,9 +182,6 @@ public class GameOverGameState extends GameStateImpl {
 
 		profile = gameProfiles.getCurrentProfile();
 
-		// String profileJson = preferences.getString("profile");
-		// profile = profileJsonSerializer.parse(profileJson);
-
 		submitScoreProcessor = new FutureProcessor<String>(new SubmitScoreHandler());
 		registerProfileProcessor = new FutureProcessor<Profile>(new FutureHandler<Profile>() {
 
@@ -227,16 +211,6 @@ public class GameOverGameState extends GameStateImpl {
 	}
 
 	@Override
-	public void show() {
-		previousScreen.show();
-	}
-
-	@Override
-	public void hide() {
-		previousScreen.hide();
-	}
-
-	@Override
 	public void resume() {
 		Gdx.input.setCatchBackKey(true);
 	}
@@ -248,17 +222,10 @@ public class GameOverGameState extends GameStateImpl {
 
 	@Override
 	public void render(int delta) {
-		if (spriteBatch == null)
-			return;
-
-		previousScreen.render(delta);
-
 		spriteBatch.begin();
-		overlaySprite.draw(spriteBatch);
-
+		backgroundSprite.draw(spriteBatch);
 		gameOverText.draw(spriteBatch, buttonFont);
 		scoreSubmitText.draw(spriteBatch, buttonFont);
-
 		tryAgainButton.draw(spriteBatch);
 		mainMenuButton.draw(spriteBatch);
 		spriteBatch.end();
