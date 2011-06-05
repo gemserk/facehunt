@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>com.gemserk.games.facehunt</groupId>
 		<artifactId>facehunt</artifactId>
-		<version>1.0.9-SNAPSHOT</version>
+		<version>1.0.9</version>
 	</parent>
 
 	<groupId>com.gemserk.games.facehunt</groupId>
 	<artifactId>facehunt-android</artifactId>
-	<version>1.0.9-SNAPSHOT</version>
+	<version>1.0.9</version>
 	<packaging>apk</packaging>
 
 	<name>Face Hunt - Android Version</name>
