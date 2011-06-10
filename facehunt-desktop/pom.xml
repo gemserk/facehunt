@@ -28,9 +28,11 @@
 
 		<webstartMain>com.gemserk.games.facehunt.FaceHuntDesktopApplication</webstartMain>
 
-		<appletGameParameter>com.gemserk.games.facehunt.FaceHuntDesktopApplication</appletGameParameter>
+		<appletGameParameter>com.gemserk.games.facehunt.FaceHuntApplet</appletGameParameter>
+		
 		<mainClass>${appletGameParameter}</mainClass>
-		<jnlp.applet.mainClass>com.gemserk.games.facehunt.FaceHuntDesktopApplication</jnlp.applet.mainClass>
+		
+		<jnlp.applet.mainClass>com.gemserk.games.facehunt.FaceHuntApplet</jnlp.applet.mainClass>
 
 		<natives>${basedir}/target/natives/</natives>
 
