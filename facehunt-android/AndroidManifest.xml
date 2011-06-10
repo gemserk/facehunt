@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.gemserk.games.facehunt" android:versionCode="11"
-	android:versionName="1.0.9" android:installLocation="preferExternal">
+	package="com.gemserk.games.facehunt" android:versionCode="12"
+	android:versionName="1.1.0" android:installLocation="preferExternal">
 
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
