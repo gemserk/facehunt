@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.utils.GdxNativesLoader;
 
 public class FaceHuntApplet extends Applet {
 
@@ -28,6 +29,10 @@ public class FaceHuntApplet extends Applet {
 	}
 
 	public void init() {
+		GdxNativesLoader.disableNativesLoading = true;
+		
+		System.loadLibrary("gdx");
+		
 		try {
 			setLayout(new BorderLayout());
 			// ApplicationListener game = (ApplicationListener) Class.forName(getParameter("game")).newInstance();

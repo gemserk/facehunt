@@ -15,22 +15,22 @@
 	<name>Face Hunt - Desktop Version</name>
 	<description>Desktop version of Face Hunt game</description>
 
-	<url>http://www.gemserk.com</url>
-
+	<url>http://blog.gemserk.com</url>
 
 	<properties>
-
-		<webstartName>${project.name}</webstartName>
+		<webstartName>Face Hunt</webstartName>
+		<webstartDescription>Face Hunt</webstartDescription>
 		<webstartCodebase>http://www.gemserk.com/prototipos/${project.parent.artifactId}-latest/</webstartCodebase>
 
 		<!-- finalName>${project.artifactId}-${project.version}</finalName -->
 		<finalName>${project.artifactId}-${project.version}</finalName>
 
 		<webstartMain>com.gemserk.games.facehunt.FaceHuntDesktopApplication</webstartMain>
+		<appletMain>com.gemserk.games.facehunt.FaceHuntApplet</appletMain>
 
 		<appletGameParameter>com.gemserk.games.facehunt.FaceHuntApplet</appletGameParameter>
 		
-		<mainClass>${appletGameParameter}</mainClass>
+		<mainClass>${webstartMain}</mainClass>
 		
 		<jnlp.applet.mainClass>com.gemserk.games.facehunt.FaceHuntApplet</jnlp.applet.mainClass>
 
