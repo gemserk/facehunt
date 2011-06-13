@@ -187,7 +187,7 @@ public class GameOverGameState extends GameStateImpl {
 
 			@Override
 			public void done(Profile profile) {
-				gameProfiles.updateProfiles(profile);
+				gameProfiles.updateProfile(profile);
 
 				submitScoreProcessor.setFuture(executorService.submit(new SubmitScoreCallable(score, profile)));
 			}

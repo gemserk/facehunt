@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Input.TextInputListener;
@@ -147,7 +148,7 @@ public class MainMenuGameState extends GameStateImpl {
 		exitButton = new TextButton(buttonFont, "Exit", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.3f);
 
 		changeUsernameButton = new TextButton(textFont, "Username: " + username + "\n(tap to change it)", viewportWidth * 0.5f, Gdx.graphics.getHeight() * 0.125f) //
-			.setAlignment(HAlignment.CENTER);
+				.setAlignment(HAlignment.CENTER);
 
 		Color notOverColor = new Color(1f, 1f, 1f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
@@ -186,9 +187,11 @@ public class MainMenuGameState extends GameStateImpl {
 
 		playButton.draw(spriteBatch);
 		survivalModeButton.draw(spriteBatch);
-		exitButton.draw(spriteBatch);
 		highscoresButton.draw(spriteBatch);
 		changeUsernameButton.draw(spriteBatch);
+
+		if (Gdx.app.getType() != ApplicationType.Applet)
+			exitButton.draw(spriteBatch);
 
 		titleFont.setColor(1f, 1f, 0f, 1f);
 		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.85f);
@@ -210,29 +213,30 @@ public class MainMenuGameState extends GameStateImpl {
 		Synchronizers.synchronize();
 
 		playButton.update();
-		survivalModeButton.update();
-		exitButton.update();
-		highscoresButton.update();
-		changeUsernameButton.update();
-
 		if (playButton.isReleased()) {
 			game.transition(game.tutorialScreen, true);
 			pressedSound.play();
 		}
 
+		survivalModeButton.update();
 		if (survivalModeButton.isReleased()) {
 			game.transition(game.gameScreen, true);
 			pressedSound.play();
 		}
 
+		highscoresButton.update();
 		if (highscoresButton.isReleased()) {
 			game.transition(game.highscoresScreen, true);
 			pressedSound.play();
 		}
 
-		if (exitButton.isReleased())
-			System.exit(0);
+		if (Gdx.app.getType() != ApplicationType.Applet) {
+			exitButton.update();
+			if (exitButton.isReleased())
+				System.exit(0);
+		}
 
+		changeUsernameButton.update();
 		if (changeUsernameButton.isReleased()) {
 
 			game.getScreen().pause();
@@ -253,6 +257,7 @@ public class MainMenuGameState extends GameStateImpl {
 							if (savedProfile.getName().equals(username)) {
 								// use this profile as selected
 								profile = savedProfile;
+								gameProfiles.updateProfile(profile);
 								savedProfileFound = true;
 								break;
 							}
@@ -263,7 +268,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 							try {
 								profile = profiles.update(profile);
-								gameProfiles.updateProfiles(profile);
+								gameProfiles.updateProfile(profile);
 
 							} catch (Exception e) {
 								// profile couldn't be updated... :(
@@ -274,7 +279,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 						} else if (!savedProfileFound) {
 							profile = new Profile(username, false);
-							gameProfiles.updateProfiles(profile);
+							gameProfiles.updateProfile(profile);
 						}
 
 						MainMenuGameState.this.username = username;

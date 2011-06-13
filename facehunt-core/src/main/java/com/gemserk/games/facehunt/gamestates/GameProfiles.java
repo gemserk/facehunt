@@ -23,7 +23,7 @@ public class GameProfiles {
 	/**
 	 * Updates the current profile with values of specified profile, it also updates saved profile list.
 	 */
-	public void updateProfiles(Profile profile) {
+	public void updateProfile(Profile profile) {
 		String profilesListJson = preferences.getString("profiles", "[]");
 		Set<Profile> profileList = profileJsonSerializer.parseList(profilesListJson);
 		profileList.remove(profile);
