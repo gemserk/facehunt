@@ -40,7 +40,11 @@ public class FaceHuntApplet extends Applet {
 			canvas = new Canvas() {
 				public final void addNotify() {
 					super.addNotify();
-					application = new LwjglApplication(new FaceHuntGame(), false, this);
+					application = new LwjglApplication(new FaceHuntGame(), false, this) {
+						public com.badlogic.gdx.Application.ApplicationType getType() {
+							return ApplicationType.Applet;
+						};
+					};
 				}
 
 				public final void removeNotify() {
