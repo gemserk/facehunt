@@ -66,7 +66,7 @@ public class PauseGameState extends GameStateImpl {
 		backgroundSprite.setSize(viewportWidth, viewportHeight);
 
 		BitmapFont buttonFont = resourceManager.getResourceValue("ButtonFont2");
-		buttonFont.setScale(1f * viewportWidth / 800f);
+		// buttonFont.setScale(1f * viewportWidth / 800f);
 
 		resumeButton = new TextButton(buttonFont, "Resume", viewportWidth * 0.5f, viewportHeight * 0.65f);
 		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, viewportHeight * 0.35f);

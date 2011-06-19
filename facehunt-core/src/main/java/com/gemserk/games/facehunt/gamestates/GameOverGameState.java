@@ -143,14 +143,14 @@ public class GameOverGameState extends GameStateImpl {
 		backgroundSprite.setSize(viewportWidth, viewportHeight);
 		
 		buttonFont = resourceManager.getResourceValue("ButtonFont2");
-		buttonFont.setScale(1f * viewportWidth / 800f);
+		// buttonFont.setScale(1f * viewportWidth / 800f);
 
 		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), viewportWidth * 0.5f, viewportHeight * 0.8f).setColor(Color.RED);
 
 		tryAgainButton = new TextButton(buttonFont, "Try again", viewportWidth * 0.5f, viewportHeight * 0.4f);
 		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, viewportHeight * 0.25f);
 
-		Color notOverColor = new Color(1f, 1f, 1f, 1f);
+		Color notOverColor = new Color(1f, 1f, 0f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
 
 		tryAgainButton.setNotOverColor(notOverColor);

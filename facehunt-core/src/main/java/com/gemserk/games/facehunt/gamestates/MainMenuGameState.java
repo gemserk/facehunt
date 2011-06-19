@@ -133,7 +133,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 		textFont = resourceManager.getResourceValue("TextFont");
 		textFont.setColor(1f, 1f, 0f, 1f);
-		textFont.setScale(1f * viewportWidth / 800f);
+		// textFont.setScale(1f * viewportWidth / 800f);
 
 		titleFont = resourceManager.getResourceValue("TitleFont");
 		titleFont.setColor(1f, 1f, 0f, 1f);
@@ -170,7 +170,7 @@ public class MainMenuGameState extends GameStateImpl {
 		exitButton.setColor(notOverColor);
 
 		changeUsernameButton.setColor(new Color(1f, 1f, 0f, 1f));
-		changeUsernameButton.setOverColor(new Color(1f, 0f, 0f, 1f));
+		changeUsernameButton.setOverColor(new Color(0f, 0f, 1f, 1f));
 		changeUsernameButton.setNotOverColor(new Color(1f, 1f, 0f, 1f));
 
 		pressedSound = resourceManager.getResourceValue("ButtonPressedSound");

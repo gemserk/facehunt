@@ -12,12 +12,12 @@ import com.gemserk.resources.ResourceManager;
 public class GameResourceBuilder extends LibgdxResourceBuilder {
 	public GameResourceBuilder(ResourceManager<String> resourceManager) {
 		super(resourceManager);
-		
+
 		texture("GemserkLogoTexture", "data/images/logo-gemserk-512x128.png");
 		texture("GemserkLogoTextureBlur", "data/images/logo-gemserk-512x128-blur.png");
 		texture("LwjglLogoTexture", "data/images/logo-lwjgl-512x256-inverted.png");
 		texture("LibgdxLogoTexture", "data/images/logo-libgdx-clockwork-512x256.png");
-		
+
 		sprite("GemserkLogo", "GemserkLogoTexture");
 		sprite("GemserkLogoBlur", "GemserkLogoTextureBlur");
 		sprite("LwjglLogo", "LwjglLogoTexture", 0, 0, 512, 185);
@@ -48,14 +48,18 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		font("Font", "data/fonts/font.png", "data/fonts/font.fnt", true);
 		font("ButtonFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
 		font("TitleFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
-		
+
 		font("TutorialFont", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", true);
-		font("TextFont", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", false);
-		font("ButtonFont2", "data/fonts/purisa-27.png", "data/fonts/purisa-27.fnt", false);
-		
-		if (Gdx.graphics.getHeight() >= 480f)
+
+		if (Gdx.graphics.getHeight() >= 480f) {
+			font("ButtonFont2", "data/fonts/purisa-27.png", "data/fonts/purisa-27.fnt", false);
+			font("TextFont", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", false);
 			font("ScoresFont", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
-		else
+		} else {
+			font("ButtonFont2", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", false);
+			font("TextFont", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
 			font("ScoresFont", "data/fonts/purisa-12.png", "data/fonts/purisa-12.fnt", false);
+		}
+
 	}
 }
