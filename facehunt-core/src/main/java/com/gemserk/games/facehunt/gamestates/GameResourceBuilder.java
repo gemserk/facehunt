@@ -1,5 +1,6 @@
 package com.gemserk.games.facehunt.gamestates;
 
+import com.badlogic.gdx.Gdx;
 import com.gemserk.commons.gdx.resources.LibgdxResourceBuilder;
 import com.gemserk.resources.ResourceManager;
 
@@ -48,9 +49,13 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		font("ButtonFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
 		font("TitleFont", "data/fonts/titlefont.png", "data/fonts/titlefont.fnt", true);
 		
-		font("ScoresFont", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
 		font("TutorialFont", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", true);
 		font("TextFont", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", false);
 		font("ButtonFont2", "data/fonts/purisa-27.png", "data/fonts/purisa-27.fnt", false);
+		
+		if (Gdx.graphics.getHeight() >= 480f)
+			font("ScoresFont", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
+		else
+			font("ScoresFont", "data/fonts/purisa-12.png", "data/fonts/purisa-12.fnt", false);
 	}
 }

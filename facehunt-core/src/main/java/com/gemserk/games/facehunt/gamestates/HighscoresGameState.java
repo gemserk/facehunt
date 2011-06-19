@@ -243,7 +243,8 @@ public class HighscoresGameState extends GameStateImpl {
 		// font = resourceManager.getResourceValue("ButtonFont");
 		font = resourceManager.getResourceValue("ScoresFont");
 
-		font.setScale(1f * viewportWidth / 800f);
+//		font.setScale(1f * viewportWidth / 480f);
+		font.setScale(1f);
 
 		// font.setScale(1f);
 		// newHeight = (viewportHeight * 0.9f / 12f) / font.getLineHeight();
