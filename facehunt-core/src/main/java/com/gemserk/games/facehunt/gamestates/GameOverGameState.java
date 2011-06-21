@@ -16,6 +16,7 @@ import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.gui.Text;
 import com.gemserk.commons.gdx.gui.TextButton;
+import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.datastore.profiles.Profile;
@@ -64,15 +65,17 @@ public class GameOverGameState extends GameStateImpl {
 
 	private final FaceHuntGame game;
 
+	private ResourceManager<String> resourceManager;
+	
+	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
+	
+	private SoundPlayer soundPlayer;
+
 	private SpriteBatch spriteBatch;
 
-	private ResourceManager<String> resourceManager;
-
 	private TextButton tryAgainButton;
-
+	
 	private TextButton mainMenuButton;
-
-	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
 
 	private Sound pressedSound;
 
@@ -103,7 +106,11 @@ public class GameOverGameState extends GameStateImpl {
 	private GameProfiles gameProfiles;
 
 	private Sprite backgroundSprite;
-
+	
+	public void setSoundPlayer(SoundPlayer soundPlayer) {
+		this.soundPlayer = soundPlayer;
+	}
+	
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
 	}
@@ -243,12 +250,12 @@ public class GameOverGameState extends GameStateImpl {
 		mainMenuButton.update();
 
 		if (tryAgainButton.isReleased()) {
-			pressedSound.play();
+			soundPlayer.play(pressedSound);
 			game.transition(previousScreen, true);
 		}
 
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
-			pressedSound.play();
+			soundPlayer.play(pressedSound);
 			game.transition(menuScreen, true);
 		}
 	}

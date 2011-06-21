@@ -13,6 +13,7 @@ import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.gui.TextButton;
+import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
@@ -42,6 +43,12 @@ public class PauseGameState extends GameStateImpl {
 	private boolean mainMenu;
 
 	private Sprite backgroundSprite;
+	
+	private SoundPlayer soundPlayer;
+	
+	public void setSoundPlayer(SoundPlayer soundPlayer) {
+		this.soundPlayer = soundPlayer;
+	}
 
 	public void setPreviousScreen(Screen previousScreen) {
 		this.previousScreen = previousScreen;
@@ -131,12 +138,12 @@ public class PauseGameState extends GameStateImpl {
 		mainMenuButton.update();
 
 		if (resumeButton.isReleased()) {
-			pressedSound.play();
+			soundPlayer.play(pressedSound);
 			game.transition(previousScreen, true);
 		}
 
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
-			pressedSound.play();
+			soundPlayer.play(pressedSound);
 			game.transition(menuScreen, true);
 			mainMenu = true;
 		}
