@@ -44,6 +44,7 @@ import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
+import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.datastore.profiles.Profile;
 import com.gemserk.datastore.profiles.ProfileJsonSerializer;
@@ -129,6 +130,12 @@ public class SurvivalModeGameState extends GameStateImpl {
 	private int viewportHeight;
 	
 	private GameProfiles gameProfiles;
+	
+	private SoundPlayer soundPlayer;
+	
+	public void setSoundPlayer(SoundPlayer soundPlayer) {
+		this.soundPlayer = soundPlayer;
+	}
 
 	public void setGameProfiles(GameProfiles gameProfiles) {
 		this.gameProfiles = gameProfiles;
@@ -292,7 +299,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 					templates.createMedicFaceType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getMedicFaceTouchTrigger());
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
-				sound.play();
+				soundPlayer.play(sound);
 
 				return false;
 			}
@@ -335,7 +342,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 				health.add(5f);
 
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
 
 				return true;
 			}
@@ -361,7 +368,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 				health.remove(20f);
 
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
 
 				return true;
 			}
@@ -373,7 +380,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 			@Override
 			protected boolean handle(Entity e) {
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
-				sound.play();
+				soundPlayer.play(sound);
 				return false;
 			}
 		};

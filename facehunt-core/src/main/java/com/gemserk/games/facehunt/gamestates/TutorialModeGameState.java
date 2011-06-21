@@ -45,6 +45,7 @@ import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
+import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.EnemySpawnInfo;
 import com.gemserk.games.facehunt.FaceHuntGame;
@@ -127,6 +128,12 @@ public class TutorialModeGameState extends GameStateImpl {
 
 	private Sprite whiteRectangle;
 
+	private SoundPlayer soundPlayer;
+
+	public void setSoundPlayer(SoundPlayer soundPlayer) {
+		this.soundPlayer = soundPlayer;
+	}
+
 	public TutorialModeGameState(FaceHuntGame game) {
 		this.game = game;
 		this.gameData = new GameData();
@@ -152,7 +159,7 @@ public class TutorialModeGameState extends GameStateImpl {
 		spriteBatch = new SpriteBatch();
 
 		font = resourceManager.getResourceValue("Font");
-		tutorialFont = resourceManager.getResourceValue("TutorialFont");		
+		tutorialFont = resourceManager.getResourceValue("TutorialFont");
 		tutorialFont.setScale(1f * viewportWidth / 800f);
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
@@ -290,7 +297,8 @@ public class TutorialModeGameState extends GameStateImpl {
 					templates.createMedicFaceType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getMedicFaceTouchTrigger());
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
-				sound.play();
+				soundPlayer.play(sound);
+				// sound.play();
 
 				return false;
 			}
@@ -333,13 +341,14 @@ public class TutorialModeGameState extends GameStateImpl {
 				health.add(5f);
 
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
+				// sound.play();
 
 				return true;
 			}
 		};
 	}
-	
+
 	private Trigger getMedicFaceTouchTrigger() {
 		return new AbstractTrigger() {
 			@Override
@@ -359,7 +368,8 @@ public class TutorialModeGameState extends GameStateImpl {
 				health.remove(20f);
 
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
+				// sound.play();
 
 				return true;
 			}
@@ -371,7 +381,9 @@ public class TutorialModeGameState extends GameStateImpl {
 			@Override
 			protected boolean handle(Entity e) {
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
-				sound.play();
+				soundPlayer.play(sound);
+				// sound.play();
+
 				return false;
 			}
 		};

@@ -12,6 +12,7 @@ import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.ScreenImpl;
+import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.datastore.profiles.ProfilesHttpImpl;
 import com.gemserk.games.facehunt.gamestates.GameOverGameState;
@@ -71,12 +72,16 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		preferences = Gdx.app.getPreferences("gemserk-facehunt");
 		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
 		profiles = new ProfilesHttpImpl("http://gemserkscores.appspot.com");
-//		 scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
-//		 profiles = new ProfilesHttpImpl("http://localhost:8080/");
-		
+		// scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
+		// profiles = new ProfilesHttpImpl("http://localhost:8080/");
+
 		GameProfiles gameProfiles = new GameProfiles(preferences);
+		// GamePreferences gamePreferences = new GamePreferences(preferences);
+		SoundPlayer soundPlayer = new SoundPlayer();
 
 		tutorialModeGameState = new TutorialModeGameState(this);
+		tutorialModeGameState.setSoundPlayer(soundPlayer);
+
 		pauseGameState = new PauseGameState(this);
 
 		gameOverGameState = new GameOverGameState(this);
@@ -88,6 +93,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		MainMenuGameState mainMenuGameState = new MainMenuGameState(this);
 		mainMenuGameState.setProfiles(profiles);
 		mainMenuGameState.setGameProfiles(gameProfiles);
+		mainMenuGameState.setSoundPlayer(soundPlayer);
 
 		HighscoresGameState highscoresGameState = new HighscoresGameState(this);
 		highscoresGameState.setScores(scores);
@@ -96,6 +102,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 		SurvivalModeGameState survivalModeGameState = new SurvivalModeGameState(this);
 		survivalModeGameState.setGameProfiles(gameProfiles);
+		survivalModeGameState.setSoundPlayer(soundPlayer);
 
 		menuScreen = new ScreenImpl(mainMenuGameState);
 		tutorialScreen = new ScreenImpl(tutorialModeGameState);

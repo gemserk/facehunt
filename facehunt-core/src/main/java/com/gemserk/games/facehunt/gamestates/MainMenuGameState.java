@@ -22,6 +22,7 @@ import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.TextButton;
+import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.datastore.profiles.Profile;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.games.facehunt.FaceHuntGame;
@@ -78,6 +79,12 @@ public class MainMenuGameState extends GameStateImpl {
 	private GameProfiles gameProfiles;
 
 	private ToggleableImageButton speakersButton;
+	
+	private SoundPlayer soundPlayer;
+	
+	public void setSoundPlayer(SoundPlayer soundPlayer) {
+		this.soundPlayer = soundPlayer;
+	}
 
 	public void setGameProfiles(GameProfiles gameProfiles) {
 		this.gameProfiles = gameProfiles;
@@ -236,19 +243,19 @@ public class MainMenuGameState extends GameStateImpl {
 		playButton.update();
 		if (playButton.isReleased()) {
 			game.transition(game.tutorialScreen, true);
-			pressedSound.play();
+			soundPlayer.play(pressedSound);
 		}
 
 		survivalModeButton.update();
 		if (survivalModeButton.isReleased()) {
 			game.transition(game.gameScreen, true);
-			pressedSound.play();
+			soundPlayer.play(pressedSound);
 		}
 
 		highscoresButton.update();
 		if (highscoresButton.isReleased()) {
 			game.transition(game.highscoresScreen, true);
-			pressedSound.play();
+			soundPlayer.play(pressedSound);
 		}
 
 		if (Gdx.app.getType() != ApplicationType.Applet) {
