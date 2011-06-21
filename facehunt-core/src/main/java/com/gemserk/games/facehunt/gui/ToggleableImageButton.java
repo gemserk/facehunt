@@ -3,9 +3,18 @@ package com.gemserk.games.facehunt.gui;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
+import com.gemserk.commons.gdx.input.LibgdxPointer;
+import com.gemserk.commons.gdx.math.MathUtils2;
 
 public class ToggleableImageButton {
+	
+	public static class ToggleHandler {
+		
+		public void onToggle(boolean value) {}
+		
+	}
 	
 	float x,y;
 	
@@ -17,6 +26,10 @@ public class ToggleableImageButton {
 	
 	Rectangle bounds;
 	
+	LibgdxPointer libgdxPointer = new LibgdxPointer(0);
+	
+	ToggleHandler toggleHandler = new ToggleHandler();
+
 	public ToggleableImageButton setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;
@@ -43,23 +56,40 @@ public class ToggleableImageButton {
 		return this;
 	}
 	
+	public ToggleableImageButton setToggleHandler(ToggleHandler toggleHandler) {
+		this.toggleHandler = toggleHandler;
+		return this;
+	}
+	
 	public ToggleableImageButton() {
 
 	}
 	
-	public void toggle() {
+	private void toggle() {
 		enabled = !enabled;
+		toggleHandler.onToggle(enabled);
 	}
 	
 	public void draw(SpriteBatch spriteBatch) {
-		if (enabled) {
+		if (enabled) 
 			SpriteBatchUtils.drawCentered(spriteBatch, enabledSprite, x, y, 0f);
-		} else {
+		else
 			SpriteBatchUtils.drawCentered(spriteBatch, disabledSprite, x, y, 0f);
-		}
 	}
 	
 	public void udpate(int delta) {
+		
+		libgdxPointer.update();
+		
+		if (!libgdxPointer.wasPressed)
+			return;
+		
+		Vector2 pressedPosition = libgdxPointer.getPressedPosition();
+		
+		if (!MathUtils2.inside(bounds, pressedPosition.x - x, pressedPosition.y - y)) 
+			return;
+		
+		toggle();
 		
 	}
 

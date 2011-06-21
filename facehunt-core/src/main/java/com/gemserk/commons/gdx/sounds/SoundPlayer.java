@@ -4,7 +4,7 @@ import com.badlogic.gdx.audio.Sound;
 
 public class SoundPlayer {
 	
-	private float volume = 0f;
+	private float volume = 1f;
 	
 	public void setVolume(float volume) {
 		this.volume = volume;
@@ -12,6 +12,18 @@ public class SoundPlayer {
 	
 	public float getVolume() {
 		return volume;
+	}
+	
+	public boolean isMuted() {
+		return getVolume() <= 0f;
+	}
+	
+	public void mute() {
+		setVolume(0f);
+	}
+	
+	public void unmute() {
+		setVolume(1f);
 	}
 	
 	public void play(Sound sound) {

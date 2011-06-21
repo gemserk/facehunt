@@ -27,6 +27,7 @@ import com.gemserk.datastore.profiles.Profile;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.gui.ToggleableImageButton;
+import com.gemserk.games.facehunt.gui.ToggleableImageButton.ToggleHandler;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 import com.gemserk.resources.dataloaders.DataLoader;
@@ -79,9 +80,9 @@ public class MainMenuGameState extends GameStateImpl {
 	private GameProfiles gameProfiles;
 
 	private ToggleableImageButton speakersButton;
-	
+
 	private SoundPlayer soundPlayer;
-	
+
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
 	}
@@ -191,7 +192,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 		Sprite speakersOnSprite = resourceManager.getResourceValue("SpeakersOnSprite");
 		Sprite speakersOffSprite = resourceManager.getResourceValue("SpeakersOffSprite");
-		
+
 		speakersOnSprite.setColor(1f, 1f, 0f, 1f);
 		speakersOnSprite.setScale(0.7f * viewportWidth / 800f);
 
@@ -200,9 +201,18 @@ public class MainMenuGameState extends GameStateImpl {
 
 		speakersButton = new ToggleableImageButton().setEnabledSprite(speakersOnSprite) //
 				.setDisabledSprite(speakersOffSprite) //
-				.setEnabled(false) //
-				.setPosition(viewportWidth * 0.92f, viewportHeight * 0.15f)
-				.setBounds(new Rectangle());
+				.setEnabled(!soundPlayer.isMuted()) //
+				.setPosition(viewportWidth * 0.92f, viewportHeight * 0.15f) //
+				.setBounds(new Rectangle(-speakersOnSprite.getWidth() * 0.5f, -speakersOnSprite.getHeight() * 0.5f, speakersOnSprite.getWidth(), speakersOnSprite.getHeight())) //
+				.setToggleHandler(new ToggleHandler() {
+					@Override
+					public void onToggle(boolean value) {
+						if (value)
+							soundPlayer.unmute();
+						else
+							soundPlayer.mute();
+					}
+				});
 	}
 
 	@Override
@@ -218,7 +228,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 		if (Gdx.app.getType() != ApplicationType.Applet)
 			exitButton.draw(spriteBatch);
-		
+
 		speakersButton.draw(spriteBatch);
 
 		titleFont.setColor(1f, 1f, 0f, 1f);
@@ -239,6 +249,8 @@ public class MainMenuGameState extends GameStateImpl {
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize();
+		
+		speakersButton.udpate(delta);
 
 		playButton.update();
 		if (playButton.isReleased()) {
