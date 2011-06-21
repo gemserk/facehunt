@@ -8,7 +8,7 @@ import com.gemserk.datastore.profiles.Profile;
 import com.gemserk.datastore.profiles.ProfileJsonSerializer;
 
 /**
- * Abstracts Profiles persistence and retrieval
+ * Abstracts persistence and retrieval
  */
 public class GamePreferences {
 
@@ -49,13 +49,28 @@ public class GamePreferences {
 
 		return profile;
 	}
-	
+
 	/**
 	 * Returns locally saved profiles.
 	 */
 	public Set<Profile> getSavedProfiles() {
 		String profilesListJson = preferences.getString("profiles", "[]");
 		return profileJsonSerializer.parseList(profilesListJson);
+	}
+
+	/**
+	 * Returns saved sound volume.
+	 */
+	public float getSoundVolume() {
+		return preferences.getFloat("volume", 1f);
+	}
+
+	/**
+	 * Updates and saves current sound volume. 
+	 */
+	public void updateSoundVolume(float volume) {
+		preferences.putFloat("volume", volume);
+		preferences.flush();
 	}
 
 }

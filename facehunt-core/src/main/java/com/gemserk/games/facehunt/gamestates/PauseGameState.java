@@ -51,6 +51,12 @@ public class PauseGameState extends GameStateImpl {
 
 	private ToggleableImageButton speakersButton;
 	
+	private GamePreferences gamePreferences;
+	
+	public void setGamePreferences(GamePreferences gamePreferences) {
+		this.gamePreferences = gamePreferences;
+	}
+	
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
 	}
@@ -129,10 +135,14 @@ public class PauseGameState extends GameStateImpl {
 				.setToggleHandler(new ToggleHandler() {
 					@Override
 					public void onToggle(boolean value) {
-						if (value)
+						if (value) {
 							soundPlayer.unmute();
-						else
+							gamePreferences.updateSoundVolume(soundPlayer.getVolume());
+						}
+						else {
 							soundPlayer.mute();
+							gamePreferences.updateSoundVolume(soundPlayer.getVolume());
+						}
 					}
 				});
 	}

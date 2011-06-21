@@ -207,10 +207,14 @@ public class MainMenuGameState extends GameStateImpl {
 				.setToggleHandler(new ToggleHandler() {
 					@Override
 					public void onToggle(boolean value) {
-						if (value)
+						if (value) {
 							soundPlayer.unmute();
-						else
+							gamePreferences.updateSoundVolume(soundPlayer.getVolume());
+						}
+						else {
 							soundPlayer.mute();
+							gamePreferences.updateSoundVolume(soundPlayer.getVolume());
+						}
 					}
 				});
 	}
