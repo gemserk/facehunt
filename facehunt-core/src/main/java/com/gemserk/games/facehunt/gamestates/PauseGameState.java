@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
@@ -17,6 +18,8 @@ import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
+import com.gemserk.games.facehunt.gui.ToggleableImageButton;
+import com.gemserk.games.facehunt.gui.ToggleableImageButton.ToggleHandler;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
@@ -45,6 +48,8 @@ public class PauseGameState extends GameStateImpl {
 	private Sprite backgroundSprite;
 	
 	private SoundPlayer soundPlayer;
+
+	private ToggleableImageButton speakersButton;
 	
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
@@ -106,6 +111,30 @@ public class PauseGameState extends GameStateImpl {
 		menuScreen = game.menuScreen;
 
 		mainMenu = false;
+		
+		Sprite speakersOnSprite = resourceManager.getResourceValue("SpeakersOnSprite");
+		Sprite speakersOffSprite = resourceManager.getResourceValue("SpeakersOffSprite");
+
+		speakersOnSprite.setColor(1f, 1f, 0f, 1f);
+		speakersOnSprite.setScale(0.7f * viewportWidth / 800f);
+
+		speakersOffSprite.setColor(1f, 0f, 0f, 1f);
+		speakersOffSprite.setScale(0.7f * viewportWidth / 800f);
+
+		speakersButton = new ToggleableImageButton().setEnabledSprite(speakersOnSprite) //
+				.setDisabledSprite(speakersOffSprite) //
+				.setEnabled(!soundPlayer.isMuted()) //
+				.setPosition(viewportWidth * 0.92f, viewportHeight * 0.15f) //
+				.setBounds(new Rectangle(-speakersOnSprite.getWidth() * 0.5f, -speakersOnSprite.getHeight() * 0.5f, speakersOnSprite.getWidth(), speakersOnSprite.getHeight())) //
+				.setToggleHandler(new ToggleHandler() {
+					@Override
+					public void onToggle(boolean value) {
+						if (value)
+							soundPlayer.unmute();
+						else
+							soundPlayer.mute();
+					}
+				});
 	}
 
 	@Override
@@ -125,6 +154,7 @@ public class PauseGameState extends GameStateImpl {
 		backgroundSprite.draw(spriteBatch);
 		resumeButton.draw(spriteBatch);
 		mainMenuButton.draw(spriteBatch);
+		speakersButton.draw(spriteBatch);
 		spriteBatch.end();
 	}
 
@@ -132,6 +162,8 @@ public class PauseGameState extends GameStateImpl {
 	public void update(int delta) {
 		Synchronizers.synchronize(delta);
 
+		speakersButton.udpate(delta);
+		
 		inputDevicesMonitor.update();
 
 		resumeButton.update();
