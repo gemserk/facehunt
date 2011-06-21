@@ -103,7 +103,7 @@ public class GameOverGameState extends GameStateImpl {
 
 	private FutureProcessor<Profile> registerProfileProcessor;
 
-	private GameProfiles gameProfiles;
+	private GamePreferences gamePreferences;
 
 	private Sprite backgroundSprite;
 	
@@ -127,8 +127,8 @@ public class GameOverGameState extends GameStateImpl {
 		this.score = score;
 	}
 
-	public void setGameProfiles(GameProfiles gameProfiles) {
-		this.gameProfiles = gameProfiles;
+	public void setGameProfiles(GamePreferences gamePreferences) {
+		this.gamePreferences = gamePreferences;
 	}
 
 	public GameOverGameState(FaceHuntGame game) {
@@ -187,14 +187,14 @@ public class GameOverGameState extends GameStateImpl {
 
 		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.55f).setColor(new Color(1f, 1f, 0f, 1f));
 
-		profile = gameProfiles.getCurrentProfile();
+		profile = gamePreferences.getCurrentProfile();
 
 		submitScoreProcessor = new FutureProcessor<String>(new SubmitScoreHandler());
 		registerProfileProcessor = new FutureProcessor<Profile>(new FutureHandler<Profile>() {
 
 			@Override
 			public void done(Profile profile) {
-				gameProfiles.updateProfile(profile);
+				gamePreferences.updateProfile(profile);
 
 				submitScoreProcessor.setFuture(executorService.submit(new SubmitScoreCallable(score, profile)));
 			}

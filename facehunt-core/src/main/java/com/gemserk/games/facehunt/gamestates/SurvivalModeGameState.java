@@ -129,7 +129,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	private int viewportHeight;
 	
-	private GameProfiles gameProfiles;
+	private GamePreferences gamePreferences;
 	
 	private SoundPlayer soundPlayer;
 	
@@ -137,8 +137,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 		this.soundPlayer = soundPlayer;
 	}
 
-	public void setGameProfiles(GameProfiles gameProfiles) {
-		this.gameProfiles = gameProfiles;
+	public void setGameProfiles(GamePreferences gamePreferences) {
+		this.gamePreferences = gamePreferences;
 	}
 
 	private Function velocityIncrementFunction = new Function() {
@@ -457,7 +457,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 		if (health.isEmpty()) {
 			gameData.gameOver = true;
 
-			Profile profile = gameProfiles.getCurrentProfile();
+			Profile profile = gamePreferences.getCurrentProfile();
 
 			HashSet<String> tags = new HashSet<String>();
 			

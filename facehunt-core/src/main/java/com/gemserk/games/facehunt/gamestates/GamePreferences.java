@@ -10,13 +10,13 @@ import com.gemserk.datastore.profiles.ProfileJsonSerializer;
 /**
  * Abstracts Profiles persistence and retrieval
  */
-public class GameProfiles {
+public class GamePreferences {
 
 	private final ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
 
 	private final Preferences preferences;
 
-	public GameProfiles(Preferences preferences) {
+	public GamePreferences(Preferences preferences) {
 		this.preferences = preferences;
 	}
 

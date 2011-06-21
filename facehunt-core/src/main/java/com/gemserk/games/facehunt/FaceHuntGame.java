@@ -16,7 +16,7 @@ import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.datastore.profiles.ProfilesHttpImpl;
 import com.gemserk.games.facehunt.gamestates.GameOverGameState;
-import com.gemserk.games.facehunt.gamestates.GameProfiles;
+import com.gemserk.games.facehunt.gamestates.GamePreferences;
 import com.gemserk.games.facehunt.gamestates.HighscoresGameState;
 import com.gemserk.games.facehunt.gamestates.MainMenuGameState;
 import com.gemserk.games.facehunt.gamestates.PauseGameState;
@@ -75,7 +75,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		// scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
 		// profiles = new ProfilesHttpImpl("http://localhost:8080/");
 
-		GameProfiles gameProfiles = new GameProfiles(preferences);
+		GamePreferences gamePreferences = new GamePreferences(preferences);
 		// GamePreferences gamePreferences = new GamePreferences(preferences);
 		SoundPlayer soundPlayer = new SoundPlayer();
 
@@ -89,12 +89,12 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		gameOverGameState.setScores(scores);
 		gameOverGameState.setExecutorService(executorService);
 		gameOverGameState.setProfiles(profiles);
-		gameOverGameState.setGameProfiles(gameProfiles);
+		gameOverGameState.setGameProfiles(gamePreferences);
 		gameOverGameState.setSoundPlayer(soundPlayer);
 
 		MainMenuGameState mainMenuGameState = new MainMenuGameState(this);
 		mainMenuGameState.setProfiles(profiles);
-		mainMenuGameState.setGameProfiles(gameProfiles);
+		mainMenuGameState.setGameProfiles(gamePreferences);
 		mainMenuGameState.setSoundPlayer(soundPlayer);
 
 		HighscoresGameState highscoresGameState = new HighscoresGameState(this);
@@ -103,7 +103,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		highscoresGameState.setPreferences(preferences);
 
 		SurvivalModeGameState survivalModeGameState = new SurvivalModeGameState(this);
-		survivalModeGameState.setGameProfiles(gameProfiles);
+		survivalModeGameState.setGameProfiles(gamePreferences);
 		survivalModeGameState.setSoundPlayer(soundPlayer);
 
 		menuScreen = new ScreenImpl(mainMenuGameState);

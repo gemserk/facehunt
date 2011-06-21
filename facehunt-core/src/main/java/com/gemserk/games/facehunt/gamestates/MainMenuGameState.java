@@ -77,7 +77,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 	private Profiles profiles;
 
-	private GameProfiles gameProfiles;
+	private GamePreferences gamePreferences;
 
 	private ToggleableImageButton speakersButton;
 
@@ -87,8 +87,8 @@ public class MainMenuGameState extends GameStateImpl {
 		this.soundPlayer = soundPlayer;
 	}
 
-	public void setGameProfiles(GameProfiles gameProfiles) {
-		this.gameProfiles = gameProfiles;
+	public void setGameProfiles(GamePreferences gamePreferences) {
+		this.gamePreferences = gamePreferences;
 	}
 
 	public void setProfiles(Profiles profiles) {
@@ -101,7 +101,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 	@Override
 	public void init() {
-		profile = gameProfiles.getCurrentProfile();
+		profile = gamePreferences.getCurrentProfile();
 
 		username = profile.getName();
 
@@ -289,7 +289,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 						// TODO: use futures or at least try/catch
 
-						Set<Profile> profileList = gameProfiles.getSavedProfiles();
+						Set<Profile> profileList = gamePreferences.getSavedProfiles();
 
 						boolean savedProfileFound = false;
 
@@ -297,7 +297,7 @@ public class MainMenuGameState extends GameStateImpl {
 							if (savedProfile.getName().equals(username)) {
 								// use this profile as selected
 								profile = savedProfile;
-								gameProfiles.updateProfile(profile);
+								gamePreferences.updateProfile(profile);
 								savedProfileFound = true;
 								break;
 							}
@@ -308,7 +308,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 							try {
 								profile = profiles.update(profile);
-								gameProfiles.updateProfile(profile);
+								gamePreferences.updateProfile(profile);
 
 							} catch (Exception e) {
 								// profile couldn't be updated... :(
@@ -319,7 +319,7 @@ public class MainMenuGameState extends GameStateImpl {
 
 						} else if (!savedProfileFound) {
 							profile = new Profile(username, false);
-							gameProfiles.updateProfile(profile);
+							gamePreferences.updateProfile(profile);
 						}
 
 						MainMenuGameState.this.username = username;
