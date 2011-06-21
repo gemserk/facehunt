@@ -29,10 +29,16 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		texture("FaceSpriteSheet", "data/images/face-parts.png");
 		texture("OverlayTexture", "data/images/white-rectangle.png");
 
+		texture("SpeakersOnTexture", "data/images/speakers-on.png");
+		texture("SpeakersOffTexture", "data/images/speakers-off.png");
+
 		sprite("BackgroundSprite", "BackgroundTexture");
 		sprite("HappyFaceSprite", "HappyFaceTexture");
 		sprite("SadFaceSprite", "SadFaceTexture");
 		sprite("OverlaySprite", "OverlayTexture");
+
+		sprite("SpeakersOnSprite", "SpeakersOnTexture");
+		sprite("SpeakersOffSprite", "SpeakersOffTexture");
 
 		sprite("Part01", "FaceSpriteSheet", 64 * 0, 64 * 0, 64, 64);
 		sprite("Part02", "FaceSpriteSheet", 64 * 1, 64 * 0, 64, 64);

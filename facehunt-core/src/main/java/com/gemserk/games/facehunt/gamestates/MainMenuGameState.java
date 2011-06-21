@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
@@ -24,6 +25,7 @@ import com.gemserk.commons.gdx.gui.TextButton;
 import com.gemserk.datastore.profiles.Profile;
 import com.gemserk.datastore.profiles.Profiles;
 import com.gemserk.games.facehunt.FaceHuntGame;
+import com.gemserk.games.facehunt.gui.ToggleableImageButton;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 import com.gemserk.resources.dataloaders.DataLoader;
@@ -74,6 +76,8 @@ public class MainMenuGameState extends GameStateImpl {
 	private Profiles profiles;
 
 	private GameProfiles gameProfiles;
+
+	private ToggleableImageButton speakersButton;
 
 	public void setGameProfiles(GameProfiles gameProfiles) {
 		this.gameProfiles = gameProfiles;
@@ -177,6 +181,21 @@ public class MainMenuGameState extends GameStateImpl {
 
 		particleEmitter1.setPosition(Gdx.graphics.getWidth() * 0.2f, Gdx.graphics.getHeight() * 0.85f);
 		particleEmitter2.setPosition(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.85f);
+
+		Sprite speakersOnSprite = resourceManager.getResourceValue("SpeakersOnSprite");
+		Sprite speakersOffSprite = resourceManager.getResourceValue("SpeakersOffSprite");
+		
+		speakersOnSprite.setColor(1f, 1f, 0f, 1f);
+		speakersOnSprite.setScale(0.7f * viewportWidth / 800f);
+
+		speakersOffSprite.setColor(1f, 0f, 0f, 1f);
+		speakersOffSprite.setScale(0.7f * viewportWidth / 800f);
+
+		speakersButton = new ToggleableImageButton().setEnabledSprite(speakersOnSprite) //
+				.setDisabledSprite(speakersOffSprite) //
+				.setEnabled(false) //
+				.setPosition(viewportWidth * 0.92f, viewportHeight * 0.15f)
+				.setBounds(new Rectangle());
 	}
 
 	@Override
@@ -192,6 +211,8 @@ public class MainMenuGameState extends GameStateImpl {
 
 		if (Gdx.app.getType() != ApplicationType.Applet)
 			exitButton.draw(spriteBatch);
+		
+		speakersButton.draw(spriteBatch);
 
 		titleFont.setColor(1f, 1f, 0f, 1f);
 		SpriteBatchUtils.drawCentered(spriteBatch, titleFont, "Face Hunt", Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.85f);
