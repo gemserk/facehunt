@@ -86,6 +86,18 @@ public class SplashGameState extends GameStateImpl {
 		libgdxLogo.draw(spriteBatch);
 		spriteBatch.end();
 	}
+	
+	@Override
+	public void resume() {
+		game.getAdWhirlViewHandler().hide();
+		super.resume();
+	}
+	
+	@Override
+	public void pause() {
+		game.getAdWhirlViewHandler().show();
+		super.pause();
+	}
 
 	@Override
 	public void update(int delta) {

@@ -1,25 +1,28 @@
 package com.gemserk.games.facehunt;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
+import com.adwhirl.AdWhirlLayout.AdWhirlInterface;
+import com.adwhirl.AdWhirlManager;
+import com.adwhirl.AdWhirlTargeting;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.gemserk.commons.adwhirl.AdWhirlAndroidHandler;
+import com.gemserk.commons.adwhirl.CustomAdViewHandler;
+import com.gemserk.commons.adwhirl.PausableAdWhirlLayout;
 
-public class FaceHuntAndroidApplication extends AndroidApplication  {
+public class FaceHuntAndroidApplication extends AndroidApplication  implements AdWhirlInterface  {
+
+	private PausableAdWhirlLayout adView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		config.useGL20 = false;
-		config.useAccelerometer = false;
-		config.useCompass = false;
-		config.useWakelock = true;
-		initialize(new FaceHuntGame(), config);
 		
 		RelativeLayout layout = new RelativeLayout(this);
 
@@ -41,9 +44,9 @@ public class FaceHuntAndroidApplication extends AndroidApplication  {
 		AdWhirlTargeting.setPostalCode("94123");
 		AdWhirlTargeting.setTestMode(false);
 
-		adView = new PausableAdWhirlLayout(this, "5d99c9fc499b41e5be30b22e3b52d799");
+		adView = new PausableAdWhirlLayout(this, "7b8dd38c0a3e48f3bdf995791d6d186e");
 		
-		handler = new AdWhirlAndroidHandler(adView);
+		Handler handler = new AdWhirlAndroidHandler(adView);
 		CustomAdViewHandler adWhirlViewHandler = new CustomAdViewHandler(handler);
 		View gameView = initializeForView(new FaceHuntGame(adWhirlViewHandler), config);
 
@@ -57,7 +60,7 @@ public class FaceHuntAndroidApplication extends AndroidApplication  {
 		adView.setMaxHeight((int) (diHeight * density));
 
 		RelativeLayout.LayoutParams adParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-		adParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		adParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		adParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
 		layout.addView(gameView);
@@ -66,4 +69,9 @@ public class FaceHuntAndroidApplication extends AndroidApplication  {
 		setContentView(layout);
 	}
 	
+	@Override
+	public void adWhirlGeneric() {
+
+	}
+
 }

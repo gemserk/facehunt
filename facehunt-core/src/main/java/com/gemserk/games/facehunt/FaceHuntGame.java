@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
+import com.gemserk.commons.adwhirl.AdWhirlViewHandler;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.ScreenImpl;
 import com.gemserk.commons.gdx.sounds.SoundPlayer;
@@ -62,6 +63,16 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public Preferences preferences;
 
 	private ExecutorService executorService;
+
+	private final AdWhirlViewHandler adWhirlViewHandler;
+	
+	public AdWhirlViewHandler getAdWhirlViewHandler() {
+		return adWhirlViewHandler;
+	}
+	
+	public FaceHuntGame(AdWhirlViewHandler adWhirlViewHandler) {
+		this.adWhirlViewHandler = adWhirlViewHandler;
+	}
 
 	@Override
 	public void create() {

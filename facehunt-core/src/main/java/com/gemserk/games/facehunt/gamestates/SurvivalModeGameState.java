@@ -485,11 +485,13 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	@Override
 	public void resume() {
+		game.getAdWhirlViewHandler().hide();
 		Gdx.input.setCatchBackKey(true);
 	}
 
 	@Override
 	public void pause() {
+		game.getAdWhirlViewHandler().show();
 		Gdx.input.setCatchBackKey(false);
 	}
 
