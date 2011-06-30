@@ -3,8 +3,8 @@ package com.gemserk.games.facehunt.systems;
 import com.artemis.Entity;
 import com.artemis.EntityProcessingSystem;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.gemserk.commons.artemis.components.Contact;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
+import com.gemserk.commons.gdx.box2d.Contact;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
 
 public class BounceSmallVelocityFixSystem extends EntityProcessingSystem {

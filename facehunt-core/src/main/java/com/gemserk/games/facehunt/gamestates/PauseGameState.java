@@ -189,6 +189,7 @@ public class PauseGameState extends GameStateImpl {
 			game.transition(menuScreen, true);
 			mainMenu = true;
 		}
+		
 	}
 
 	@Override
