@@ -346,6 +346,12 @@ public class MainMenuGameState extends GameStateImpl {
 			game.transition(game.testScreen, true);
 
 	}
+	
+	@Override
+	public void resume() {
+		super.resume();
+		game.getAdWhirlViewHandler().show();
+	}
 
 	@Override
 	public void dispose() {

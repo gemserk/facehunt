@@ -178,6 +178,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.google.ads.admob</groupId>
+			<artifactId>admob</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.adwhirl.adwhirl</groupId>
 			<artifactId>adwhirl</artifactId>
 			<version>3.0.0</version>

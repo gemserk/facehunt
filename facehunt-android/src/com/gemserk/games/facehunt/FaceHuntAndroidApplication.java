@@ -50,8 +50,8 @@ public class FaceHuntAndroidApplication extends AndroidApplication  implements A
 		CustomAdViewHandler adWhirlViewHandler = new CustomAdViewHandler(handler);
 		View gameView = initializeForView(new FaceHuntGame(adWhirlViewHandler), config);
 
-		int diWidth = 400;
-		int diHeight = 32;
+		int diWidth = 800;
+		int diHeight = 75;
 		
 		float density = getResources().getDisplayMetrics().density;
 
