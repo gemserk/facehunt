@@ -51,7 +51,7 @@ public class FaceHuntAndroidApplication extends AndroidApplication  implements A
 		View gameView = initializeForView(new FaceHuntGame(adWhirlViewHandler), config);
 
 		int diWidth = 800;
-		int diHeight = 45;
+		int diHeight = 50;
 		
 		float density = getResources().getDisplayMetrics().density;
 
