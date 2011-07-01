@@ -277,7 +277,7 @@ public class MainMenuGameState extends GameStateImpl {
 		if (Gdx.app.getType() != ApplicationType.Applet) {
 			exitButton.update();
 			if (exitButton.isReleased())
-				System.exit(0);
+				Gdx.app.exit();
 		}
 
 		changeUsernameButton.update();

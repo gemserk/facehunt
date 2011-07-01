@@ -84,7 +84,6 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		
 		Analytics.traker.trackPageView("/start", "/start", null);
 		
-		
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
 
