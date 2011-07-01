@@ -65,15 +65,15 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	private ExecutorService executorService;
 
 	private final AdWhirlViewHandler adWhirlViewHandler;
-	
+
 	public AdWhirlViewHandler getAdWhirlViewHandler() {
 		return adWhirlViewHandler;
 	}
-	
+
 	public FaceHuntGame(AdWhirlViewHandler adWhirlViewHandler) {
 		this.adWhirlViewHandler = adWhirlViewHandler;
 	}
-	
+
 	public FaceHuntGame() {
 		this(new AdWhirlViewHandler());
 	}
@@ -93,7 +93,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		GamePreferences gamePreferences = new GamePreferences(preferences);
 		// GamePreferences gamePreferences = new GamePreferences(preferences);
 		SoundPlayer soundPlayer = new SoundPlayer();
-		
+
 		soundPlayer.setVolume(gamePreferences.getSoundVolume());
 
 		tutorialModeGameState = new TutorialModeGameState(this);
@@ -170,6 +170,16 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void pause() {
+		adWhirlViewHandler.hide();
+	}
+
+	@Override
+	public void resume() {
+		adWhirlViewHandler.show();
 	}
 
 }
