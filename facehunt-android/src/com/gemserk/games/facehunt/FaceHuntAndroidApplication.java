@@ -12,6 +12,13 @@ import com.adwhirl.AdWhirlManager;
 import com.adwhirl.AdWhirlTargeting;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.dmurph.tracking.AnalyticsConfigData;
+import com.dmurph.tracking.JGoogleAnalyticsTracker;
+import com.dmurph.tracking.JGoogleAnalyticsTracker.GoogleAnalyticsVersion;
+import com.dmurph.tracking.VisitorData;
+import com.gemserk.analytics.Analytics;
+import com.gemserk.analytics.googleanalytics.android.AnalyticsStoredConfig;
+import com.gemserk.analytics.googleanalytics.android.BasicConfig;
 import com.gemserk.commons.adwhirl.AdWhirlAndroidHandler;
 import com.gemserk.commons.adwhirl.CustomAdViewHandler;
 import com.gemserk.commons.adwhirl.PausableAdWhirlLayout;
@@ -19,6 +26,8 @@ import com.gemserk.commons.adwhirl.PausableAdWhirlLayout;
 public class FaceHuntAndroidApplication extends AndroidApplication  implements AdWhirlInterface  {
 
 	private PausableAdWhirlLayout adView;
+	private AnalyticsStoredConfig storedConfig;
+	private VisitorData visitorData;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,7 +57,15 @@ public class FaceHuntAndroidApplication extends AndroidApplication  implements A
 		
 		Handler handler = new AdWhirlAndroidHandler(adView);
 		CustomAdViewHandler adWhirlViewHandler = new CustomAdViewHandler(handler);
-		View gameView = initializeForView(new FaceHuntGame(adWhirlViewHandler), config);
+		FaceHuntGame faceHuntGame = new FaceHuntGame(adWhirlViewHandler){
+			@Override
+			public void pause() {
+				super.pause();
+				saveAnalyticsData();
+			}
+		};
+		
+		View gameView = initializeForView(faceHuntGame, config);
 
 		int diWidth = 800;
 		int diHeight = 50;
@@ -67,6 +84,20 @@ public class FaceHuntAndroidApplication extends AndroidApplication  implements A
 		layout.addView(adView, adParams);
 
 		setContentView(layout);
+		
+		storedConfig = new AnalyticsStoredConfig(getApplicationContext());
+		visitorData = storedConfig.loadVisitor();
+		
+		AnalyticsConfigData analyticsconfig = new AnalyticsConfigData("UA-23542248-3",visitorData);
+		BasicConfig.configure(analyticsconfig, getApplicationContext());
+		
+		JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(analyticsconfig,GoogleAnalyticsVersion.V_4_7_2);
+		Analytics.traker = tracker;
+	}
+	
+	protected void saveAnalyticsData() {
+		Analytics.traker.completeBackgroundTasks(500);
+		storedConfig.saveVisitor(visitorData);
 	}
 	
 	@Override

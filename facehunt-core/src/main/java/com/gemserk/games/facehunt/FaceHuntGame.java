@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.gemserk.analytics.Analytics;
 import com.gemserk.animation4j.converters.Converters;
 import com.gemserk.animation4j.gdx.converters.LibgdxConverters;
 import com.gemserk.commons.adwhirl.AdWhirlViewHandler;
@@ -80,6 +81,10 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	@Override
 	public void create() {
+		
+		Analytics.traker.trackPageView("/start", "/start", null);
+		
+		
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
 
