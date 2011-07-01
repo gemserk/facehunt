@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.gemserk.analytics.Analytics;
 import com.gemserk.animation4j.transitions.Transition;
 import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
@@ -140,6 +141,8 @@ public class TutorialModeGameState extends GameStateImpl {
 	}
 
 	public void restartGame() {
+		
+		Analytics.traker.trackPageView("/startTutorial", "/startTutorial", null);
 
 		gameData.gameOver = false;
 
@@ -474,6 +477,9 @@ public class TutorialModeGameState extends GameStateImpl {
 				if (currentWaveIndex == waves.length - 1) {
 					gameData.gameOver = true;
 					game.transition(game.gameScreen, true);
+					
+					Analytics.traker.trackPageView("/finishTutorial", "/finishTutorial", null);
+					
 				} else {
 					internalGameState = InternalGameState.PREPARE_INTRO;
 					currentWaveIndex++;

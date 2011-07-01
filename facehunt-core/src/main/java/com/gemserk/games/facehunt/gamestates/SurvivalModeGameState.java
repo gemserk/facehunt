@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.gemserk.analytics.Analytics;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
 import com.gemserk.commons.artemis.components.SpatialComponent;
@@ -158,6 +159,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 	}
 
 	public void restartGame() {
+		
+		Analytics.traker.trackPageView("/startGame", "/startGame", null);
 
 		viewportWidth = Gdx.graphics.getWidth();
 		viewportHeight = Gdx.graphics.getHeight();
@@ -475,6 +478,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 			
 			game.gameOverGameState.setScore(new Score(profile.getName(), gameData.points, tags, new HashMap<String, Object>()));
 			game.transition(game.gameOverScreen);
+			
+			Analytics.traker.trackPageView("/finishGame", "/finishGame", null);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {

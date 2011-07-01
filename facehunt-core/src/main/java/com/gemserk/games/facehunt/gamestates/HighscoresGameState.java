@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.gemserk.analytics.Analytics;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
 import com.gemserk.commons.gdx.gui.Text;
@@ -145,6 +146,25 @@ public class HighscoresGameState extends GameStateImpl {
 		@Override
 		public Collection<Score> call() throws Exception {
 			Set<String> tags = new HashSet<String>();
+			
+			String highscoresPage = "/viewHighscoresAll";
+			
+			switch (range) {
+			case Day:
+				highscoresPage = "/viewHighscoresDaily";
+				break;
+			case Week:
+				highscoresPage = "/viewHighscoresWeekly";
+				break;
+			case Month:
+				highscoresPage = "/viewHighscoresMonthly";
+				break;
+			default:
+				break;
+			}
+			
+			Analytics.traker.trackPageView(highscoresPage, highscoresPage, null);
+			
 			return scores.getOrderedByPoints(tags, 10, false, range);
 		}
 	}
@@ -291,6 +311,7 @@ public class HighscoresGameState extends GameStateImpl {
 
 	@Override
 	public void resume() {
+		Analytics.traker.trackPageView("/viewHighscores", "/viewHighscores", null);
 		game.getAdWhirlViewHandler().hide();
 		Gdx.input.setCatchBackKey(true);
 	}
