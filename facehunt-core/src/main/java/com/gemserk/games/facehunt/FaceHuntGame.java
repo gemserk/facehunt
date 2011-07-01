@@ -43,7 +43,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	public Screen menuScreen;
 
-	public Screen scoreScreen;
+	public Screen pauseScreen;
 
 	public Screen testScreen;
 
@@ -131,7 +131,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		menuScreen = new ScreenImpl(mainMenuGameState);
 		tutorialScreen = new ScreenImpl(tutorialModeGameState);
 		gameScreen = new ScreenImpl(survivalModeGameState);
-		scoreScreen = new ScreenImpl(pauseGameState);
+		pauseScreen = new ScreenImpl(pauseGameState);
 		gameOverScreen = new ScreenImpl(gameOverGameState);
 		splashScreen = new ScreenImpl(new SplashGameState(this));
 		testScreen = new ScreenImpl(new TestGameState(this));

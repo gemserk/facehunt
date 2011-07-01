@@ -465,7 +465,7 @@ public class TutorialModeGameState extends GameStateImpl {
 			if (health.isEmpty()) {
 				gameData.gameOver = true;
 				game.pauseGameState.setPreviousScreen(game.tutorialScreen);
-				game.transition(game.scoreScreen);
+				game.transition(game.pauseScreen);
 			}
 
 			ImmutableBag<Entity> faces = world.getGroupManager().getEntities(Groups.FaceGroup);
@@ -520,7 +520,7 @@ public class TutorialModeGameState extends GameStateImpl {
 			currentTextIndex = 0;
 
 			if (currentWaveIndex >= waves.length) {
-				game.transition(game.scoreScreen, true);
+				game.transition(game.pauseScreen, true);
 				return;
 			}
 
@@ -541,7 +541,8 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
 			game.pauseGameState.setPreviousScreen(game.tutorialScreen);
-			game.transition(game.scoreScreen);
+			game.transition(game.pauseScreen);
+			Analytics.traker.trackPageView("/tutorialPaused", "/tutorialPaused", null);
 		}
 
 	}

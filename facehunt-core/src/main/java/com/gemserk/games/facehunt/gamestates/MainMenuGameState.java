@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.gemserk.analytics.Analytics;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
@@ -208,10 +209,12 @@ public class MainMenuGameState extends GameStateImpl {
 					@Override
 					public void onToggle(boolean value) {
 						if (value) {
+							Analytics.traker.trackPageView("/soundEnabled", "/soundEnabled", null);
 							soundPlayer.unmute();
 							gamePreferences.updateSoundVolume(soundPlayer.getVolume());
 						}
 						else {
+							Analytics.traker.trackPageView("/soundDisabled", "/soundDisabled", null);
 							soundPlayer.mute();
 							gamePreferences.updateSoundVolume(soundPlayer.getVolume());
 						}

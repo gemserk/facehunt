@@ -484,7 +484,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
 			game.pauseGameState.setPreviousScreen(game.gameScreen);
-			game.transition(game.scoreScreen);
+			game.transition(game.pauseScreen);
+			Analytics.traker.trackPageView("/gamePaused", "/gamePaused", null);
 		}
 
 	}
