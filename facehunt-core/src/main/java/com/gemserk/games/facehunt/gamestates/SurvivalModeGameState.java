@@ -13,6 +13,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -175,7 +176,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		spriteBatch = new SpriteBatch();
 
-		font = resourceManager.getResourceValue("Font");
+		font = resourceManager.getResourceValue("PointsFont");
 
 		ArrayList<RenderLayer> renderLayers = new ArrayList<RenderLayer>();
 		renderLayers.add(new RenderLayer(-1000, -100, backgroundLayerCamera));
@@ -421,19 +422,25 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 		Container health = healthComponent.getHealth();
-		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.3f), (Gdx.graphics.getHeight() - 25), (Gdx.graphics.getWidth() * 0.6f), 10f);
+		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.4f), // 
+				Gdx.graphics.getHeight() * 0.97f, // 
+				(Gdx.graphics.getWidth() * 0.55f), // 
+				Gdx.graphics.getHeight() * 0.02f);
 
-		String text = "Points: 99999";
+		String text = "Points: " + gameData.points;
 
 		TextBounds bounds = font.getMultiLineBounds(text);
-		float scale = SpriteBatchUtils.calculateScaleForText(viewportWidth, bounds.width, 0.2f);
+		float scale = SpriteBatchUtils.calculateScaleForText(viewportWidth, bounds.width, 0.3f);
 
 		font.setScale(scale);
 		font.setColor(Color.RED);
-		font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
+		SpriteBatchUtils.drawMultilineTextWithAlignment(spriteBatch, font, text, Gdx.graphics.getWidth() * 0.02f, Gdx.graphics.getHeight() * 0.98f, 0f, 0.5f, HAlignment.LEFT);
+		// font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
 		font.setScale(1f);
 
 		spriteBatch.end();
+		
+		// ImmediateModeRendererUtils.drawHorizontalAxis(Gdx.graphics.getHeight() * 0.95f, 1000f, Color.GREEN);
 	}
 
 	@Override

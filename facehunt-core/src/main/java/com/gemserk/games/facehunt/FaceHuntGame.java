@@ -73,6 +73,10 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 	public FaceHuntGame(AdWhirlViewHandler adWhirlViewHandler) {
 		this.adWhirlViewHandler = adWhirlViewHandler;
 	}
+	
+	public FaceHuntGame() {
+		this(new AdWhirlViewHandler());
+	}
 
 	@Override
 	public void create() {
