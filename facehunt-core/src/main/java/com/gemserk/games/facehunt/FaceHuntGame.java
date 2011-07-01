@@ -174,12 +174,16 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	@Override
 	public void pause() {
+		super.pause();
+		Gdx.app.log("FaceHunt", "game paused via ApplicationListner.pause()");
 		adWhirlViewHandler.hide();
 	}
-
+	
 	@Override
 	public void resume() {
-		adWhirlViewHandler.show();
+		super.resume();
+		Gdx.app.log("FaceHunt", "game resumed via ApplicationListner.resume()");
+		adWhirlViewHandler.show();		
 	}
 
 }
