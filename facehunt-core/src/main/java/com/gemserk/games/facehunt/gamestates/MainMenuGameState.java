@@ -334,7 +334,7 @@ public class MainMenuGameState extends GameStateImpl {
 				}
 
 				@Override
-				public void cancled() {
+				public void canceled() {
 					game.getScreen().resume();
 				}
 
