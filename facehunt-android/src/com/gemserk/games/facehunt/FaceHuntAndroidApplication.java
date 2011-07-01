@@ -25,7 +25,7 @@ public class FaceHuntAndroidApplication extends AndroidApplication  implements A
 		super.onCreate(savedInstanceState);
 		
 		RelativeLayout layout = new RelativeLayout(this);
-
+		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
