@@ -153,10 +153,10 @@ public class GameOverGameState extends GameStateImpl {
 		buttonFont = resourceManager.getResourceValue("ButtonFont2");
 		// buttonFont.setScale(1f * viewportWidth / 800f);
 
-		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), viewportWidth * 0.5f, viewportHeight * 0.8f).setColor(Color.RED);
+		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), viewportWidth * 0.5f, viewportHeight * 0.70f).setColor(Color.RED);
 
-		tryAgainButton = new TextButton(buttonFont, "Try again", viewportWidth * 0.5f, viewportHeight * 0.4f);
-		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, viewportHeight * 0.25f);
+		tryAgainButton = new TextButton(buttonFont, "Try again", viewportWidth * 0.5f, viewportHeight * 0.35f);
+		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, viewportHeight * 0.20f);
 
 		Color notOverColor = new Color(1f, 1f, 0f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
@@ -186,7 +186,7 @@ public class GameOverGameState extends GameStateImpl {
 		menuScreen = game.menuScreen;
 		previousScreen = game.gameScreen;
 
-		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.55f).setColor(new Color(1f, 1f, 0f, 1f));
+		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.50f).setColor(new Color(1f, 1f, 0f, 1f));
 
 		profile = gamePreferences.getCurrentProfile();
 
