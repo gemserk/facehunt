@@ -437,8 +437,12 @@ public class HighscoresGameState extends GameStateImpl {
 			if (profile.getPublicKey() != null && profile.getPublicKey().equals(score.getProfilePublicKey()))
 				scoreColor = Color.RED;
 
+			String name = score.getName();
+			if (name.length() > 15) 
+				name = name.substring(0, 15);
+			
 			Text numberText = new Text("" + index + ". ", viewportWidth * 0.3f, y, 1f, 0.5f).setColor(scoreColor);
-			Text nameText = new Text(score.getName(), viewportWidth * 0.3f, y, 0f, 0.5f).setColor(scoreColor);
+			Text nameText = new Text(name, viewportWidth * 0.3f, y, 0f, 0.5f).setColor(scoreColor);
 			Text pointsText = new Text(Long.toString(score.getPoints()), viewportWidth * 0.7f, y, 1f, 0.5f).setColor(scoreColor);
 
 			texts.add(numberText);
