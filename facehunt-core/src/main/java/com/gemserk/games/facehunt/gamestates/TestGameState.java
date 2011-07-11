@@ -42,6 +42,7 @@ import com.gemserk.commons.gdx.games.Spatial;
 import com.gemserk.commons.gdx.games.SpatialImpl;
 import com.gemserk.commons.gdx.games.SpatialPhysicsImpl;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
+import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.componentsengine.utils.Container;
@@ -104,6 +105,11 @@ public class TestGameState extends GameStateImpl {
 	private Sprite whiteRectangle;
 
 	private SpriteBatch spriteBatch;
+	private SoundPlayer soundPlayer;
+
+	public void setSoundPlayer(SoundPlayer soundPlayer) {
+		this.soundPlayer = soundPlayer;
+	}
 
 	public TestGameState(FaceHuntGame game) {
 		this.game = game;
@@ -192,32 +198,23 @@ public class TestGameState extends GameStateImpl {
 		return bodyBuilder;
 	}
 
-	private Trigger getFaceTouchTrigger() {
+	private Trigger getFaceDeadHandler() {
 		return new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
-				// world.add animation face...
-				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
-				Container health = healthComponent.getHealth();
-				float damagePerMs = 10f / 1000f; // 10 damage per second
-
-				float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
-				health.remove(damage);
-
-				if (!health.isEmpty())
-					return false;
-
 				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
+				
 				if (pointsComponent != null) {
 					gameData.points += pointsComponent.getPoints();
+					Gdx.app.log("FaceHunt", "points = " + gameData.points);
 				}
 
-				healthComponent = player.getComponent(HealthComponent.class);
-				health = healthComponent.getHealth();
+				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+				Container health = healthComponent.getHealth();
 				health.add(5f);
-
+				
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
 
 				return true;
 			}
@@ -228,23 +225,11 @@ public class TestGameState extends GameStateImpl {
 		return new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
-				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
-				Spatial spatial = spatialComponent.getSpatial();
-
-				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-				Color currentColor = spriteComponent.getColor();
-
-				templates.createDeadFace(spatial, 6, 1500, currentColor);
-
-				world.deleteEntity(e);
-
 				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 				Container health = healthComponent.getHealth();
 				health.remove(20f);
-
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				sound.play();
-
 				return true;
 			}
 		};
@@ -297,7 +282,7 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
-			templates.createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, new Color(1f, 1f, 0f, 1f), getFaceHitTrigger(), getFaceTouchTrigger());
+			templates.createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, new Color(1f, 1f, 0f, 1f), getFaceHitTrigger(), getFaceDeadHandler());
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace2").isReleased()) {
@@ -307,7 +292,7 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
-			templates.createFaceSecondType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceTouchTrigger());
+			templates.createFaceSecondType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceDeadHandler());
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace3").isReleased()) {
@@ -317,7 +302,7 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
-			templates.createFaceInvulnerableType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceTouchTrigger());
+			templates.createFaceInvulnerableType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceDeadHandler());
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace4").isReleased()) {
@@ -411,7 +396,7 @@ public class TestGameState extends GameStateImpl {
 						bullet.refresh();
 						angle += angleIncrement;
 					}
-					
+
 					world.deleteEntity(e);
 				}
 			}));

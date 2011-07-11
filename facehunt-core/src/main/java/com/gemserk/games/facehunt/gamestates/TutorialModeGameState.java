@@ -24,8 +24,6 @@ import com.gemserk.animation4j.transitions.Transitions;
 import com.gemserk.animation4j.transitions.event.TransitionEventHandler;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
-import com.gemserk.commons.artemis.components.SpatialComponent;
-import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
 import com.gemserk.commons.artemis.systems.HitDetectionSystem;
 import com.gemserk.commons.artemis.systems.MovementSystem;
@@ -60,6 +58,7 @@ import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
+import com.gemserk.games.facehunt.systems.ScriptSystem;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -189,6 +188,7 @@ public class TutorialModeGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
+		worldWrapper.addUpdateSystem(new ScriptSystem());
 		worldWrapper.init();
 
 		templates = new Templates(world, bodyBuilder, resourceManager);
@@ -292,11 +292,11 @@ public class TutorialModeGameState extends GameStateImpl {
 				Spatial spatial = new SpatialImpl(x, y, 1f, 1f, 0f);
 
 				if (type == 0)
-					templates.createFaceFirstType(spatial, sprite, controller, linearVelocity, angularVelocity, new Color(1f, 1f, 0f, 1f), getFaceHitTrigger(), getFaceTouchTrigger());
+					templates.createFaceFirstType(spatial, sprite, controller, linearVelocity, angularVelocity, new Color(1f, 1f, 0f, 1f), getFaceHitTrigger(), getFaceDeadHandler());
 				else if (type == 1)
-					templates.createFaceSecondType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
+					templates.createFaceSecondType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceDeadHandler());
 				else if (type == 2)
-					templates.createFaceInvulnerableType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceTouchTrigger());
+					templates.createFaceInvulnerableType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceDeadHandler());
 				else if (type == 3)
 					templates.createMedicFaceType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getMedicFaceTouchTrigger());
 
@@ -310,43 +310,21 @@ public class TutorialModeGameState extends GameStateImpl {
 		entity.refresh();
 	}
 
-	private Trigger getFaceTouchTrigger() {
+	private Trigger getFaceDeadHandler() {
 		return new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
-				// world.add animation face...
-				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
-				Container health = healthComponent.getHealth();
-				float damagePerMs = 10f / 1000f; // 10 damage per second
-
-				float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
-				health.remove(damage);
-
-				if (!health.isEmpty())
-					return false;
-
-				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
-				Spatial spatial = spatialComponent.getSpatial();
-
-				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-				Color currentColor = spriteComponent.getColor();
-
-				templates.createDeadFace(spatial, 6, 1500, currentColor);
-
-				world.deleteEntity(e);
-
 				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
-				if (pointsComponent != null) {
+				
+				if (pointsComponent != null) 
 					gameData.points += pointsComponent.getPoints();
-				}
 
-				healthComponent = player.getComponent(HealthComponent.class);
-				health = healthComponent.getHealth();
+				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
+				Container health = healthComponent.getHealth();
 				health.add(5f);
-
+				
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				soundPlayer.play(sound);
-				// sound.play();
 
 				return true;
 			}
@@ -357,24 +335,11 @@ public class TutorialModeGameState extends GameStateImpl {
 		return new AbstractTrigger() {
 			@Override
 			protected boolean handle(Entity e) {
-				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
-				Spatial spatial = spatialComponent.getSpatial();
-
-				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-				Color currentColor = spriteComponent.getColor();
-
-				templates.createDeadFace(spatial, 6, 1500, currentColor);
-
-				world.deleteEntity(e);
-
 				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 				Container health = healthComponent.getHealth();
 				health.remove(20f);
-
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				soundPlayer.play(sound);
-				// sound.play();
-
+				sound.play();
 				return true;
 			}
 		};

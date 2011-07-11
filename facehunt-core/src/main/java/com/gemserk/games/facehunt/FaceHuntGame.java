@@ -118,13 +118,16 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		survivalModeGameState.setGameProfiles(gamePreferences);
 		survivalModeGameState.setSoundPlayer(soundPlayer);
 
+		TestGameState testGameState = new TestGameState(this);
+		testGameState.setSoundPlayer(soundPlayer);
+		
 		menuScreen = new ScreenImpl(mainMenuGameState);
 		tutorialScreen = new ScreenImpl(tutorialModeGameState);
 		gameScreen = new ScreenImpl(survivalModeGameState);
 		pauseScreen = new ScreenImpl(pauseGameState);
 		gameOverScreen = new ScreenImpl(gameOverGameState);
 		splashScreen = new ScreenImpl(new SplashGameState(this));
-		testScreen = new ScreenImpl(new TestGameState(this));
+		testScreen = new ScreenImpl(testGameState);
 		highscoresScreen = new ScreenImpl(highscoresGameState);
 
 		fadeTransitionScreen = new FadeTransitionScreen(this);

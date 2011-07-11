@@ -18,6 +18,7 @@ import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
 import com.gemserk.commons.artemis.triggers.AbstractTrigger;
+import com.gemserk.commons.artemis.triggers.NullTrigger;
 import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
 import com.gemserk.commons.gdx.games.Spatial;
@@ -43,16 +44,16 @@ public class Templates {
 	private final World world;
 
 	private final BodyBuilder bodyBuilder;
-	
+
 	private final ResourceManager<String> resourceManager;
-	
+
 	public Templates(World world, BodyBuilder bodyBuilder, ResourceManager<String> resourceManager) {
 		this.world = world;
 		this.bodyBuilder = bodyBuilder;
 		this.resourceManager = resourceManager;
 	}
 
-	public void createFaceFirstType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Color color, Trigger hitTrigger, Trigger touchTrigger) {
+	public void createFaceFirstType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Color color, Trigger hitTrigger, final Trigger deadFaceTrigger) {
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
 		final Color faceColor = new Color(color);
@@ -60,26 +61,37 @@ public class Templates {
 		Entity entity = world.createEntity();
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 6f, 15f, 100);
 		collidableTemplate(entity, hitTrigger);
-		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
-		
-		entity.addComponent(new ScriptComponent(new ScriptJavaImpl(){
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, new NullTrigger());
+
+		entity.addComponent(new ScriptComponent(new ScriptJavaImpl() {
 			@Override
 			public void update(World world, Entity e) {
-				HealthComponent health = ComponentWrapper.getHealth(e);
+				HealthComponent healthComponent = ComponentWrapper.getHealth(e);
 				Spatial spatial = ComponentWrapper.getSpatial(e);
 				SpriteComponent spriteComponent = ComponentWrapper.getSprite(e);
-				
-				if (health.getHealth().isEmpty()) {
+				TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
+
+				if (touchableComponent.isTouched()) {
+					Container health = healthComponent.getHealth();
+					float damagePerMs = 10f / 1000f; // 10 damage per second
+					float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
+					health.remove(damage);
+				}
+
+				if (healthComponent.getHealth().isEmpty()) {
+					deadFaceTrigger.trigger(e);
+					
 					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
 					world.deleteEntity(e);
 				}
+
 			}
 		}));
 		
 		entity.refresh();
 	}
 
-	public void createFaceSecondType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
+	public void createFaceSecondType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, final Trigger deadFaceTrigger) {
 		Color color = new Color(0f, 1f, 0f, 1f);
 		final Color hideColor = new Color(color.r, color.g, color.b, 0f);
 		final Color showColor = new Color(color.r, color.g, color.b, 1f);
@@ -88,43 +100,122 @@ public class Templates {
 		Entity entity = world.createEntity();
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 3f, 7f, 250);
 		collidableTemplate(entity, hitTrigger);
-		touchableTemplate(entity, controller, spatial.getWidth() * 0.3f, touchTrigger);
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.3f, new NullTrigger());
 		entity.addComponent(new RandomMovementBehaviorComponent(750, 10f));
+
+		entity.addComponent(new ScriptComponent(new ScriptJavaImpl() {
+			@Override
+			public void update(World world, Entity e) {
+				HealthComponent healthComponent = ComponentWrapper.getHealth(e);
+				Spatial spatial = ComponentWrapper.getSpatial(e);
+				SpriteComponent spriteComponent = ComponentWrapper.getSprite(e);
+				TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
+
+				if (touchableComponent.isTouched()) {
+					Container health = healthComponent.getHealth();
+					float damagePerMs = 10f / 1000f; // 10 damage per second
+					float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
+					health.remove(damage);
+				}
+
+				if (healthComponent.getHealth().isEmpty()) {
+					deadFaceTrigger.trigger(e);
+					
+					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
+					world.deleteEntity(e);
+				}
+
+			}
+		}));
+
 		entity.refresh();
 	}
 
-	public void createFaceInvulnerableType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
+	public void createFaceInvulnerableType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, final Trigger deadFaceTrigger) {
 		Entity entity = world.createEntity();
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 0f, 0f, 0f), 2.5f, 13f, 150);
 		collidableTemplate(entity, hitTrigger);
-		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, new NullTrigger());
 		invulnerableFaceTemplate(entity, new Color(1f, 1f, 0f, 1f), new Color(1f, 0f, 0f, 1f), 1000, 3000);
+
+		entity.addComponent(new ScriptComponent(new ScriptJavaImpl() {
+			@Override
+			public void update(World world, Entity e) {
+				HealthComponent healthComponent = ComponentWrapper.getHealth(e);
+				Spatial spatial = ComponentWrapper.getSpatial(e);
+				SpriteComponent spriteComponent = ComponentWrapper.getSprite(e);
+				TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
+
+				if (touchableComponent.isTouched()) {
+					Container health = healthComponent.getHealth();
+					float damagePerMs = 10f / 1000f; // 10 damage per second
+					float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
+					health.remove(damage);
+				}
+
+				if (healthComponent.getHealth().isEmpty()) {
+					deadFaceTrigger.trigger(e);
+					
+					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
+					world.deleteEntity(e);
+				}
+
+			}
+		}));
+
 		entity.refresh();
 	}
-	
-	public void createMedicFaceType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, Trigger touchTrigger) {
+
+	public void createMedicFaceType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Trigger hitTrigger, final Trigger deadFaceTrigger) {
 		Entity entity = world.createEntity();
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, new Color(1f, 1f, 1f, 1f), -6f, 13f, 0);
 		collidableTemplate(entity, hitTrigger);
-		touchableTemplate(entity, controller, spatial.getWidth() * 0f, touchTrigger);
-		
-		int aliveTime = 4000;
-		
+		touchableTemplate(entity, controller, spatial.getWidth() * 0f, new NullTrigger());
+
+		final int aliveTime = 4000;
+
 		SpriteComponent spriteComponent = entity.getComponent(SpriteComponent.class);
 		Color color = spriteComponent.getColor();
 		color.a = 1f;
 		Color vulnerableColor = new Color(color.r, color.g, color.b, 0f);
 		Synchronizers.transition(color, Transitions.transitionBuilder(color).end(vulnerableColor).time(4000) //
 				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
-		
-		entity.addComponent(new TimerComponent(aliveTime, new AbstractTrigger() {
+
+		entity.addComponent(new ScriptComponent(new ScriptJavaImpl() {
+			
+			int time = aliveTime;
+			
 			@Override
-			protected boolean handle(Entity e) {
-				world.deleteEntity(e);
-				return true;
+			public void update(World world, Entity e) {
+				HealthComponent healthComponent = ComponentWrapper.getHealth(e);
+				Spatial spatial = ComponentWrapper.getSpatial(e);
+				SpriteComponent spriteComponent = ComponentWrapper.getSprite(e);
+				TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
+				
+				time -= world.getDelta();
+				
+				if (time <= 0) {
+					world.deleteEntity(e);
+					return;
+				}
+
+				if (touchableComponent.isTouched()) {
+					Container health = healthComponent.getHealth();
+					float damagePerMs = 10f / 1000f; // 10 damage per second
+					float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
+					health.remove(damage);
+				}
+				
+				if (healthComponent.getHealth().isEmpty()) {
+					deadFaceTrigger.trigger(e);
+					
+					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
+					world.deleteEntity(e);
+				}
+
 			}
 		}));
-		
+
 		entity.refresh();
 	}
 
@@ -212,11 +303,11 @@ public class Templates {
 			protected boolean handle(Entity e) {
 				TimerComponent timerComponent = e.getComponent(TimerComponent.class);
 				timerComponent.setCurrentTime(MathUtils.random(minTime, maxTime));
-				
+
 				HealthComponent healthComponent = e.getComponent(HealthComponent.class);
 				DamageComponent damageComponent = e.getComponent(DamageComponent.class);
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-				
+
 				if (healthComponent.getResistance() > 0f) {
 					healthComponent.setResistance(0f);
 					damageComponent.setDamagePerSecond(5f);
@@ -275,9 +366,9 @@ public class Templates {
 			}
 		}));
 	}
-	
-	///
-	
+
+	// /
+
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
 	public Sprite getRandomFacePart() {
@@ -295,7 +386,7 @@ public class Templates {
 			angle += angleIncrement;
 		}
 	}
-	
+
 	public void bulletFacePartTemplate(Entity e, Sprite sprite, Spatial spatial, int aliveTime, Color color, float angle) {
 		e.setGroup(Groups.FaceGroup);
 
@@ -331,7 +422,7 @@ public class Templates {
 		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial.getWidth() * 0.6f, spatial.getHeight() * 0.6f)));
 		e.addComponent(new SpriteComponent(sprite, 0, new Vector2(0.5f, 0.5f), faceColor));
 	}
-	
+
 	public void createBulletFaceParts(Spatial spatial, int count, final int aliveTime, Color color, Script script) {
 		float angle = MathUtils.random(0f, 360f);
 		float angleIncrement = 360f / count;

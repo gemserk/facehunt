@@ -27,6 +27,8 @@ public class FaceHuntControllerSystem extends EntityProcessingSystem {
 
 		FaceHuntController faceHuntController = touchableComponent.getFaceHuntController();
 		List<Vector2> touchedPositions = faceHuntController.getTouchedPositions();
+		
+		touchableComponent.setTouched(false);
 
 		if (touchedPositions.isEmpty())
 			return;
