@@ -434,5 +434,36 @@ public class Templates {
 			angle += angleIncrement;
 		}
 	}
+	
+	public void explosiveFaceTemplate(Entity e, Spatial spatial, Script script, FaceHuntController controller) {
+		Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+
+		e.setGroup(Groups.FaceGroup);
+
+		Body body = bodyBuilder //
+				.type(BodyType.DynamicBody) //
+				.circleShape(spatial.getWidth() * 0.5f) //
+				.mass(1f)//
+				.friction(0.5f)//
+				.restitution(1f)//
+				.userData(e)//
+				.position(spatial.getX(), spatial.getY())//
+				.categoryBits(Collisions.Face) //
+				.maskBits(Collisions.All) //
+				.build();
+
+		e.addComponent(new PhysicsComponent(body));
+		e.addComponent(new LinearVelocityLimitComponent(10f));
+		e.addComponent(new BounceSmallVelocityFixComponent());
+		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
+		e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), Color.BLUE));
+		e.addComponent(new PointsComponent(0));
+		e.addComponent(new HealthComponent(new Container(0.1f, 0.1f), 0f));
+		e.addComponent(new DamageComponent(0f));
+		e.addComponent(new TouchableComponent(controller, spatial.getWidth() * 0f));
+		e.addComponent(new ScriptComponent(script));
+
+		e.refresh();
+	}
 
 }

@@ -14,14 +14,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
-import com.gemserk.commons.artemis.components.LinearVelocityLimitComponent;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
-import com.gemserk.commons.artemis.components.SpatialComponent;
-import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.systems.HitDetectionSystem;
 import com.gemserk.commons.artemis.systems.MovementSystem;
 import com.gemserk.commons.artemis.systems.PhysicsSystem;
@@ -33,33 +29,25 @@ import com.gemserk.commons.artemis.triggers.AbstractTrigger;
 import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
-import com.gemserk.commons.gdx.box2d.Contact;
 import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.games.Spatial;
 import com.gemserk.commons.gdx.games.SpatialImpl;
-import com.gemserk.commons.gdx.games.SpatialPhysicsImpl;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.FaceHuntGame;
-import com.gemserk.games.facehunt.Groups;
-import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
 import com.gemserk.games.facehunt.components.ComponentWrapper;
-import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
-import com.gemserk.games.facehunt.components.ScriptComponent;
-import com.gemserk.games.facehunt.components.ScriptJavaImpl;
-import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
-import com.gemserk.games.facehunt.entities.Collisions;
 import com.gemserk.games.facehunt.entities.Templates;
+import com.gemserk.games.facehunt.scripts.Scripts.ExplosiveFaceScript;
 import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
@@ -203,7 +191,7 @@ public class TestGameState extends GameStateImpl {
 			@Override
 			protected boolean handle(Entity e) {
 				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
-				
+
 				if (pointsComponent != null) {
 					gameData.points += pointsComponent.getPoints();
 					Gdx.app.log("FaceHunt", "points = " + gameData.points);
@@ -212,7 +200,7 @@ public class TestGameState extends GameStateImpl {
 				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 				Container health = healthComponent.getHealth();
 				health.add(5f);
-				
+
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				soundPlayer.play(sound);
 
@@ -316,96 +304,17 @@ public class TestGameState extends GameStateImpl {
 		}
 
 		if (inputDevicesMonitor.getButton("insertFace5").isReleased()) {
-
-			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 			Entity e = world.createEntity();
 			Spatial spatial = new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f);
 
-			e.setGroup(Groups.FaceGroup);
-
-			Body body = bodyBuilder //
-					.type(BodyType.DynamicBody) //
-					.circleShape(spatial.getWidth() * 0.5f) //
-					.mass(1f)//
-					.friction(0.5f)//
-					.restitution(1f)//
-					.userData(e)//
-					.position(spatial.getX(), spatial.getY())//
-					.categoryBits(Collisions.Face) //
-					.maskBits(Collisions.All) //
-					.build();
-
-			e.addComponent(new PhysicsComponent(body));
-			e.addComponent(new LinearVelocityLimitComponent(10f));
-			e.addComponent(new BounceSmallVelocityFixComponent());
-			e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
-			e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), Color.BLUE));
-			e.addComponent(new PointsComponent(0));
-			e.addComponent(new HealthComponent(new Container(0.1f, 0.1f), 0f));
-			e.addComponent(new DamageComponent(0f));
-
-			e.addComponent(new TouchableComponent(controller, spatial.getWidth() * 0f));
-
-			e.addComponent(new ScriptComponent(new ScriptJavaImpl() {
-				@Override
-				public void update(World world, Entity e) {
-					TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
-					if (!touchableComponent.isTouched())
-						return;
-
-					SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
-					SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-
-					float angle = MathUtils.random(0f, 360f);
-					float angleIncrement = 360f / 6;
-					for (int i = 0; i < 6; i++) {
-						Entity bullet = world.createEntity();
-						templates.bulletFacePartTemplate(bullet, templates.getRandomFacePart(), spatialComponent.getSpatial(), 1500, spriteComponent.getColor(), angle);
-						bullet.addComponent(new ScriptComponent(new ScriptJavaImpl() {
-
-							int aliveTime = 1500;
-
-							@Override
-							public void update(World world, Entity e) {
-								PhysicsComponent physics = ComponentWrapper.getPhysics(e);
-								Contact contact = physics.getContact();
-
-								aliveTime -= world.getDelta();
-
-								if (aliveTime <= 0) {
-									world.deleteEntity(e);
-									return;
-								}
-
-								for (int i = 0; i < contact.getContactCount(); i++) {
-									if (!contact.isInContact(i))
-										continue;
-									Entity contactEntity = (Entity) contact.getUserData(i);
-									if (contactEntity == null)
-										continue;
-									HealthComponent health = ComponentWrapper.getHealth(contactEntity);
-									if (health == null)
-										continue;
-									health.getHealth().remove(1000f);
-
-									world.deleteEntity(e);
-								}
-							}
-						}));
-
-						bullet.refresh();
-						angle += angleIncrement;
-					}
-
-					world.deleteEntity(e);
-				}
-			}));
-
-			e.refresh();
+			templates.explosiveFaceTemplate(e, spatial, new ExplosiveFaceScript(templates, resourceManager, soundPlayer), controller);
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
+			
+			PhysicsComponent physics = ComponentWrapper.getPhysics(e);
+			Body body = physics.getBody();
 
 			body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
 			body.setAngularVelocity(0f * MathUtils.degreesToRadians);
