@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -34,35 +35,22 @@ import com.gemserk.scores.ScoresHttpImpl;
 public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	public FadeTransitionScreen fadeTransitionScreen;
-
 	public Screen splashScreen;
-
 	public Screen tutorialScreen;
-
 	public Screen gameScreen;
-
 	public Screen menuScreen;
-
 	public Screen pauseScreen;
-
 	public Screen testScreen;
-
 	public Screen highscoresScreen;
-
 	public Screen gameOverScreen;
 
 	public PauseGameState pauseGameState;
-
 	public TutorialModeGameState tutorialModeGameState;
-
 	public GameOverGameState gameOverGameState;
 
 	public Scores scores;
-
 	public Profiles profiles;
-
 	public Preferences preferences;
-
 	private ExecutorService executorService;
 
 	private final AdWhirlViewHandler adWhirlViewHandler;
@@ -188,6 +176,13 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		super.resume();
 		Gdx.app.log("FaceHunt", "game resumed via ApplicationListner.resume()");
 		adWhirlViewHandler.show();		
+	}
+	
+	@Override
+	public void render() {
+		super.render();
+		if (Gdx.input.isKeyPressed(Keys.T))
+			super.setScreen(testScreen);	
 	}
 
 }

@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -344,9 +343,6 @@ public class MainMenuGameState extends GameStateImpl {
 			}, "Username", username);
 
 		}
-
-		if (Gdx.input.isKeyPressed(Keys.T))
-			game.transition(game.testScreen, true);
 
 	}
 	
