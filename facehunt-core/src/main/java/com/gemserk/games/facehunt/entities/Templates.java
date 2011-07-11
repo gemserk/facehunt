@@ -26,10 +26,14 @@ import com.gemserk.commons.gdx.games.SpatialPhysicsImpl;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
+import com.gemserk.games.facehunt.components.ComponentWrapper;
 import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
+import com.gemserk.games.facehunt.components.Script;
+import com.gemserk.games.facehunt.components.ScriptComponent;
+import com.gemserk.games.facehunt.components.ScriptJavaImpl;
 import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.resources.ResourceManager;
@@ -57,6 +61,21 @@ public class Templates {
 		simpleFaceTemplate(entity, spatial, sprite, linearImpulse, angularVelocity, faceColor, 6f, 15f, 100);
 		collidableTemplate(entity, hitTrigger);
 		touchableTemplate(entity, controller, spatial.getWidth() * 0.15f, touchTrigger);
+		
+		entity.addComponent(new ScriptComponent(new ScriptJavaImpl(){
+			@Override
+			public void update(World world, Entity e) {
+				HealthComponent health = ComponentWrapper.getHealth(e);
+				Spatial spatial = ComponentWrapper.getSpatial(e);
+				SpriteComponent spriteComponent = ComponentWrapper.getSprite(e);
+				
+				if (health.getHealth().isEmpty()) {
+					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
+					world.deleteEntity(e);
+				}
+			}
+		}));
+		
 		entity.refresh();
 	}
 
@@ -261,7 +280,7 @@ public class Templates {
 	
 	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
 
-	private Sprite getRandomFacePart() {
+	public Sprite getRandomFacePart() {
 		int partIndex = MathUtils.random(partsIds.length - 1);
 		return resourceManager.getResourceValue(partsIds[partIndex]);
 	}
@@ -272,6 +291,54 @@ public class Templates {
 		for (int i = 0; i < count; i++) {
 			Entity e = world.createEntity();
 			facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color, angle);
+			e.refresh();
+			angle += angleIncrement;
+		}
+	}
+	
+	public void bulletFacePartTemplate(Entity e, Sprite sprite, Spatial spatial, int aliveTime, Color color, float angle) {
+		e.setGroup(Groups.FaceGroup);
+
+		Color hideColor = new Color(color.r, color.g, color.b, 0f);
+		final Color faceColor = new Color(color.r, color.g, color.b, 1f);
+
+		Synchronizers.transition(faceColor, Transitions.transitionBuilder(faceColor).end(hideColor).time(aliveTime) //
+				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
+
+		float radius = MathUtils.random(spatial.getWidth() * 0.1f, spatial.getWidth() * 0.2f);
+
+		Body body = bodyBuilder //
+				.type(BodyType.DynamicBody) //
+				.circleShape(radius) //
+				.mass(0.2f)//
+				.friction(0.5f)//
+				.restitution(0f)//
+				.userData(e)//
+				.bullet() //
+				.position(spatial.getX(), spatial.getY())//
+				.categoryBits(Collisions.FacePart) //
+				.maskBits((short) (Collisions.All & ~Collisions.FacePart)) //
+				.build();
+
+		Vector2 impulse = new Vector2(1f, 0f);
+		impulse.rotate(angle);
+		impulse.mul(MathUtils.random(1f, 1.5f));
+
+		body.applyLinearImpulse(impulse, body.getTransform().getPosition());
+		body.setAngularVelocity(MathUtils.random(-5f, 5f));
+
+		e.addComponent(new PhysicsComponent(body));
+		e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial.getWidth() * 0.6f, spatial.getHeight() * 0.6f)));
+		e.addComponent(new SpriteComponent(sprite, 0, new Vector2(0.5f, 0.5f), faceColor));
+	}
+	
+	public void createBulletFaceParts(Spatial spatial, int count, final int aliveTime, Color color, Script script) {
+		float angle = MathUtils.random(0f, 360f);
+		float angleIncrement = 360f / count;
+		for (int i = 0; i < count; i++) {
+			Entity e = world.createEntity();
+			bulletFacePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color, angle);
+			e.addComponent(new ScriptComponent(script));
 			e.refresh();
 			angle += angleIncrement;
 		}

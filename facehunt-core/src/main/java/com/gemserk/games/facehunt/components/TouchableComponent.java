@@ -1,6 +1,7 @@
 package com.gemserk.games.facehunt.components;
 
 import com.artemis.Component;
+import com.gemserk.commons.artemis.triggers.NullTrigger;
 import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 
@@ -40,6 +41,13 @@ public class TouchableComponent extends Component {
 	public TouchableComponent(FaceHuntController faceHuntController, float treshold, Trigger trigger) {
 		this.faceHuntController = faceHuntController;
 		this.trigger = trigger;
+		this.treshold = treshold;
+		this.touched = false;
+	}
+	
+	public TouchableComponent(FaceHuntController faceHuntController, float treshold) {
+		this.faceHuntController = faceHuntController;
+		this.trigger = new NullTrigger();
 		this.treshold = treshold;
 		this.touched = false;
 	}

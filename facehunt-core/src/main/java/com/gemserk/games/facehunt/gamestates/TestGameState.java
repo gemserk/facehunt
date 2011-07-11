@@ -33,6 +33,7 @@ import com.gemserk.commons.artemis.triggers.AbstractTrigger;
 import com.gemserk.commons.artemis.triggers.Trigger;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.box2d.BodyBuilder;
+import com.gemserk.commons.gdx.box2d.Contact;
 import com.gemserk.commons.gdx.camera.Camera;
 import com.gemserk.commons.gdx.camera.CameraImpl;
 import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
@@ -51,8 +52,8 @@ import com.gemserk.games.facehunt.components.ComponentWrapper;
 import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
-import com.gemserk.games.facehunt.components.Script;
 import com.gemserk.games.facehunt.components.ScriptComponent;
+import com.gemserk.games.facehunt.components.ScriptJavaImpl;
 import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
@@ -159,7 +160,7 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
 		worldWrapper.addUpdateSystem(new ScriptSystem());
-		
+
 		worldWrapper.init();
 
 		templates = new Templates(world, bodyBuilder, resourceManager);
@@ -205,16 +206,6 @@ public class TestGameState extends GameStateImpl {
 
 				if (!health.isEmpty())
 					return false;
-
-				SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
-				Spatial spatial = spatialComponent.getSpatial();
-
-				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-				Color currentColor = spriteComponent.getColor();
-
-				templates.createDeadFace(spatial, 6, 1500, currentColor);
-
-				world.deleteEntity(e);
 
 				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
 				if (pointsComponent != null) {
@@ -367,32 +358,66 @@ public class TestGameState extends GameStateImpl {
 			e.addComponent(new PointsComponent(0));
 			e.addComponent(new HealthComponent(new Container(0.1f, 0.1f), 0f));
 			e.addComponent(new DamageComponent(0f));
-			
-			e.addComponent(new TouchableComponent(controller, spatial.getWidth() * 0f, new AbstractTrigger(){
-				@Override
-				protected boolean handle(Entity e) {
-					return false;
-				}
-			}));
-			
-			e.addComponent(new ScriptComponent(new Script() {
+
+			e.addComponent(new TouchableComponent(controller, spatial.getWidth() * 0f));
+
+			e.addComponent(new ScriptComponent(new ScriptJavaImpl() {
 				@Override
 				public void update(World world, Entity e) {
 					TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
 					if (!touchableComponent.isTouched())
 						return;
-					
+
 					SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
 					SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
-					
-					templates.createDeadFace(spatialComponent.getSpatial(), 6, 1500, spriteComponent.getColor());
+
+					float angle = MathUtils.random(0f, 360f);
+					float angleIncrement = 360f / 6;
+					for (int i = 0; i < 6; i++) {
+						Entity bullet = world.createEntity();
+						templates.bulletFacePartTemplate(bullet, templates.getRandomFacePart(), spatialComponent.getSpatial(), 1500, spriteComponent.getColor(), angle);
+						bullet.addComponent(new ScriptComponent(new ScriptJavaImpl() {
+
+							int aliveTime = 1500;
+
+							@Override
+							public void update(World world, Entity e) {
+								PhysicsComponent physics = ComponentWrapper.getPhysics(e);
+								Contact contact = physics.getContact();
+
+								aliveTime -= world.getDelta();
+
+								if (aliveTime <= 0) {
+									world.deleteEntity(e);
+									return;
+								}
+
+								for (int i = 0; i < contact.getContactCount(); i++) {
+									if (!contact.isInContact(i))
+										continue;
+									Entity contactEntity = (Entity) contact.getUserData(i);
+									if (contactEntity == null)
+										continue;
+									HealthComponent health = ComponentWrapper.getHealth(contactEntity);
+									if (health == null)
+										continue;
+									health.getHealth().remove(1000f);
+
+									world.deleteEntity(e);
+								}
+							}
+						}));
+
+						bullet.refresh();
+						angle += angleIncrement;
+					}
 					
 					world.deleteEntity(e);
 				}
 			}));
-			
+
 			e.refresh();
-			
+
 			Vector2 linearImpulse = new Vector2(1f, 0f);
 			linearImpulse.rotate(MathUtils.random(360f));
 			linearImpulse.mul(MathUtils.random(1f, 5f));
