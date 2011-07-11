@@ -22,6 +22,7 @@ import com.gemserk.commons.artemis.systems.HitDetectionSystem;
 import com.gemserk.commons.artemis.systems.MovementSystem;
 import com.gemserk.commons.artemis.systems.PhysicsSystem;
 import com.gemserk.commons.artemis.systems.RenderLayer;
+import com.gemserk.commons.artemis.systems.ScriptSystem;
 import com.gemserk.commons.artemis.systems.SpriteRendererSystem;
 import com.gemserk.commons.artemis.systems.SpriteUpdateSystem;
 import com.gemserk.commons.artemis.systems.TimerSystem;
@@ -51,7 +52,6 @@ import com.gemserk.games.facehunt.scripts.Scripts.ExplosiveFaceScript;
 import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
-import com.gemserk.games.facehunt.systems.ScriptSystem;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -217,7 +217,7 @@ public class TestGameState extends GameStateImpl {
 				Container health = healthComponent.getHealth();
 				health.remove(20f);
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
 				return true;
 			}
 		};
@@ -228,7 +228,7 @@ public class TestGameState extends GameStateImpl {
 			@Override
 			protected boolean handle(Entity e) {
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
-				sound.play();
+				soundPlayer.play(sound);
 				return false;
 			}
 		};

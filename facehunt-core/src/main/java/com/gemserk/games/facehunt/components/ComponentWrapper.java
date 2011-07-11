@@ -1,7 +1,9 @@
 package com.gemserk.games.facehunt.components;
 
 import com.artemis.Entity;
+import com.gemserk.commons.artemis.Script;
 import com.gemserk.commons.artemis.components.PhysicsComponent;
+import com.gemserk.commons.artemis.components.ScriptComponent;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.gdx.games.Spatial;
