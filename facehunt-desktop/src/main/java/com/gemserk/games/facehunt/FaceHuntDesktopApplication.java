@@ -33,6 +33,7 @@ public class FaceHuntDesktopApplication {
 		config.width = 800;
 		config.height = 480;
 		config.title = "Face Hunt";
+		config.forceExit = true;
 
 		new LwjglApplication(new FaceHuntGame() {
 			@Override
