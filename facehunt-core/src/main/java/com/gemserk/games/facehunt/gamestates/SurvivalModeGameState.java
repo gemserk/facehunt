@@ -20,10 +20,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.gemserk.analytics.Analytics;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
+import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.TimerComponent;
 import com.gemserk.commons.artemis.systems.HitDetectionSystem;
 import com.gemserk.commons.artemis.systems.MovementSystem;
@@ -47,15 +49,16 @@ import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.datastore.profiles.Profile;
-import com.gemserk.datastore.profiles.ProfileJsonSerializer;
 import com.gemserk.games.facehunt.EnemySpawnInfo;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Spawner;
+import com.gemserk.games.facehunt.components.ComponentWrapper;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.Templates;
+import com.gemserk.games.facehunt.scripts.Scripts.ExplosiveFaceScript;
 import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
@@ -128,13 +131,11 @@ public class SurvivalModeGameState extends GameStateImpl {
 	private int viewportWidth;
 
 	private int viewportHeight;
-	
+
 	private GamePreferences gamePreferences;
-	
+
 	private SoundPlayer soundPlayer;
-	
-	private final ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
-	
+
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
 	}
@@ -159,7 +160,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 	}
 
 	public void restartGame() {
-		
+
 		Analytics.traker.trackPageView("/startGame", "/startGame", null);
 
 		viewportWidth = Gdx.graphics.getWidth();
@@ -236,7 +237,9 @@ public class SurvivalModeGameState extends GameStateImpl {
 				new EnemySpawnInfo(0, 10000, 0.5f), //
 						new EnemySpawnInfo(1, 10000, 0.2f), //
 						new EnemySpawnInfo(2, 10000, 0.25f), //
-						new EnemySpawnInfo(3, 10000, 0.05f) };
+						new EnemySpawnInfo(3, 10000, 0.025f), //
+						new EnemySpawnInfo(4, 10000, 0.025f), //
+				};
 			}
 		}, };
 
@@ -301,6 +304,16 @@ public class SurvivalModeGameState extends GameStateImpl {
 					templates.createFaceInvulnerableType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getFaceDeadHandler());
 				else if (type == 3)
 					templates.createMedicFaceType(spatial, sprite, controller, linearVelocity, angularVelocity, getFaceHitTrigger(), getMedicFaceTouchTrigger());
+				else if (type == 4) {
+					Entity e2 = world.createEntity();
+					templates.explosiveFaceTemplate(e2, spatial, new ExplosiveFaceScript(templates, resourceManager, soundPlayer), controller);
+
+					PhysicsComponent physics = ComponentWrapper.getPhysics(e2);
+					Body body = physics.getBody();
+
+					body.applyLinearImpulse(linearVelocity, body.getTransform().getPosition());
+					body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
+				}
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				soundPlayer.play(sound);
@@ -316,14 +329,14 @@ public class SurvivalModeGameState extends GameStateImpl {
 			@Override
 			protected boolean handle(Entity e) {
 				PointsComponent pointsComponent = e.getComponent(PointsComponent.class);
-				
-				if (pointsComponent != null) 
+
+				if (pointsComponent != null)
 					gameData.points += pointsComponent.getPoints();
 
 				HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 				Container health = healthComponent.getHealth();
 				health.add(5f);
-				
+
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
 				soundPlayer.play(sound);
 
@@ -372,9 +385,9 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 		Container health = healthComponent.getHealth();
-		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.4f), // 
-				Gdx.graphics.getHeight() * 0.97f, // 
-				(Gdx.graphics.getWidth() * 0.55f), // 
+		FaceHuntRenderUtils.renderBar(spriteBatch, whiteRectangle, health, (Gdx.graphics.getWidth() * 0.4f), //
+				Gdx.graphics.getHeight() * 0.97f, //
+				(Gdx.graphics.getWidth() * 0.55f), //
 				Gdx.graphics.getHeight() * 0.02f);
 
 		String text = "Points: " + gameData.points;
@@ -389,7 +402,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 		font.setScale(1f);
 
 		spriteBatch.end();
-		
+
 		// ImmediateModeRendererUtils.drawHorizontalAxis(Gdx.graphics.getHeight() * 0.95f, 1000f, Color.GREEN);
 	}
 
@@ -417,15 +430,15 @@ public class SurvivalModeGameState extends GameStateImpl {
 			Profile profile = gamePreferences.getCurrentProfile();
 
 			HashSet<String> tags = new HashSet<String>();
-			
-			if (Gdx.app.getType() ==ApplicationType.Android )
+
+			if (Gdx.app.getType() == ApplicationType.Android)
 				tags.add("android");
 			else
 				tags.add("pc");
-			
+
 			game.gameOverGameState.setScore(new Score(profile.getName(), gameData.points, tags, new HashMap<String, Object>()));
 			game.transition(game.gameOverScreen);
-			
+
 			Analytics.traker.trackPageView("/finishGame", "/finishGame", null);
 		}
 
