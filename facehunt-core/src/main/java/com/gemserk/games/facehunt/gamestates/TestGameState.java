@@ -369,6 +369,7 @@ public class TestGameState extends GameStateImpl {
 					
 					SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
 					SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+					
 					templates.createDeadFace(spatialComponent.getSpatial(), 6, 1500, spriteComponent.getColor());
 					
 					world.deleteEntity(e);
