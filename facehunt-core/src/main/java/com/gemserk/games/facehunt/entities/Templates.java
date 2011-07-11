@@ -80,14 +80,14 @@ public class Templates {
 
 				if (healthComponent.getHealth().isEmpty()) {
 					deadFaceTrigger.trigger(e);
-					
+
 					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
 					world.deleteEntity(e);
 				}
 
 			}
 		}));
-		
+
 		entity.refresh();
 	}
 
@@ -120,7 +120,7 @@ public class Templates {
 
 				if (healthComponent.getHealth().isEmpty()) {
 					deadFaceTrigger.trigger(e);
-					
+
 					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
 					world.deleteEntity(e);
 				}
@@ -155,7 +155,7 @@ public class Templates {
 
 				if (healthComponent.getHealth().isEmpty()) {
 					deadFaceTrigger.trigger(e);
-					
+
 					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
 					world.deleteEntity(e);
 				}
@@ -182,18 +182,18 @@ public class Templates {
 				.functions(InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut(), InterpolationFunctions.easeOut()));
 
 		entity.addComponent(new ScriptComponent(new ScriptJavaImpl() {
-			
+
 			int time = aliveTime;
-			
+
 			@Override
 			public void update(World world, Entity e) {
 				HealthComponent healthComponent = ComponentWrapper.getHealth(e);
 				Spatial spatial = ComponentWrapper.getSpatial(e);
 				SpriteComponent spriteComponent = ComponentWrapper.getSprite(e);
 				TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
-				
+
 				time -= world.getDelta();
-				
+
 				if (time <= 0) {
 					world.deleteEntity(e);
 					return;
@@ -205,10 +205,10 @@ public class Templates {
 					float damage = damagePerMs * (float) world.getDelta() * (1f - healthComponent.getResistance());
 					health.remove(damage);
 				}
-				
+
 				if (healthComponent.getHealth().isEmpty()) {
 					deadFaceTrigger.trigger(e);
-					
+
 					createDeadFace(spatial, 6, 1500, spriteComponent.getColor());
 					world.deleteEntity(e);
 				}
@@ -242,15 +242,16 @@ public class Templates {
 
 	void staticBoxTemplate(Entity entity, float x, float y, float w, float h) {
 		Body body = bodyBuilder //
+				.fixture(bodyBuilder.fixtureDefBuilder() //
+						.boxShape(w * 0.5f, h * 0.5f) //
+						.restitution(1f) //
+						.friction(0f) //
+						.categoryBits(Collisions.Border) //
+						.maskBits(Collisions.All)) //
 				.type(BodyType.StaticBody) //
-				.boxShape(w * 0.5f, h * 0.5f) //
-				.restitution(1f) //
 				.mass(1f)//
-				.friction(0f) //
 				.userData(entity) //
 				.position(x, y) //
-				.categoryBits(Collisions.Border) //
-				.maskBits(Collisions.All) //
 				.build();
 		entity.addComponent(new PhysicsComponent(body));
 	}
@@ -269,15 +270,16 @@ public class Templates {
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
+				.fixture(bodyBuilder.fixtureDefBuilder() //
+						.circleShape(spatial.getWidth() * 0.5f) //
+						.friction(0.5f)//
+						.restitution(1f)//
+						.categoryBits(Collisions.Face) //
+						.maskBits(Collisions.All)) //
 				.type(BodyType.DynamicBody) //
-				.circleShape(spatial.getWidth() * 0.5f) //
 				.mass(1f)//
-				.friction(0.5f)//
-				.restitution(1f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
-				.categoryBits(Collisions.Face) //
-				.maskBits(Collisions.All) //
 				.build();
 
 		body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
@@ -337,15 +339,15 @@ public class Templates {
 		float radius = MathUtils.random(spatial.getWidth() * 0.1f, spatial.getWidth() * 0.2f);
 
 		Body body = bodyBuilder //
+				.fixture(bodyBuilder.fixtureDefBuilder().circleShape(radius) //
+						.friction(0.5f)//
+						.restitution(0f)//
+						.categoryBits(Collisions.FacePart) //
+						.maskBits((short) (Collisions.All & ~Collisions.Face & ~Collisions.FacePart))) //
 				.type(BodyType.DynamicBody) //
-				.circleShape(radius) //
 				.mass(0.2f)//
-				.friction(0.5f)//
-				.restitution(0f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
-				.categoryBits(Collisions.FacePart) //
-				.maskBits((short) (Collisions.All & ~Collisions.Face & ~Collisions.FacePart)) //
 				.build();
 
 		Vector2 impulse = new Vector2(1f, 0f);
@@ -399,16 +401,16 @@ public class Templates {
 		float radius = MathUtils.random(spatial.getWidth() * 0.1f, spatial.getWidth() * 0.2f);
 
 		Body body = bodyBuilder //
+				.fixture(bodyBuilder.fixtureDefBuilder().circleShape(radius) //
+						.friction(0.5f)//
+						.restitution(0f)//
+						.categoryBits(Collisions.FacePart) //
+						.maskBits((short) (Collisions.All & ~Collisions.FacePart))) //
 				.type(BodyType.DynamicBody) //
-				.circleShape(radius) //
 				.mass(0.2f)//
-				.friction(0.5f)//
-				.restitution(0f)//
 				.userData(e)//
 				.bullet() //
 				.position(spatial.getX(), spatial.getY())//
-				.categoryBits(Collisions.FacePart) //
-				.maskBits((short) (Collisions.All & ~Collisions.FacePart)) //
 				.build();
 
 		Vector2 impulse = new Vector2(1f, 0f);
@@ -434,22 +436,22 @@ public class Templates {
 			angle += angleIncrement;
 		}
 	}
-	
+
 	public void explosiveFaceTemplate(Entity e, Spatial spatial, Script script, FaceHuntController controller) {
 		Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 		e.setGroup(Groups.FaceGroup);
 
 		Body body = bodyBuilder //
+				.fixture(bodyBuilder.fixtureDefBuilder().circleShape(spatial.getWidth() * 0.5f) //
+						.friction(0.5f)//
+						.restitution(1f)//
+						.categoryBits(Collisions.Face) //
+						.maskBits(Collisions.All)) //
 				.type(BodyType.DynamicBody) //
-				.circleShape(spatial.getWidth() * 0.5f) //
 				.mass(1f)//
-				.friction(0.5f)//
-				.restitution(1f)//
 				.userData(e)//
 				.position(spatial.getX(), spatial.getY())//
-				.categoryBits(Collisions.Face) //
-				.maskBits(Collisions.All) //
 				.build();
 
 		e.addComponent(new PhysicsComponent(body));
