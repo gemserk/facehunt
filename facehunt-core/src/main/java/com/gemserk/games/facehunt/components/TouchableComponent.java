@@ -15,6 +15,8 @@ public class TouchableComponent extends Component {
 	 */
 	private final float treshold;
 	
+	private boolean touched;
+	
 	public FaceHuntController getFaceHuntController() {
 		return faceHuntController;
 	}
@@ -26,11 +28,20 @@ public class TouchableComponent extends Component {
 	public float getTreshold() {
 		return treshold;
 	}
+	
+	public void setTouched(boolean touched) {
+		this.touched = touched;
+	}
 
+	public boolean isTouched() {
+		return touched;
+	}
+	
 	public TouchableComponent(FaceHuntController faceHuntController, float treshold, Trigger trigger) {
 		this.faceHuntController = faceHuntController;
 		this.trigger = trigger;
 		this.treshold = treshold;
+		this.touched = false;
 	}
 	
 }

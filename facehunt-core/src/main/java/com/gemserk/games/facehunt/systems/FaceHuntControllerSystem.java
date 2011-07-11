@@ -42,6 +42,8 @@ public class FaceHuntControllerSystem extends EntityProcessingSystem {
 			if (touchedPosition.dst(position) > radius)
 				continue;
 
+			touchableComponent.setTouched(true);
+			
 			if (trigger.isAlreadyTriggered())
 				return;
 

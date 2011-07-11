@@ -47,9 +47,12 @@ import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.FaceHuntGame;
 import com.gemserk.games.facehunt.Groups;
 import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
+import com.gemserk.games.facehunt.components.ComponentWrapper;
 import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
+import com.gemserk.games.facehunt.components.Script;
+import com.gemserk.games.facehunt.components.ScriptComponent;
 import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
@@ -58,6 +61,7 @@ import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
+import com.gemserk.games.facehunt.systems.ScriptSystem;
 import com.gemserk.games.facehunt.values.GameData;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
@@ -154,6 +158,7 @@ public class TestGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new FaceHuntControllerSystem());
 		worldWrapper.addUpdateSystem(new RandomMovementBehaviorSystem());
 		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
+		worldWrapper.addUpdateSystem(new ScriptSystem());
 		
 		worldWrapper.init();
 
@@ -363,9 +368,19 @@ public class TestGameState extends GameStateImpl {
 			e.addComponent(new HealthComponent(new Container(0.1f, 0.1f), 0f));
 			e.addComponent(new DamageComponent(0f));
 			
-			e.addComponent(new TouchableComponent(controller, spatial.getWidth() * 0f, new AbstractTrigger() {
+			e.addComponent(new TouchableComponent(controller, spatial.getWidth() * 0f, new AbstractTrigger(){
 				@Override
 				protected boolean handle(Entity e) {
+					return false;
+				}
+			}));
+			
+			e.addComponent(new ScriptComponent(new Script() {
+				@Override
+				public void update(World world, Entity e) {
+					TouchableComponent touchableComponent = ComponentWrapper.getTouchable(e);
+					if (!touchableComponent.isTouched())
+						return;
 					
 					SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
 					SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
@@ -373,7 +388,6 @@ public class TestGameState extends GameStateImpl {
 					templates.createDeadFace(spatialComponent.getSpatial(), 6, 1500, spriteComponent.getColor());
 					
 					world.deleteEntity(e);
-					return false;
 				}
 			}));
 			
