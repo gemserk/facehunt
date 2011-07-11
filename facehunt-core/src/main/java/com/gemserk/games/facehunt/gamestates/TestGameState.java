@@ -13,9 +13,13 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.artemis.WorldWrapper;
+import com.gemserk.commons.artemis.components.LinearVelocityLimitComponent;
+import com.gemserk.commons.artemis.components.PhysicsComponent;
 import com.gemserk.commons.artemis.components.SpatialComponent;
 import com.gemserk.commons.artemis.components.SpriteComponent;
 import com.gemserk.commons.artemis.systems.HitDetectionSystem;
@@ -35,15 +39,20 @@ import com.gemserk.commons.gdx.camera.Libgdx2dCamera;
 import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.games.Spatial;
 import com.gemserk.commons.gdx.games.SpatialImpl;
+import com.gemserk.commons.gdx.games.SpatialPhysicsImpl;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.componentsengine.utils.Container;
 import com.gemserk.games.facehunt.FaceHuntGame;
+import com.gemserk.games.facehunt.Groups;
+import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
+import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
+import com.gemserk.games.facehunt.entities.Collisions;
 import com.gemserk.games.facehunt.entities.Templates;
 import com.gemserk.games.facehunt.systems.BounceSmallVelocityFixSystem;
 import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
@@ -118,6 +127,7 @@ public class TestGameState extends GameStateImpl {
 				monitorKey("insertFace2", Keys.NUM_2);
 				monitorKey("insertFace3", Keys.NUM_3);
 				monitorKey("insertFace4", Keys.NUM_4);
+				monitorKey("insertFace5", Keys.NUM_5);
 			}
 		};
 
@@ -302,7 +312,7 @@ public class TestGameState extends GameStateImpl {
 		mousePosition.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 		worldCamera.unproject(mousePosition);
 
-		if (inputDevicesMonitor.getButton("insertFace1").isPressed()) {
+		if (inputDevicesMonitor.getButton("insertFace1").isReleased()) {
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
@@ -312,7 +322,7 @@ public class TestGameState extends GameStateImpl {
 			templates.createFaceFirstType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, new Color(1f, 1f, 0f, 1f), getFaceHitTrigger(), getFaceTouchTrigger());
 		}
 
-		if (inputDevicesMonitor.getButton("insertFace2").isPressed()) {
+		if (inputDevicesMonitor.getButton("insertFace2").isReleased()) {
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
@@ -322,7 +332,7 @@ public class TestGameState extends GameStateImpl {
 			templates.createFaceSecondType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceTouchTrigger());
 		}
 
-		if (inputDevicesMonitor.getButton("insertFace3").isPressed()) {
+		if (inputDevicesMonitor.getButton("insertFace3").isReleased()) {
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
@@ -332,7 +342,7 @@ public class TestGameState extends GameStateImpl {
 			templates.createFaceInvulnerableType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getFaceTouchTrigger());
 		}
 
-		if (inputDevicesMonitor.getButton("insertFace4").isPressed()) {
+		if (inputDevicesMonitor.getButton("insertFace4").isReleased()) {
 			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
 
 			Vector2 linearImpulse = new Vector2(1f, 0f);
@@ -340,6 +350,42 @@ public class TestGameState extends GameStateImpl {
 			linearImpulse.mul(MathUtils.random(1f, 5f));
 
 			templates.createMedicFaceType(new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f), sprite, controller, linearImpulse, 0f, getFaceHitTrigger(), getMedicFaceTouchTrigger());
+		}
+
+		if (inputDevicesMonitor.getButton("insertFace5").isReleased()) {
+
+			Sprite sprite = resourceManager.getResourceValue("HappyFaceSprite");
+			Entity e = world.createEntity();
+			Spatial spatial = new SpatialImpl(mousePosition.x, mousePosition.y, 1f, 1f, 0f);
+
+			e.setGroup(Groups.FaceGroup);
+
+			Body body = bodyBuilder //
+					.type(BodyType.DynamicBody) //
+					.circleShape(spatial.getWidth() * 0.5f) //
+					.mass(1f)//
+					.friction(0.5f)//
+					.restitution(1f)//
+					.userData(e)//
+					.position(spatial.getX(), spatial.getY())//
+					.categoryBits(Collisions.Face) //
+					.maskBits(Collisions.All) //
+					.build();
+
+			e.addComponent(new PhysicsComponent(body));
+			e.addComponent(new LinearVelocityLimitComponent(10f));
+			e.addComponent(new BounceSmallVelocityFixComponent());
+			e.addComponent(new SpatialComponent(new SpatialPhysicsImpl(body, spatial)));
+			e.addComponent(new SpriteComponent(sprite, 1, new Vector2(0.5f, 0.5f), Color.BLUE));
+			e.addComponent(new PointsComponent(0));
+			e.addComponent(new HealthComponent(new Container(0.1f, 0.1f), 0f));
+			e.addComponent(new DamageComponent(0f));
+			
+			e.refresh();
+
+			// body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
+			// body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
+
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
