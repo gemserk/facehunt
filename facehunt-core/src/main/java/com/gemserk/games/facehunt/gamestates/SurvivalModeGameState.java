@@ -134,6 +134,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 	
 	private SoundPlayer soundPlayer;
 	
+	private final ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
+	
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
 	}
@@ -204,7 +206,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
 		worldWrapper.init();
 
-		templates = new Templates(world, bodyBuilder);
+		templates = new Templates(world, bodyBuilder, resourceManager);
 
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
@@ -330,7 +332,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 6, 1500, currentColor);
+				templates.createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -361,7 +363,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 6, 1500, currentColor);
+				templates.createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -386,26 +388,6 @@ public class SurvivalModeGameState extends GameStateImpl {
 				return false;
 			}
 		};
-	}
-
-	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
-
-	private final ProfileJsonSerializer profileJsonSerializer = new ProfileJsonSerializer();
-
-	private Sprite getRandomFacePart() {
-		int partIndex = MathUtils.random(partsIds.length - 1);
-		return resourceManager.getResourceValue(partsIds[partIndex]);
-	}
-
-	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
-		float angle = MathUtils.random(0f, 360f);
-		float angleIncrement = 360f / count;
-		for (int i = 0; i < count; i++) {
-			Entity e = world.createEntity();
-			templates.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color, angle);
-			e.refresh();
-			angle += angleIncrement;
-		}
 	}
 
 	@Override

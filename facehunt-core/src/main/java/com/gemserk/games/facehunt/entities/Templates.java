@@ -32,16 +32,20 @@ import com.gemserk.games.facehunt.components.PointsComponent;
 import com.gemserk.games.facehunt.components.RandomMovementBehaviorComponent;
 import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
+import com.gemserk.resources.ResourceManager;
 
 public class Templates {
 
 	private final World world;
 
 	private final BodyBuilder bodyBuilder;
-
-	public Templates(World world, BodyBuilder bodyBuilder) {
+	
+	private final ResourceManager<String> resourceManager;
+	
+	public Templates(World world, BodyBuilder bodyBuilder, ResourceManager<String> resourceManager) {
 		this.world = world;
 		this.bodyBuilder = bodyBuilder;
+		this.resourceManager = resourceManager;
 	}
 
 	public void createFaceFirstType(Spatial spatial, Sprite sprite, FaceHuntController controller, Vector2 linearImpulse, float angularVelocity, Color color, Trigger hitTrigger, Trigger touchTrigger) {
@@ -251,6 +255,26 @@ public class Templates {
 				return true;
 			}
 		}));
+	}
+	
+	///
+	
+	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
+
+	private Sprite getRandomFacePart() {
+		int partIndex = MathUtils.random(partsIds.length - 1);
+		return resourceManager.getResourceValue(partsIds[partIndex]);
+	}
+
+	public void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
+		float angle = MathUtils.random(0f, 360f);
+		float angleIncrement = 360f / count;
+		for (int i = 0; i < count; i++) {
+			Entity e = world.createEntity();
+			facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color, angle);
+			e.refresh();
+			angle += angleIncrement;
+		}
 	}
 
 }

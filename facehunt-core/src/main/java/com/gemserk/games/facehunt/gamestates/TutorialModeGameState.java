@@ -104,8 +104,6 @@ public class TutorialModeGameState extends GameStateImpl {
 
 	private GameData gameData;
 
-	private BitmapFont font;
-
 	private Color waveIntroductionColor = new Color();
 
 	private Wave[] waves;
@@ -129,6 +127,12 @@ public class TutorialModeGameState extends GameStateImpl {
 	private Sprite whiteRectangle;
 
 	private SoundPlayer soundPlayer;
+
+	private int viewportWidth;
+
+	private int viewportHeight;
+
+	private BitmapFont tutorialFont;
 
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
@@ -160,7 +164,6 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		spriteBatch = new SpriteBatch();
 
-		font = resourceManager.getResourceValue("Font");
 		tutorialFont = resourceManager.getResourceValue("TutorialFont");
 		tutorialFont.setScale(1f * viewportWidth / 800f);
 
@@ -188,7 +191,7 @@ public class TutorialModeGameState extends GameStateImpl {
 		worldWrapper.addUpdateSystem(new DamagePlayerSystem());
 		worldWrapper.init();
 
-		templates = new Templates(world, bodyBuilder);
+		templates = new Templates(world, bodyBuilder, resourceManager);
 
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
@@ -328,7 +331,7 @@ public class TutorialModeGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 6, 1500, currentColor);
+				templates.createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -360,7 +363,7 @@ public class TutorialModeGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 6, 1500, currentColor);
+				templates.createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -388,30 +391,6 @@ public class TutorialModeGameState extends GameStateImpl {
 				return false;
 			}
 		};
-	}
-
-	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
-
-	private int viewportWidth;
-
-	private int viewportHeight;
-
-	private BitmapFont tutorialFont;
-
-	private Sprite getRandomFacePart() {
-		int partIndex = MathUtils.random(partsIds.length - 1);
-		return resourceManager.getResourceValue(partsIds[partIndex]);
-	}
-
-	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
-		float angle = MathUtils.random(0f, 360f);
-		float angleIncrement = 360f / count;
-		for (int i = 0; i < count; i++) {
-			Entity e = world.createEntity();
-			templates.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color, angle);
-			e.refresh();
-			angle += angleIncrement;
-		}
 	}
 
 	@Override

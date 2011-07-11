@@ -50,6 +50,7 @@ import com.gemserk.games.facehunt.components.BounceSmallVelocityFixComponent;
 import com.gemserk.games.facehunt.components.DamageComponent;
 import com.gemserk.games.facehunt.components.HealthComponent;
 import com.gemserk.games.facehunt.components.PointsComponent;
+import com.gemserk.games.facehunt.components.TouchableComponent;
 import com.gemserk.games.facehunt.controllers.FaceHuntController;
 import com.gemserk.games.facehunt.controllers.FaceHuntControllerImpl;
 import com.gemserk.games.facehunt.entities.Collisions;
@@ -156,7 +157,7 @@ public class TestGameState extends GameStateImpl {
 		
 		worldWrapper.init();
 
-		templates = new Templates(world, bodyBuilder);
+		templates = new Templates(world, bodyBuilder, resourceManager);
 
 		float worldWidth = viewportWidth * 1 / cameraData.getZoom();
 		float worldHeight = viewportHeight * 1 / cameraData.getZoom();
@@ -206,7 +207,7 @@ public class TestGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 6, 1500, currentColor);
+				templates.createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -237,7 +238,7 @@ public class TestGameState extends GameStateImpl {
 				SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 				Color currentColor = spriteComponent.getColor();
 
-				createDeadFace(spatial, 6, 1500, currentColor);
+				templates.createDeadFace(spatial, 6, 1500, currentColor);
 
 				world.deleteEntity(e);
 
@@ -262,24 +263,6 @@ public class TestGameState extends GameStateImpl {
 				return false;
 			}
 		};
-	}
-
-	private String[] partsIds = new String[] { "Part01", "Part02", "Part03", "Part04", "Part05" };
-
-	private Sprite getRandomFacePart() {
-		int partIndex = MathUtils.random(partsIds.length - 1);
-		return resourceManager.getResourceValue(partsIds[partIndex]);
-	}
-
-	void createDeadFace(Spatial spatial, int count, final int aliveTime, Color color) {
-		float angle = MathUtils.random(0f, 360f);
-		float angleIncrement = 360f / count;
-		for (int i = 0; i < count; i++) {
-			Entity e = world.createEntity();
-			templates.facePartTemplate(e, getRandomFacePart(), spatial, aliveTime, color, angle);
-			e.refresh();
-			angle += angleIncrement;
-		}
 	}
 
 	@Override
@@ -380,11 +363,27 @@ public class TestGameState extends GameStateImpl {
 			e.addComponent(new HealthComponent(new Container(0.1f, 0.1f), 0f));
 			e.addComponent(new DamageComponent(0f));
 			
+			e.addComponent(new TouchableComponent(controller, spatial.getWidth() * 0f, new AbstractTrigger() {
+				@Override
+				protected boolean handle(Entity e) {
+					
+					SpatialComponent spatialComponent = e.getComponent(SpatialComponent.class);
+					SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
+					templates.createDeadFace(spatialComponent.getSpatial(), 6, 1500, spriteComponent.getColor());
+					
+					world.deleteEntity(e);
+					return false;
+				}
+			}));
+			
 			e.refresh();
+			
+			Vector2 linearImpulse = new Vector2(1f, 0f);
+			linearImpulse.rotate(MathUtils.random(360f));
+			linearImpulse.mul(MathUtils.random(1f, 5f));
 
-			// body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
-			// body.setAngularVelocity(angularVelocity * MathUtils.degreesToRadians);
-
+			body.applyLinearImpulse(linearImpulse, body.getTransform().getPosition());
+			body.setAngularVelocity(0f * MathUtils.degreesToRadians);
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
