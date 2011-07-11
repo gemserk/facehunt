@@ -74,6 +74,8 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		
 		Converters.register(Vector2.class, LibgdxConverters.vector2());
 		Converters.register(Color.class, LibgdxConverters.color());
+		
+		com.badlogic.gdx.physics.box2d.World.setVelocityThreshold(0f);
 
 		executorService = Executors.newCachedThreadPool();
 		preferences = Gdx.app.getPreferences("gemserk-facehunt");
