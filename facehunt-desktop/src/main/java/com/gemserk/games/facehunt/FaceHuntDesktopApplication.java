@@ -1,5 +1,8 @@
 package com.gemserk.games.facehunt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -10,12 +13,21 @@ import com.gemserk.analytics.Analytics;
 import com.gemserk.analytics.googleanalytics.DesktopAnalyticsAutoConfigurator;
 
 public class FaceHuntDesktopApplication {
+	
+	protected static final Logger logger = LoggerFactory.getLogger(FaceHuntDesktopApplication.class);
+	
 	public static void main(String[] argv) {
 		AnalyticsConfigData analyticsConfig = new AnalyticsConfigData("UA-23542248-3");
 		DesktopAnalyticsAutoConfigurator.populateFromSystem(analyticsConfig);
 
 		JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(analyticsConfig, GoogleAnalyticsVersion.V_4_7_2);
 		Analytics.traker = tracker;
+		
+		String runningInDebug = System.getProperty("runningInDebug");
+		if (runningInDebug != null) {
+			logger.info("Running in debug mode, Analytics disabled");
+			Analytics.traker.setEnabled(false);
+		}
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 800;
