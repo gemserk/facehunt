@@ -404,6 +404,7 @@ public class Templates {
 				.fixture(bodyBuilder.fixtureDefBuilder().circleShape(radius) //
 						.friction(0.5f)//
 						.restitution(0f)//
+						.sensor() //
 						.categoryBits(Collisions.FacePart) //
 						.maskBits((short) (Collisions.All & ~Collisions.FacePart))) //
 				.type(BodyType.DynamicBody) //

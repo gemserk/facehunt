@@ -41,8 +41,9 @@ public class Scripts {
 			SpriteComponent spriteComponent = e.getComponent(SpriteComponent.class);
 
 			float angle = MathUtils.random(0f, 360f);
-			float angleIncrement = 360f / 6;
-			for (int i = 0; i < 6; i++) {
+			int explosionBulletsCount = 20;
+			float angleIncrement = 360f / explosionBulletsCount;
+			for (int i = 0; i < explosionBulletsCount; i++) {
 				Entity bullet = world.createEntity();
 				templates.bulletFacePartTemplate(bullet, templates.getRandomFacePart(), spatialComponent.getSpatial(), 1500, spriteComponent.getColor(), angle);
 				bullet.addComponent(new ScriptComponent(new ExplosiveFacePartScript()));
@@ -83,8 +84,7 @@ public class Scripts {
 				if (health == null)
 					continue;
 				health.getHealth().remove(1000f);
-
-				world.deleteEntity(e);
+				// world.deleteEntity(e);
 			}
 		}
 	}
