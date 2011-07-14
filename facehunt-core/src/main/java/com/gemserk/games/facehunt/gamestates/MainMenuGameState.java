@@ -113,10 +113,10 @@ public class MainMenuGameState extends GameStateImpl {
 
 		new GameResourceBuilder(resourceManager) {
 			{
-				particleEmitter("FaceEmitter", "HappyFaceSprite", "data/emitters/FaceEmitter");
+				particleEmitter2("FaceEmitter", "HappyFaceSprite", "data/emitters/FaceEmitter");
 			}
 
-			private void particleEmitter(String id, final String spriteId, final String file) {
+			private void particleEmitter2(String id, final String spriteId, final String file) {
 				resourceManager.add(id, new ResourceLoaderImpl<ParticleEmitter>(new DataLoader<ParticleEmitter>() {
 					@Override
 					public ParticleEmitter load() {
