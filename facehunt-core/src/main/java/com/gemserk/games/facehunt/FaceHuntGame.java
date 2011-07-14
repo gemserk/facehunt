@@ -61,10 +61,20 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 	public FaceHuntGame(AdWhirlViewHandler adWhirlViewHandler) {
 		this.adWhirlViewHandler = adWhirlViewHandler;
+		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
+		profiles = new ProfilesHttpImpl("http://gemserkscores.appspot.com");
 	}
 
 	public FaceHuntGame() {
 		this(new AdWhirlViewHandler());
+	}
+	
+	public void setScores(Scores scores) {
+		this.scores = scores;
+	}
+	
+	public void setProfiles(Profiles profiles) {
+		this.profiles = profiles;
 	}
 
 	@Override
@@ -79,10 +89,6 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 		executorService = Executors.newCachedThreadPool();
 		preferences = Gdx.app.getPreferences("gemserk-facehunt");
-		scores = new ScoresHttpImpl("db3bbc454ad707213fe02874e526e5f7", "http://gemserkscores.appspot.com", new ScoreSerializerJSONImpl());
-		profiles = new ProfilesHttpImpl("http://gemserkscores.appspot.com");
-		// scores = new ScoresHttpImpl("dsadfasfdsfaasd", "http://localhost:8080/", new ScoreSerializerJSONImpl());
-		// profiles = new ProfilesHttpImpl("http://localhost:8080/");
 
 		GamePreferences gamePreferences = new GamePreferences(preferences);
 		// GamePreferences gamePreferences = new GamePreferences(preferences);

@@ -15,8 +15,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
+import com.gemserk.commons.gdx.gui.Container;
+import com.gemserk.commons.gdx.gui.GuiControls;
 import com.gemserk.commons.gdx.gui.Text;
-import com.gemserk.commons.gdx.gui.TextButton;
+import com.gemserk.commons.gdx.gui.TextButton.ButtonHandler;
 import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
@@ -67,51 +69,30 @@ public class GameOverGameState extends GameStateImpl {
 	private final FaceHuntGame game;
 
 	private ResourceManager<String> resourceManager;
-	
 	private InputDevicesMonitorImpl<String> inputDevicesMonitor;
-	
 	private SoundPlayer soundPlayer;
-
 	private SpriteBatch spriteBatch;
-
-	private TextButton tryAgainButton;
-	
-	private TextButton mainMenuButton;
-
 	private Sound pressedSound;
-
 	private Screen previousScreen;
-
 	private Screen menuScreen;
-
-	private Text gameOverText;
-
 	private Scores scores;
-
 	private Profiles profiles;
-
 	private Score score;
-
 	private BitmapFont buttonFont;
-
 	private ExecutorService executorService;
-
 	private Text scoreSubmitText;
-
 	private FutureProcessor<String> submitScoreProcessor;
-
 	private Profile profile;
-
 	private FutureProcessor<Profile> registerProfileProcessor;
-
 	private GamePreferences gamePreferences;
-
 	private Sprite backgroundSprite;
-	
+
+	private Container container;
+
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
 	}
-	
+
 	public void setExecutorService(ExecutorService executorService) {
 		this.executorService = executorService;
 	}
@@ -146,28 +127,54 @@ public class GameOverGameState extends GameStateImpl {
 
 		new GameResourceBuilder(resourceManager);
 
+		container = new Container();
+
 		backgroundSprite = resourceManager.getResourceValue("BackgroundSprite");
 		backgroundSprite.setPosition(0, 0);
 		backgroundSprite.setSize(viewportWidth, viewportHeight);
-		
-		buttonFont = resourceManager.getResourceValue("ButtonFont2");
-		// buttonFont.setScale(1f * viewportWidth / 800f);
-
-		gameOverText = new Text("Game Over\n" + "Score: " + score.getPoints(), viewportWidth * 0.5f, viewportHeight * 0.70f).setColor(Color.RED);
-
-		tryAgainButton = new TextButton(buttonFont, "Try again", viewportWidth * 0.5f, viewportHeight * 0.35f);
-		mainMenuButton = new TextButton(buttonFont, "Main Menu", viewportWidth * 0.5f, viewportHeight * 0.20f);
 
 		Color notOverColor = new Color(1f, 1f, 0f, 1f);
 		Color overColor = new Color(0.3f, 0.3f, 1f, 1f);
 
-		tryAgainButton.setNotOverColor(notOverColor);
-		tryAgainButton.setOverColor(overColor);
-		tryAgainButton.setColor(notOverColor);
+		buttonFont = resourceManager.getResourceValue("ButtonFont2");
+		// buttonFont.setScale(1f * viewportWidth / 800f);
 
-		mainMenuButton.setNotOverColor(notOverColor);
-		mainMenuButton.setOverColor(overColor);
-		mainMenuButton.setColor(notOverColor);
+		container.add(GuiControls //
+				.label("Game Over\n" + "Score: " + score.getPoints()) //
+				.font(buttonFont) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.70f) //
+				.color(Color.RED) //
+				.build());
+
+		container.add(GuiControls.textButton() //
+				.text("Try again") //
+				.font(buttonFont) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.35f) //
+				.notOverColor(notOverColor) //
+				.overColor(overColor) //
+				.handler(new ButtonHandler() {
+					@Override
+					public void onReleased() {
+						soundPlayer.play(pressedSound);
+						game.transition(previousScreen, true);
+					}
+				})//
+				.build());
+
+		container.add(GuiControls.textButton() //
+				.text("Main Menu") //
+				.font(buttonFont) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.20f) //
+				.notOverColor(notOverColor) //
+				.overColor(overColor) //
+				.handler(new ButtonHandler() {
+					@Override
+					public void onReleased() {
+						soundPlayer.play(pressedSound);
+						game.transition(menuScreen, true);
+					}
+				})//
+				.build());
 
 		Gdx.input.setCatchBackKey(true);
 
@@ -186,7 +193,13 @@ public class GameOverGameState extends GameStateImpl {
 		menuScreen = game.menuScreen;
 		previousScreen = game.gameScreen;
 
-		scoreSubmitText = new Text("Submitting score...", viewportWidth * 0.5f, viewportHeight * 0.50f).setColor(new Color(1f, 1f, 0f, 1f));
+		scoreSubmitText = GuiControls //
+				.label("Submitting score...") //
+				.font(buttonFont) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.50f) //
+				.color(new Color(1f, 1f, 0f, 1f)) //
+				.build();
+		container.add(scoreSubmitText);
 
 		profile = gamePreferences.getCurrentProfile();
 
@@ -233,33 +246,17 @@ public class GameOverGameState extends GameStateImpl {
 		Gdx.graphics.getGL10().glClear(GL10.GL_COLOR_BUFFER_BIT);
 		spriteBatch.begin();
 		backgroundSprite.draw(spriteBatch);
-		gameOverText.draw(spriteBatch, buttonFont);
-		scoreSubmitText.draw(spriteBatch, buttonFont);
-		tryAgainButton.draw(spriteBatch);
-		mainMenuButton.draw(spriteBatch);
+		container.draw(spriteBatch);
 		spriteBatch.end();
 	}
 
 	@Override
 	public void update(int delta) {
 		Synchronizers.synchronize(delta);
-
 		inputDevicesMonitor.update();
 		registerProfileProcessor.update();
 		submitScoreProcessor.update();
-
-		tryAgainButton.update();
-		mainMenuButton.update();
-
-		if (tryAgainButton.isReleased()) {
-			soundPlayer.play(pressedSound);
-			game.transition(previousScreen, true);
-		}
-
-		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
-			soundPlayer.play(pressedSound);
-			game.transition(menuScreen, true);
-		}
+		container.update();
 	}
 
 	@Override

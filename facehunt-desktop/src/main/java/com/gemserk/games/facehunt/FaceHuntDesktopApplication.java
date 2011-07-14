@@ -11,20 +11,23 @@ import com.dmurph.tracking.JGoogleAnalyticsTracker;
 import com.dmurph.tracking.JGoogleAnalyticsTracker.GoogleAnalyticsVersion;
 import com.gemserk.analytics.Analytics;
 import com.gemserk.analytics.googleanalytics.DesktopAnalyticsAutoConfigurator;
+import com.gemserk.scores.ScoresMemoryImpl;
 
 public class FaceHuntDesktopApplication {
-	
+
 	protected static final Logger logger = LoggerFactory.getLogger(FaceHuntDesktopApplication.class);
-	
+
 	public static void main(String[] argv) {
 		AnalyticsConfigData analyticsConfig = new AnalyticsConfigData("UA-23542248-3");
 		DesktopAnalyticsAutoConfigurator.populateFromSystem(analyticsConfig);
 
 		JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(analyticsConfig, GoogleAnalyticsVersion.V_4_7_2);
 		Analytics.traker = tracker;
-		
+
 		String runningInDebug = System.getProperty("runningInDebug");
-		if (runningInDebug != null) {
+		boolean debugMode = runningInDebug != null;
+
+		if (debugMode) {
 			logger.info("Running in debug mode, Analytics disabled");
 			Analytics.traker.setEnabled(false);
 		}
@@ -35,13 +38,20 @@ public class FaceHuntDesktopApplication {
 		config.title = "Face Hunt";
 		config.forceExit = true;
 
-		new LwjglApplication(new FaceHuntGame() {
+		FaceHuntGame faceHuntGame = new FaceHuntGame() {
 			@Override
 			public void create() {
 				Gdx.graphics.setVSync(true);
 				super.create();
 			}
-		}, config);
+		};
+
+		if (debugMode) {
+			// faceHuntGame.setProfiles(profiles);
+			faceHuntGame.setScores(new ScoresMemoryImpl());
+		}
+
+		new LwjglApplication(faceHuntGame, config);
 		// new LwjglApplication(new FaceHuntGame(), "Face Hunt", 480, 320, false);
 		// new LwjglApplication(new FaceHuntGame(), "Face Hunt", 1024, 768, false);
 	}

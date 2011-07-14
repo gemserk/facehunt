@@ -441,6 +441,9 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 			Analytics.traker.trackPageView("/finishGame", "/finishGame", null);
 		}
+		
+		if (Gdx.input.isKeyPressed(Keys.Q)) 
+			health.setCurrent(0);
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
 			game.pauseGameState.setPreviousScreen(game.gameScreen);

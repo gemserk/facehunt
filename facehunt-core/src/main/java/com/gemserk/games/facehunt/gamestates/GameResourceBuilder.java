@@ -59,12 +59,12 @@ public class GameResourceBuilder extends LibgdxResourceBuilder {
 		font("PointsFont", "data/fonts/purisa-27.png", "data/fonts/purisa-27.fnt", true);
 		
 		if (Gdx.graphics.getHeight() >= 480f) {
-			font("ButtonFont2", "data/fonts/purisa-27.png", "data/fonts/purisa-27.fnt", false);
+			font("ButtonFont2", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", false);
 			font("TextFont", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", false);
 			font("ScoresFont", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
 			
 		} else {
-			font("ButtonFont2", "data/fonts/purisa-24.png", "data/fonts/purisa-24.fnt", false);
+			font("ButtonFont2", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
 			font("TextFont", "data/fonts/purisa-18.png", "data/fonts/purisa-18.fnt", false);
 			font("ScoresFont", "data/fonts/purisa-12.png", "data/fonts/purisa-12.fnt", false);
 		}
