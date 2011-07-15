@@ -55,11 +55,11 @@ public class GameOverGameState extends GameStateImpl {
 	class SubmitScoreHandler implements FutureHandler<String> {
 
 		public void done(String scoreId) {
-			scoreSubmitText.setText("Score submitted!").setColor(Color.GREEN);
+			scoreSubmitText.setText("Score: " + score.getPoints() + " pts submitted!").setColor(Color.GREEN);
 		}
 
 		public void failed(Exception e) {
-			scoreSubmitText.setText("Submit score failed :(").setColor(Color.RED);
+			scoreSubmitText.setText("Score: " + score.getPoints() + " pts submit failed").setColor(Color.RED);
 			if (e != null)
 				Gdx.app.log("FaceHunt", e.getMessage(), e);
 		}
@@ -140,18 +140,20 @@ public class GameOverGameState extends GameStateImpl {
 		// buttonFont.setScale(1f * viewportWidth / 800f);
 
 		container.add(GuiControls //
-				.label("Game Over\n" + "Score: " + score.getPoints()) //
+				.label("Game Over") //
 				.font(buttonFont) //
-				.position(viewportWidth * 0.5f, viewportHeight * 0.70f) //
+				.center(0.5f, 0f) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.75f) //
 				.color(Color.RED) //
 				.build());
 
 		container.add(GuiControls.textButton() //
 				.text("Try again") //
 				.font(buttonFont) //
-				.position(viewportWidth * 0.5f, viewportHeight * 0.35f) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.45f) //
 				.notOverColor(notOverColor) //
 				.overColor(overColor) //
+				.boundsOffset(20f, 10f) //
 				.handler(new ButtonHandler() {
 					@Override
 					public void onReleased() {
@@ -160,13 +162,30 @@ public class GameOverGameState extends GameStateImpl {
 					}
 				})//
 				.build());
+		
+		container.add(GuiControls.textButton() //
+				.text("Highscores") //
+				.font(buttonFont) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.30f) //
+				.notOverColor(notOverColor) //
+				.overColor(overColor) //
+				.boundsOffset(20f, 10f) //
+				.handler(new ButtonHandler() {
+					@Override
+					public void onReleased() {
+						soundPlayer.play(pressedSound);
+						game.transition(game.highscoresScreen, true);
+					}
+				})//
+				.build());
 
 		container.add(GuiControls.textButton() //
 				.text("Main Menu") //
 				.font(buttonFont) //
-				.position(viewportWidth * 0.5f, viewportHeight * 0.20f) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.15f) //
 				.notOverColor(notOverColor) //
 				.overColor(overColor) //
+				.boundsOffset(20f, 10f) //
 				.handler(new ButtonHandler() {
 					@Override
 					public void onReleased() {
@@ -194,9 +213,9 @@ public class GameOverGameState extends GameStateImpl {
 		previousScreen = game.gameScreen;
 
 		scoreSubmitText = GuiControls //
-				.label("Submitting score...") //
+				.label("Score: " + score.getPoints() +  " pts submitting...") //
 				.font(buttonFont) //
-				.position(viewportWidth * 0.5f, viewportHeight * 0.50f) //
+				.position(viewportWidth * 0.5f, viewportHeight * 0.6f) //
 				.color(new Color(1f, 1f, 0f, 1f)) //
 				.build();
 		container.add(scoreSubmitText);
@@ -215,7 +234,7 @@ public class GameOverGameState extends GameStateImpl {
 
 			@Override
 			public void failed(Exception e) {
-				scoreSubmitText.setText("Submit score failed :(").setColor(Color.RED);
+				scoreSubmitText.setText("Score: " + score.getPoints() + " pts submit failed").setColor(Color.RED);
 				if (e != null)
 					Gdx.app.log("FaceHunt", e.getMessage(), e);
 			}
