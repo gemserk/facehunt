@@ -302,7 +302,6 @@ public class TutorialModeGameState extends GameStateImpl {
 
 				Sound sound = resourceManager.getResourceValue("CritterSpawnedSound");
 				soundPlayer.play(sound);
-				// sound.play();
 
 				return false;
 			}
@@ -339,7 +338,7 @@ public class TutorialModeGameState extends GameStateImpl {
 				Container health = healthComponent.getHealth();
 				health.remove(20f);
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
 				return true;
 			}
 		};
@@ -351,8 +350,6 @@ public class TutorialModeGameState extends GameStateImpl {
 			protected boolean handle(Entity e) {
 				Sound sound = resourceManager.getResourceValue("CritterBounceSound");
 				soundPlayer.play(sound);
-				// sound.play();
-
 				return false;
 			}
 		};

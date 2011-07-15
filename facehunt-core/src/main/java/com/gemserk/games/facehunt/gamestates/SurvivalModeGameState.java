@@ -353,7 +353,7 @@ public class SurvivalModeGameState extends GameStateImpl {
 				Container health = healthComponent.getHealth();
 				health.remove(20f);
 				Sound sound = resourceManager.getResourceValue("CritterKilledSound");
-				sound.play();
+				soundPlayer.play(sound);
 				return true;
 			}
 		};
