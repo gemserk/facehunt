@@ -15,12 +15,12 @@ import com.gemserk.animation4j.transitions.sync.Synchronizers;
 import com.gemserk.commons.gdx.GameStateImpl;
 import com.gemserk.commons.gdx.Screen;
 import com.gemserk.commons.gdx.gui.TextButton;
+import com.gemserk.commons.gdx.gui.ToggleableImageButton;
+import com.gemserk.commons.gdx.gui.ToggleableImageButton.ToggleHandler;
 import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.input.InputDevicesMonitorImpl;
 import com.gemserk.componentsengine.input.LibgdxInputMappingBuilder;
 import com.gemserk.games.facehunt.FaceHuntGame;
-import com.gemserk.games.facehunt.gui.ToggleableImageButton;
-import com.gemserk.games.facehunt.gui.ToggleableImageButton.ToggleHandler;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 
