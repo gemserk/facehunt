@@ -407,6 +407,11 @@ public class Templates {
 						.sensor() //
 						.categoryBits(Collisions.FacePart) //
 						.maskBits((short) (Collisions.All & ~Collisions.FacePart))) //
+				.fixture(bodyBuilder.fixtureDefBuilder().circleShape(radius) //
+						.friction(0.5f)//
+						.restitution(0f)//
+						.categoryBits(Collisions.FacePart) //
+						.maskBits((short) (Collisions.Border))) //
 				.type(BodyType.DynamicBody) //
 				.mass(0.2f)//
 				.userData(e)//
@@ -414,7 +419,7 @@ public class Templates {
 				.position(spatial.getX(), spatial.getY())//
 				.build();
 
-		Vector2 impulse = new Vector2(1f, 0f);
+		Vector2 impulse = new Vector2(2f, 0f);
 		impulse.rotate(angle);
 		impulse.mul(MathUtils.random(1f, 1.5f));
 
