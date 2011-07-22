@@ -95,7 +95,6 @@ public class SplashGameState extends GameStateImpl {
 	
 	@Override
 	public void pause() {
-		game.getAdWhirlViewHandler().show();
 		super.pause();
 	}
 
@@ -104,7 +103,7 @@ public class SplashGameState extends GameStateImpl {
 		Synchronizers.synchronize(delta);
 		timer.update(delta);
 		if (!timer.isRunning())
-			game.transition(game.menuScreen, true);
+			game.transition(game.menuScreen, true, 1000);
 		if (Gdx.input.justTouched())
 			timer.update(10000);
 	}

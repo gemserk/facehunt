@@ -318,7 +318,6 @@ public class HighscoresGameState extends GameStateImpl {
 
 	@Override
 	public void pause() {
-		game.getAdWhirlViewHandler().show();
 		Gdx.input.setCatchBackKey(false);
 	}
 
@@ -400,10 +399,10 @@ public class HighscoresGameState extends GameStateImpl {
 		}
 
 		if (tapScreenButton.isPressed())
-			game.transition(game.menuScreen, true);
+			game.transition(game.menuScreen, true, 1000);
 
 		if (inputDevicesMonitor.getButton("back").isReleased())
-			game.transition(game.menuScreen, true);
+			game.transition(game.menuScreen, true, 1000);
 	}
 
 	private void reloadScores(Range range) {

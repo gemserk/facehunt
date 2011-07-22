@@ -46,6 +46,7 @@ import com.gemserk.commons.gdx.camera.Libgdx2dCameraTransformImpl;
 import com.gemserk.commons.gdx.games.Spatial;
 import com.gemserk.commons.gdx.games.SpatialImpl;
 import com.gemserk.commons.gdx.graphics.SpriteBatchUtils;
+import com.gemserk.commons.gdx.gui.GuiControls;
 import com.gemserk.commons.gdx.input.LibgdxPointer;
 import com.gemserk.commons.gdx.sounds.SoundPlayer;
 import com.gemserk.componentsengine.utils.Container;
@@ -64,6 +65,7 @@ import com.gemserk.games.facehunt.systems.DamagePlayerSystem;
 import com.gemserk.games.facehunt.systems.FaceHuntControllerSystem;
 import com.gemserk.games.facehunt.systems.RandomMovementBehaviorSystem;
 import com.gemserk.games.facehunt.values.GameData;
+import com.gemserk.resources.Resource;
 import com.gemserk.resources.ResourceManager;
 import com.gemserk.resources.ResourceManagerImpl;
 import com.gemserk.scores.Score;
@@ -76,10 +78,6 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	}
 
-	enum InternalGameState {
-		INTRO, PLAYING, PREPARE_INTRO
-	}
-
 	public static interface Function {
 
 		float f(float x);
@@ -89,52 +87,30 @@ public class SurvivalModeGameState extends GameStateImpl {
 	private final FaceHuntGame game;
 
 	private ResourceManager<String> resourceManager;
-
 	private SpriteBatch spriteBatch;
-
 	private Libgdx2dCameraTransformImpl worldCamera = new Libgdx2dCameraTransformImpl();
-
 	private Libgdx2dCamera backgroundLayerCamera = new Libgdx2dCameraTransformImpl();
-
 	private Camera cameraData;
-
 	private WorldWrapper worldWrapper;
-
 	private World world;
-
 	private com.badlogic.gdx.physics.box2d.World physicsWorld;
-
 	private BodyBuilder bodyBuilder;
-
 	private Box2DDebugRenderer box2dDebugRenderer;
-
 	private FaceHuntController controller;
-
 	private GameData gameData;
-
 	private BitmapFont font;
-
 	private Wave[] waves;
-
 	private int currentWaveIndex;
-
 	private Wave currentWave;
-
 	private Spawner spawner;
-
 	private Templates templates;
-
 	private Entity player;
-
 	private Sprite whiteRectangle;
-
 	private int viewportWidth;
-
 	private int viewportHeight;
-
 	private GamePreferences gamePreferences;
-
 	private SoundPlayer soundPlayer;
+	private com.gemserk.commons.gdx.gui.Container guiContainer;
 
 	public void setSoundPlayer(SoundPlayer soundPlayer) {
 		this.soundPlayer = soundPlayer;
@@ -160,6 +136,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 	}
 
 	public void restartGame() {
+
+		guiContainer = new com.gemserk.commons.gdx.gui.Container();
 
 		Analytics.traker.trackPageView("/startGame", "/startGame", null);
 
@@ -401,6 +379,8 @@ public class SurvivalModeGameState extends GameStateImpl {
 		// font.draw(spriteBatch, "Points: " + gameData.points, 10, Gdx.graphics.getHeight());
 		font.setScale(1f);
 
+		guiContainer.draw(spriteBatch);
+
 		spriteBatch.end();
 
 		// ImmediateModeRendererUtils.drawHorizontalAxis(Gdx.graphics.getHeight() * 0.95f, 1000f, Color.GREEN);
@@ -427,6 +407,14 @@ public class SurvivalModeGameState extends GameStateImpl {
 		if (health.isEmpty()) {
 			gameData.gameOver = true;
 
+			Resource<BitmapFont> fontResource = resourceManager.get("PointsFont");
+
+			guiContainer.add(GuiControls.label("Game Over") //
+					.position(viewportWidth * 0.5f, viewportHeight * 0.5f) //
+					.color(1f, 0f, 0f, 1f) //
+					.font(fontResource.get()) //
+					.build());
+
 			Profile profile = gamePreferences.getCurrentProfile();
 
 			HashSet<String> tags = new HashSet<String>();
@@ -437,17 +425,17 @@ public class SurvivalModeGameState extends GameStateImpl {
 				tags.add("pc");
 
 			game.gameOverGameState.setScore(new Score(profile.getName(), gameData.points, tags, new HashMap<String, Object>()));
-			game.transition(game.gameOverScreen);
+			game.transition(game.gameOverScreen, 4000);
 
 			Analytics.traker.trackPageView("/finishGame", "/finishGame", null);
 		}
-		
-		if (Gdx.input.isKeyPressed(Keys.Q)) 
+
+		if (Gdx.input.isKeyPressed(Keys.Q))
 			health.setCurrent(0);
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
 			game.pauseGameState.setPreviousScreen(game.gameScreen);
-			game.transition(game.pauseScreen);
+			game.transition(game.pauseScreen, 1000);
 			Analytics.traker.trackPageView("/gamePaused", "/gamePaused", null);
 		}
 
@@ -467,7 +455,6 @@ public class SurvivalModeGameState extends GameStateImpl {
 
 	@Override
 	public void pause() {
-		game.getAdWhirlViewHandler().show();
 		Gdx.input.setCatchBackKey(false);
 	}
 

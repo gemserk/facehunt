@@ -138,7 +138,7 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 
 		fadeTransitionScreen = new FadeTransitionScreen(this);
 
-		transition(null, splashScreen);
+		transition(null, splashScreen, 1000);
 	}
 
 	@Override
@@ -146,19 +146,19 @@ public class FaceHuntGame extends com.gemserk.commons.gdx.Game {
 		this.screen = screen;
 	}
 
-	public void transition(Screen nextScreen) {
-		this.transition(nextScreen, false);
+	public void transition(Screen nextScreen, int time) {
+		this.transition(nextScreen, false, time);
 	}
 
-	public void transition(Screen nextScreen, boolean shouldDisposeCurrent) {
-		fadeTransitionScreen.transition(getScreen(), nextScreen, 1000, shouldDisposeCurrent);
+	public void transition(Screen nextScreen, boolean shouldDisposeCurrent, int time) {
+		fadeTransitionScreen.transition(getScreen(), nextScreen, time, shouldDisposeCurrent);
 		fadeTransitionScreen.resume();
 		fadeTransitionScreen.show();
 		setScreen(fadeTransitionScreen);
 	}
 
-	public void transition(Screen currentScreen, Screen nextScreen) {
-		fadeTransitionScreen.transition(currentScreen, nextScreen, 1000);
+	public void transition(Screen currentScreen, Screen nextScreen, int time) {
+		fadeTransitionScreen.transition(currentScreen, nextScreen, time);
 		fadeTransitionScreen.resume();
 		fadeTransitionScreen.show();
 		setScreen(fadeTransitionScreen);

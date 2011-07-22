@@ -260,19 +260,19 @@ public class MainMenuGameState extends GameStateImpl {
 
 		playButton.update();
 		if (playButton.isReleased()) {
-			game.transition(game.tutorialScreen, true);
+			game.transition(game.tutorialScreen, true, 1000);
 			soundPlayer.play(pressedSound);
 		}
 
 		survivalModeButton.update();
 		if (survivalModeButton.isReleased()) {
-			game.transition(game.gameScreen, true);
+			game.transition(game.gameScreen, true, 1000);
 			soundPlayer.play(pressedSound);
 		}
 
 		highscoresButton.update();
 		if (highscoresButton.isReleased()) {
-			game.transition(game.highscoresScreen, true);
+			game.transition(game.highscoresScreen, true, 1000);
 			soundPlayer.play(pressedSound);
 		}
 

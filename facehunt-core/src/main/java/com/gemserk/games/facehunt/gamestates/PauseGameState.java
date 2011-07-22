@@ -152,6 +152,7 @@ public class PauseGameState extends GameStateImpl {
 
 	@Override
 	public void resume() {
+		game.getAdWhirlViewHandler().show();
 		Gdx.input.setCatchBackKey(true);
 	}
 
@@ -184,12 +185,12 @@ public class PauseGameState extends GameStateImpl {
 
 		if (resumeButton.isReleased()) {
 			soundPlayer.play(pressedSound);
-			game.transition(previousScreen, true);
+			game.transition(previousScreen, true, 1000);
 		}
 
 		if (mainMenuButton.isReleased() || inputDevicesMonitor.getButton("back").isReleased()) {
 			soundPlayer.play(pressedSound);
-			game.transition(menuScreen, true);
+			game.transition(menuScreen, true, 1000);
 			mainMenu = true;
 		}
 		

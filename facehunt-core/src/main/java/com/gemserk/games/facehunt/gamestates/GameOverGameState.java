@@ -158,7 +158,7 @@ public class GameOverGameState extends GameStateImpl {
 					@Override
 					public void onReleased() {
 						soundPlayer.play(pressedSound);
-						game.transition(previousScreen, true);
+						game.transition(previousScreen, true, 1000);
 					}
 				})//
 				.build());
@@ -174,7 +174,7 @@ public class GameOverGameState extends GameStateImpl {
 					@Override
 					public void onReleased() {
 						soundPlayer.play(pressedSound);
-						game.transition(game.highscoresScreen, true);
+						game.transition(game.highscoresScreen, true, 1000);
 					}
 				})//
 				.build());
@@ -190,7 +190,7 @@ public class GameOverGameState extends GameStateImpl {
 					@Override
 					public void onReleased() {
 						soundPlayer.play(pressedSound);
-						game.transition(menuScreen, true);
+						game.transition(menuScreen, true, 1000);
 					}
 				})//
 				.build());
@@ -252,6 +252,7 @@ public class GameOverGameState extends GameStateImpl {
 
 	@Override
 	public void resume() {
+		game.getAdWhirlViewHandler().show();
 		Gdx.input.setCatchBackKey(true);
 	}
 

@@ -321,7 +321,7 @@ public class TestGameState extends GameStateImpl {
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE))
-			game.transition(game.menuScreen, true);
+			game.transition(game.menuScreen, true, 1000);
 
 	}
 

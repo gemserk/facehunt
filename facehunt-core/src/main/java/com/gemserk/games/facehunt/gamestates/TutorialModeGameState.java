@@ -404,7 +404,7 @@ public class TutorialModeGameState extends GameStateImpl {
 			if (health.isEmpty()) {
 				gameData.gameOver = true;
 				game.pauseGameState.setPreviousScreen(game.tutorialScreen);
-				game.transition(game.pauseScreen);
+				game.transition(game.pauseScreen, 1000);
 			}
 
 			ImmutableBag<Entity> faces = world.getGroupManager().getEntities(Groups.FaceGroup);
@@ -415,7 +415,7 @@ public class TutorialModeGameState extends GameStateImpl {
 
 				if (currentWaveIndex == waves.length - 1) {
 					gameData.gameOver = true;
-					game.transition(game.gameScreen, true);
+					game.transition(game.gameScreen, true, 1000);
 					
 					Analytics.traker.trackPageView("/finishTutorial", "/finishTutorial", null);
 					
@@ -459,7 +459,7 @@ public class TutorialModeGameState extends GameStateImpl {
 			currentTextIndex = 0;
 
 			if (currentWaveIndex >= waves.length) {
-				game.transition(game.pauseScreen, true);
+				game.transition(game.pauseScreen, true, 1000);
 				return;
 			}
 
@@ -480,7 +480,7 @@ public class TutorialModeGameState extends GameStateImpl {
 
 		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.ESCAPE)) {
 			game.pauseGameState.setPreviousScreen(game.tutorialScreen);
-			game.transition(game.pauseScreen);
+			game.transition(game.pauseScreen, 1000);
 			Analytics.traker.trackPageView("/tutorialPaused", "/tutorialPaused", null);
 		}
 
@@ -500,7 +500,6 @@ public class TutorialModeGameState extends GameStateImpl {
 
 	@Override
 	public void pause() {
-		game.getAdWhirlViewHandler().show();
 		Gdx.input.setCatchBackKey(false);
 	}
 
