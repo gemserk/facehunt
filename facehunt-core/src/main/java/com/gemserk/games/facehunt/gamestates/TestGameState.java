@@ -242,9 +242,6 @@ public class TestGameState extends GameStateImpl {
 		worldCamera.rotate(cameraData.getAngle());
 		worldWrapper.render();
 
-		if (Gdx.input.isKeyPressed(Keys.D))
-			box2dDebugRenderer.render(physicsWorld);
-
 		spriteBatch.begin();
 		HealthComponent healthComponent = player.getComponent(HealthComponent.class);
 		Container health = healthComponent.getHealth();

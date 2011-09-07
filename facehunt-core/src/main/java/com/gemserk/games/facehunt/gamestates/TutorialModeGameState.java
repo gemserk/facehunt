@@ -363,8 +363,8 @@ public class TutorialModeGameState extends GameStateImpl {
 		worldCamera.rotate(cameraData.getAngle());
 		worldWrapper.render();
 
-		if (Gdx.input.isKeyPressed(Keys.D))
-			box2dDebugRenderer.render(physicsWorld);
+//		if (Gdx.input.isKeyPressed(Keys.D))
+//			box2dDebugRenderer.render(physicsWorld);
 
 		spriteBatch.begin();
 
